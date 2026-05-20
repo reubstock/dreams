@@ -473,6 +473,109 @@
   }
   .modal-result-note b { color: var(--ink); }
 
+  /* clickable neighbor cards */
+  .neighbor-card[role="button"] {
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s, border-color 0.15s, box-shadow 0.2s;
+    position: relative;
+    outline: none;
+  }
+  .neighbor-card[role="button"]:hover,
+  .neighbor-card[role="button"]:focus-visible {
+    background: var(--paper);
+    border-color: var(--rust);
+    box-shadow: 0 8px 28px rgba(184, 66, 26, 0.18);
+  }
+  .neighbor-card[role="button"]:active { transform: translateY(1px); }
+  .neighbor-card[role="button"]::after {
+    content: "open →";
+    position: absolute;
+    top: 14px; right: 18px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0.55;
+    transition: opacity 0.15s, color 0.15s, transform 0.15s;
+  }
+  .neighbor-card[role="button"]:hover::after,
+  .neighbor-card[role="button"]:focus-visible::after {
+    opacity: 1; color: var(--rust); transform: translateX(3px);
+  }
+
+  /* neighbor modal content */
+  .neighbor-modal-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 14px; margin-bottom: 16px;
+    gap: 14px;
+  }
+  .neighbor-modal-id {
+    font-family: 'Didot', serif; font-size: 36px; font-style: italic;
+    color: var(--ink); line-height: 1;
+  }
+  .neighbor-modal-sim {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--rust);
+    text-align: right;
+  }
+  .neighbor-modal-meta {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.04em; color: var(--muted);
+    margin-bottom: 22px;
+  }
+  .neighbor-modal-dream {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 17px; font-style: italic; line-height: 1.55;
+    color: var(--ink);
+    padding: 18px 22px; background: var(--paper-2);
+    border-left: 3px solid var(--rust);
+    margin-bottom: 8px;
+  }
+  .nm-section-h {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--rust);
+    margin: 26px 0 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .nm-section-h::after {
+    content: ""; flex: 1; height: 1px; background: var(--ink-2);
+  }
+  .nm-overlap-list {
+    margin: 0; padding: 0; list-style: none;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 14.5px; line-height: 1.5; color: var(--ink);
+  }
+  .nm-overlap-list li {
+    padding: 10px 0; border-bottom: 1px dotted var(--ink-2);
+    display: grid; grid-template-columns: 18px 1fr; gap: 10px;
+    align-items: start;
+  }
+  .nm-overlap-list li:last-child { border-bottom: none; }
+  .nm-overlap-list li::before {
+    content: ""; display: block;
+    width: 8px; height: 8px; margin-top: 7px;
+    background: var(--rust); border-radius: 50%;
+    grid-column: 1;
+  }
+  .nm-overlap-list li b { color: var(--ink); font-weight: 600; }
+  .nm-overlap-list li i { color: var(--ink-2); font-style: italic; }
+  .nm-morph-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+  }
+  .nm-morph-chips span {
+    border: 1px solid var(--ink-2); padding: 6px 10px;
+    background: var(--paper);
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+  .nm-footer {
+    margin-top: 26px; padding-top: 16px;
+    border-top: 1px solid var(--ink);
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+  }
+
   /* toast */
   .toast {
     position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
@@ -1051,7 +1154,7 @@
       </tbody>
     </table>
 
-    <div class="neighbor-card" id="neighbor-anchor">
+    <div class="neighbor-card" id="neighbor-anchor" role="button" tabindex="0" data-neighbor="4012" aria-label="Open neighbor dream 4012">
       <div>
         <div class="nc-tag">Nearest neighbor · #1</div>
         <div class="nc-id">#4012</div>
@@ -1061,7 +1164,7 @@
         <div class="nc-meta">F · 32 · cosine sim 0.81 · cluster: SYMBOL_FAILURE + URGENCY_NO_OBJECT</div>
       </div>
     </div>
-    <div class="neighbor-card extra">
+    <div class="neighbor-card extra" role="button" tabindex="0" data-neighbor="7194" aria-label="Open neighbor dream 7194">
       <div>
         <div class="nc-tag">Nearest neighbor · #2</div>
         <div class="nc-id">#7194</div>
@@ -1071,7 +1174,7 @@
         <div class="nc-meta">M · 41 · cosine sim 0.77 · cluster: PARENT_AGE_INVERSION + SYMBOL_FAILURE</div>
       </div>
     </div>
-    <div class="neighbor-card extra">
+    <div class="neighbor-card extra" role="button" tabindex="0" data-neighbor="2856" aria-label="Open neighbor dream 2856">
       <div>
         <div class="nc-tag">Nearest neighbor · #3</div>
         <div class="nc-id">#2856</div>
@@ -1117,6 +1220,24 @@
         </div>
         <div class="modal-result-note" id="mr-note"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- =================== NEIGHBOR MODAL =================== -->
+  <div class="modal-backdrop" id="neighbor-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="nm-id">
+      <button class="modal-close" aria-label="Close" data-action="close-neighbor">×</button>
+      <div class="neighbor-modal-head">
+        <div class="neighbor-modal-id" id="nm-id">#0000</div>
+        <div class="neighbor-modal-sim" id="nm-sim">cosine sim · 0.00</div>
+      </div>
+      <div class="neighbor-modal-meta" id="nm-meta"></div>
+      <div class="neighbor-modal-dream" id="nm-dream"></div>
+      <div class="nm-section-h">Why this is a neighbor</div>
+      <ul class="nm-overlap-list" id="nm-overlap"></ul>
+      <div class="nm-section-h">Their morph chain</div>
+      <div class="nm-morph-chips" id="nm-morphs"></div>
+      <div class="nm-footer">Full diagnostic for this dream — coming soon</div>
     </div>
   </div>
 
@@ -1245,6 +1366,84 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('shown'), 2200);
   }
+
+  // ============ Neighbor cards (clickable) ============
+  const neighbors = {
+    '4012': {
+      id: '#4012',
+      sim: 'cosine sim · 0.81',
+      meta: 'F · 32 · cluster: SYMBOL_FAILURE + URGENCY_NO_OBJECT',
+      dream: '"I was in an airport that wasn’t an airport. The keys had no teeth and the door had no lock and I knew I had to be somewhere but the somewhere kept moving. My phone showed a clock with twelve hands. I tried to ask for help but the agents were behind a glass that wouldn’t show my reflection. When I finally got to my gate, the gate was a window, and the window was painted on a wall."',
+      overlap: [
+        '<b>Symbol failure</b> — their keys with no teeth, door with no lock ↔ <i>your phone with foreign letters</i>',
+        '<b>Urgency without object</b> — their "somewhere kept moving" ↔ <i>your "late for something I couldn’t remember"</i>',
+        '<b>Communication blocked</b> — their reflectionless glass ↔ <i>your unreachable brother</i>',
+        '<b>High morph count</b> — 7 morphs ↔ <i>your 8 morphs</i> (both ~3.5× the database norm)'
+      ],
+      morphs: ['airport → not airport', 'keys → no teeth', 'door → no lock', 'clock → 12 hands', 'agents → no reflection', 'gate → window', 'window → painted wall']
+    },
+    '7194': {
+      id: '#7194',
+      sim: 'cosine sim · 0.77',
+      meta: 'M · 41 · cluster: PARENT_AGE_INVERSION + SYMBOL_FAILURE',
+      dream: '"My father was a child and I had to read him his own letters but the handwriting had changed and the words wouldn’t stay still on the page. He kept asking if I was his father. We were in our old house but the kitchen had become a library and the library had no librarian. Outside the window, snow was falling upward."',
+      overlap: [
+        '<b>Parent age-inversion</b> — his father as a child ↔ <i>your younger mother</i> (this motif occurs in only 0.4% of coded dreams)',
+        '<b>Symbol failure</b> — handwriting changed, words won’t stay still ↔ <i>your foreign alphabet</i>',
+        '<b>Setting substitution</b> — kitchen → library ↔ <i>your house → beach</i>',
+        '<b>Physics inversion</b> — snow falling upward ↔ <i>your fish swimming above the ceiling</i>'
+      ],
+      morphs: ['father → child', 'handwriting → unstable', 'kitchen → library', 'librarian → absent', 'snow → falling upward']
+    },
+    '2856': {
+      id: '#2856',
+      sim: 'cosine sim · 0.73',
+      meta: 'F · 28 · cluster: URGENCY_NO_OBJECT + IDENTITY_DRIFT',
+      dream: '"The wedding was already starting and I was the one getting married but I couldn’t remember the other person’s name or whether I had agreed to any of this. Everyone in the pews was someone I had known once. The officiant was reading vows in a language that sounded like my mother’s but wasn’t. I kept looking at the rings and forgetting which finger they went on."',
+      overlap: [
+        '<b>Urgency without object</b> — wedding underway without consent or partner-name ↔ <i>your "late for something I couldn’t remember"</i>',
+        '<b>Symbol failure</b> — vows in a language that "sounded like" but wasn’t ↔ <i>your phone with foreign letters</i>',
+        '<b>Identity drift</b> — forgetting agreement, forgetting which finger ↔ <i>your dreamer-as-only-stable-thing slipping</i>',
+        '<b>Family motif</b> — the language that sounded like the mother’s ↔ <i>your younger mother</i>'
+      ],
+      morphs: ['wedding → underway w/o consent', 'partner → nameless', 'attendees → forgotten people', 'vows → unintelligible', 'rings → wrong finger']
+    }
+  };
+
+  const neighborModal = document.getElementById('neighbor-modal');
+  function openNeighbor(id) {
+    const n = neighbors[id];
+    if (!n) return;
+    document.getElementById('nm-id').textContent = n.id;
+    document.getElementById('nm-sim').textContent = n.sim;
+    document.getElementById('nm-meta').textContent = n.meta;
+    document.getElementById('nm-dream').textContent = n.dream;
+    document.getElementById('nm-overlap').innerHTML = n.overlap.map(o => `<li><span>${o}</span></li>`).join('');
+    document.getElementById('nm-morphs').innerHTML = n.morphs.map(m => `<span>${m}</span>`).join('');
+    neighborModal.classList.add('open');
+    neighborModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    neighborModal.scrollTop = 0;
+  }
+  function closeNeighbor() {
+    neighborModal.classList.remove('open');
+    neighborModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.neighbor-card[role="button"]').forEach(card => {
+    card.addEventListener('click', () => openNeighbor(card.dataset.neighbor));
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openNeighbor(card.dataset.neighbor);
+      }
+    });
+  });
+  document.querySelectorAll('[data-action="close-neighbor"]').forEach(b => b.addEventListener('click', closeNeighbor));
+  neighborModal.addEventListener('click', e => { if (e.target === neighborModal) closeNeighbor(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && neighborModal.classList.contains('open')) closeNeighbor();
+  });
 })();
 </script>
 </body>
