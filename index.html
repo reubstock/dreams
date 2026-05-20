@@ -13,8 +13,11 @@
     --muted: #7a6e4f;
     --rust: #b8421a;
     --rust-deep: #7a2a0e;
+    --rust-soft: #d97a3e;
     --rule: #1a1408;
     --accent-cool: #2a4060;
+    --morpho-bright: #6fb6ff;
+    --morpho-deep: #0a1f5c;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
@@ -32,7 +35,6 @@
   .masthead {
     border-bottom: 2px solid var(--ink);
     padding: 22px 0 14px;
-    margin-bottom: 0;
     display: flex; align-items: flex-end; justify-content: space-between;
   }
   .brand {
@@ -57,7 +59,12 @@
   .headline-block {
     padding: 64px 0 48px;
     border-bottom: 1px solid var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 48px;
+    align-items: start;
   }
+  .headline-text { min-width: 0; }
   .kicker {
     font-family: ui-monospace, Menlo, monospace; font-size: 11px;
     letter-spacing: 0.24em; text-transform: uppercase; color: var(--rust);
@@ -78,6 +85,24 @@
   }
   .one-liner b { color: var(--ink); font-weight: 600; }
   .one-liner .pop { background: var(--ink); color: var(--paper); padding: 0 4px; }
+
+  /* hero icon */
+  .dream-icon-wrap {
+    display: flex; flex-direction: column; align-items: flex-end;
+    padding-top: 6px;
+  }
+  .dream-icon {
+    width: 200px; height: auto; display: block;
+    filter: drop-shadow(0 8px 14px rgba(10, 31, 92, 0.18));
+  }
+  .dream-icon-caption {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    text-align: right; line-height: 1.6; margin-top: 14px;
+    max-width: 200px;
+  }
+  .dream-icon-caption b { color: var(--ink); font-weight: 600; }
+  .dream-icon-caption i { font-style: italic; text-transform: none; letter-spacing: 0; color: var(--ink-2); }
 
   /* ============ SECTION HEADER ============ */
   .section-head {
@@ -133,6 +158,36 @@
     font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--muted);
   }
+
+  /* ============ MORPH DEFINITION ============ */
+  .morph-def {
+    background: var(--paper-2);
+    border: 1px solid var(--ink);
+    border-left: 4px solid var(--rust);
+    padding: 22px 26px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .morph-def-label {
+    font-family: 'Didot', serif;
+    font-size: 32px; font-style: italic;
+    color: var(--rust); line-height: 1;
+  }
+  .morph-def-label small {
+    display: block;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); font-style: normal; margin-top: 6px;
+  }
+  .morph-def-body {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 16.5px; line-height: 1.55; color: var(--ink);
+  }
+  .morph-def-body b { color: var(--ink); font-weight: 600; }
+  .morph-def-body em { font-style: italic; color: var(--rust-deep); }
 
   /* ============ MORPH CHAIN ============ */
   .morph-grid {
@@ -216,22 +271,56 @@
   }
   .stab-summary b { background: var(--rust); color: var(--paper); padding: 1px 5px; font-weight: 600; }
 
-  /* ============ READING ============ */
+  /* ============ READING (TABBED) ============ */
   .reading-block {
     background: var(--ink); color: var(--paper);
-    padding: 56px 56px; margin: 64px -56px 0;
+    padding: 48px 56px 56px; margin: 64px -56px 0;
   }
-  .reading-block .kicker { color: var(--rust-soft, #d97a3e); }
+  .reading-block .kicker { color: var(--rust-soft); margin-bottom: 22px; }
+  .lens-tabs {
+    display: flex; gap: 28px;
+    border-bottom: 1px solid #2a2218;
+    margin-bottom: 32px;
+  }
+  .lens-tab {
+    background: transparent; border: none;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(241, 234, 215, 0.45); cursor: pointer;
+    padding: 0 0 14px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .lens-tab:hover { color: rgba(241, 234, 215, 0.85); }
+  .lens-tab.active {
+    color: var(--paper);
+    border-color: var(--rust-soft);
+  }
+  .lens-tab .lens-num {
+    color: var(--rust-soft); margin-right: 6px; opacity: 0.7;
+  }
+  .lens-content { display: none; }
+  .lens-content.active { display: block; }
   .reading-block .read-q {
     font-family: 'Didot', 'Bodoni 72', serif;
     font-size: 38px; line-height: 1.18; font-style: italic;
-    color: var(--paper); margin: 10px 0 18px; max-width: 920px; font-weight: 400;
+    color: var(--paper); margin: 0 0 22px; max-width: 920px; font-weight: 400;
   }
   .reading-block .read-a {
     font-family: 'Iowan Old Style', Georgia, serif;
-    font-size: 19px; line-height: 1.55; max-width: 820px; color: #ded5be;
+    font-size: 18px; line-height: 1.6; max-width: 820px; color: #ded5be;
   }
+  .reading-block .read-a p { margin: 0 0 16px; }
+  .reading-block .read-a p:last-child { margin-bottom: 0; }
+  .reading-block .read-a b { color: var(--paper); font-weight: 600; }
   .reading-block .read-a em { color: #f4c98a; font-style: italic; }
+  .reading-block .read-a .caveat {
+    margin-top: 22px; padding-top: 18px;
+    border-top: 1px solid #2a2218;
+    font-size: 13.5px; color: rgba(241, 234, 215, 0.55);
+    font-style: italic; line-height: 1.55;
+  }
 
   /* ============ DATABASE COMPARE ============ */
   .compare-table {
@@ -258,6 +347,8 @@
     background: var(--paper-2);
     display: grid; grid-template-columns: 90px 1fr; gap: 24px; align-items: start;
   }
+  .neighbor-card.extra { display: none; opacity: 0; transition: opacity 0.4s ease; margin-top: 12px; }
+  .neighbor-card.extra.shown { display: grid; opacity: 1; }
   .neighbor-card .nc-tag {
     font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
     letter-spacing: 0.18em; text-transform: uppercase; color: var(--rust);
@@ -285,8 +376,115 @@
   .btn {
     border: 1px solid var(--ink); padding: 14px 22px; color: var(--ink);
     background: var(--paper); cursor: pointer;
+    font-family: inherit; font-size: inherit; letter-spacing: inherit;
+    text-transform: inherit;
+    transition: background 0.15s, color 0.15s, transform 0.05s;
   }
+  .btn:hover { background: var(--ink-2); color: var(--paper); }
   .btn.primary { background: var(--ink); color: var(--paper); }
+  .btn.primary:hover { background: var(--rust); border-color: var(--rust); }
+  .btn:active { transform: translateY(1px); }
+  .btn.saved { background: var(--paper-2); color: var(--muted); cursor: default; border-style: dashed; }
+  .btn.saved:hover { background: var(--paper-2); color: var(--muted); }
+
+  /* ============ MODAL ============ */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(10, 8, 4, 0.85);
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 24px; z-index: 100;
+    opacity: 0; transition: opacity 0.18s ease;
+  }
+  .modal-backdrop.open { display: flex; opacity: 1; }
+  .modal {
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 36px 40px 32px;
+    max-width: 640px; width: 100%;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px;
+    background: none; border: none; cursor: pointer;
+    font-family: 'Didot', serif; font-size: 28px; line-height: 1;
+    color: var(--ink-2); padding: 4px 10px;
+  }
+  .modal-close:hover { color: var(--rust); }
+  .modal h2 {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 32px; font-weight: 400; font-style: italic;
+    color: var(--ink); margin: 0 0 8px;
+  }
+  .modal .modal-sub {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .modal .modal-help {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 15px; line-height: 1.55; color: var(--ink-2);
+    margin-bottom: 18px;
+  }
+  .modal textarea {
+    width: 100%; min-height: 200px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 16px; line-height: 1.55; padding: 14px 16px;
+    resize: vertical;
+    outline: none;
+  }
+  .modal textarea:focus { border-color: var(--rust); }
+  .modal-actions {
+    display: flex; justify-content: flex-end; gap: 10px;
+    margin-top: 16px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .modal-result {
+    display: none; margin-top: 22px; padding-top: 22px;
+    border-top: 1px solid var(--ink);
+  }
+  .modal-result.shown { display: block; }
+  .modal-result-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-bottom: 18px;
+  }
+  .modal-result-stat {
+    border: 1px solid var(--ink-2); padding: 12px 14px; background: var(--paper-2);
+  }
+  .modal-result-stat .mr-num {
+    font-family: 'Didot', serif; font-size: 32px; line-height: 1; color: var(--rust);
+    display: block;
+  }
+  .modal-result-stat .mr-label {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    margin-top: 6px;
+  }
+  .modal-result-note {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 14.5px; line-height: 1.55; color: var(--ink-2);
+  }
+  .modal-result-note b { color: var(--ink); }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--paper);
+    padding: 12px 22px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    border: 1px solid var(--rust-soft);
+    opacity: 0; transition: opacity 0.18s, transform 0.18s;
+    z-index: 200; pointer-events: none;
+  }
+  .toast.shown { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ============ RESPONSIVE ============ */
   @media (max-width: 1024px) {
@@ -298,55 +496,68 @@
     .morph:nth-last-child(-n+4) { border-bottom: 1px solid var(--ink); }
     .morph:nth-last-child(-n+2) { border-bottom: none; }
     .reading-block { margin: 64px -32px 0; padding: 48px 32px; }
+    .headline-block { grid-template-columns: 1fr 160px; gap: 32px; }
+    .dream-icon { width: 160px; }
+    .dream-icon-caption { max-width: 160px; }
   }
 
   @media (max-width: 720px) {
     body { font-size: 15px; }
     .container { padding: 0 18px; }
 
-    /* masthead */
     .masthead { flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 0 12px; }
     .brand { font-size: 30px; }
     .masthead-meta { text-align: left; font-size: 10px; }
     .sub-bar { font-size: 9px; flex-direction: column; gap: 4px; }
 
-    /* headline */
-    .headline-block { padding: 40px 0 32px; }
+    .headline-block {
+      padding: 32px 0 32px;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .dream-icon-wrap {
+      align-items: flex-start;
+      flex-direction: row;
+      gap: 16px;
+      align-items: center;
+    }
+    .dream-icon { width: 100px; }
+    .dream-icon-caption { text-align: left; max-width: none; margin-top: 0; font-size: 9.5px; }
+
     h1.pattern { font-size: 52px; line-height: 0.95; letter-spacing: -0.015em; }
     .one-liner { font-size: 17px; line-height: 1.4; }
     .kicker { font-size: 10px; }
 
-    /* sections */
     .section-head { margin: 40px 0 18px; gap: 10px; }
     .section-head .num { font-size: 22px; }
     .section-head .title { font-size: 9.5px; letter-spacing: 0.18em; }
 
-    /* source */
     .source-grid { grid-template-columns: 1fr; gap: 28px; }
     .source-text { font-size: 18px; line-height: 1.6; }
     .source-stats { border-left: none; border-top: 1px solid var(--ink); padding-left: 0; padding-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 24px; }
     .source-stats .stat { margin-bottom: 0; }
     .source-stats .stat-num { font-size: 32px; }
 
-    /* morph chain */
+    .morph-def { grid-template-columns: 1fr; gap: 12px; padding: 18px 20px; }
+    .morph-def-label { font-size: 26px; }
+
     .morph-grid { grid-template-columns: 1fr; }
     .morph:nth-child(n) { border-right: none; border-bottom: 1px solid var(--ink); }
     .morph:last-child { border-bottom: none; }
     .morph { min-height: auto; padding: 18px 18px 20px; }
     .morph .m-ba { font-size: 16px; }
 
-    /* stability */
     .stability-wrap { grid-template-columns: 1fr; gap: 28px; }
     .stability-diagram { padding: 18px 14px; }
     .stab-svg { height: 320px; }
     .stability-table h4 { font-size: 16px; }
 
-    /* reading block */
-    .reading-block { margin: 48px -18px 0; padding: 36px 18px; }
-    .reading-block .read-q { font-size: 26px; line-height: 1.2; }
-    .reading-block .read-a { font-size: 16px; line-height: 1.55; }
+    .reading-block { margin: 48px -18px 0; padding: 32px 18px 36px; }
+    .lens-tabs { gap: 16px; }
+    .lens-tab { font-size: 9.5px; letter-spacing: 0.18em; padding-bottom: 10px; }
+    .reading-block .read-q { font-size: 24px; line-height: 1.22; }
+    .reading-block .read-a { font-size: 15.5px; line-height: 1.6; }
 
-    /* compare table — convert to card list on mobile */
     .compare-table thead { display: none; }
     .compare-table, .compare-table tbody, .compare-table tr, .compare-table td { display: block; width: 100%; }
     .compare-table tr {
@@ -377,22 +588,24 @@
       text-align: right; font-size: 13px;
     }
 
-    /* neighbor card */
     .neighbor-card { grid-template-columns: 1fr; gap: 14px; padding: 18px 18px; }
     .neighbor-card .nc-id { font-size: 22px; }
     .neighbor-card .nc-quote { font-size: 16px; }
 
-    /* actions */
     .actions { flex-direction: column; gap: 10px; margin-top: 40px; }
     .btn { width: 100%; padding: 16px; text-align: center; font-size: 10.5px; }
+
+    .modal { padding: 28px 22px 24px; }
+    .modal h2 { font-size: 24px; }
+    .modal-result-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
   @media (max-width: 380px) {
     h1.pattern { font-size: 44px; }
     .source-text { font-size: 16.5px; }
     .source-stats { grid-template-columns: 1fr; }
+    .dream-icon { width: 80px; }
   }
-
 </style>
 </head>
 <body>
@@ -413,14 +626,111 @@
 
     <!-- =================== HEADLINE =================== -->
     <section class="headline-block">
-      <div class="kicker">Primary pattern detected</div>
-      <h1 class="pattern">A dream of <em>metamorphoses.</em></h1>
-      <p class="one-liner">
-        Eight things transform or break in eighty-seven words.
-        The dreamer is the <b>only stable identity</b> on the page.
-        Read structurally, this is a dream about being
-        <span class="pop">the last fixed point in a world losing its grammar.</span>
-      </p>
+      <div class="headline-text">
+        <div class="kicker">Primary pattern detected</div>
+        <h1 class="pattern">A dream of <em>metamorphoses.</em></h1>
+        <p class="one-liner">
+          Eight things transform or break in eighty-seven words.
+          The dreamer is the <b>only stable identity</b> on the page.
+          Read structurally, this is a dream about being
+          <span class="pop">the last fixed point in a world losing its grammar.</span>
+        </p>
+      </div>
+      <div class="dream-icon-wrap">
+        <svg class="dream-icon" viewBox="0 0 280 230" xmlns="http://www.w3.org/2000/svg" aria-label="Morpho butterfly">
+          <defs>
+            <linearGradient id="bf-blue" x1="0.5" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stop-color="#7ec1ff"/>
+              <stop offset="22%" stop-color="#4d8fe8"/>
+              <stop offset="55%" stop-color="#1e4cb4"/>
+              <stop offset="85%" stop-color="#0e2a78"/>
+              <stop offset="100%" stop-color="#06184a"/>
+            </linearGradient>
+            <radialGradient id="bf-shine" cx="0.32" cy="0.28" r="0.7">
+              <stop offset="0%" stop-color="#bcdcff" stop-opacity="0.95"/>
+              <stop offset="35%" stop-color="#7ec1ff" stop-opacity="0.55"/>
+              <stop offset="80%" stop-color="#4d8fe8" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#1e4cb4" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="bf-edge" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#0a1230"/>
+              <stop offset="100%" stop-color="#1c3168"/>
+            </linearGradient>
+          </defs>
+
+          <!-- LEFT WINGS -->
+          <g>
+            <!-- Forewing -->
+            <path d="M 140 78
+                     C 100 46, 52 28, 24 56
+                     C 6 88, 22 110, 62 114
+                     C 100 116, 122 108, 140 96 Z"
+                  fill="url(#bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
+            <ellipse cx="70" cy="74" rx="38" ry="20" fill="url(#bf-shine)"/>
+            <!-- Forewing edge band -->
+            <path d="M 24 56 C 18 70, 18 90, 22 105"
+                  stroke="url(#bf-edge)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+            <!-- Hindwing -->
+            <path d="M 140 108
+                     C 102 112, 64 124, 50 158
+                     C 46 188, 76 200, 108 184
+                     C 128 172, 140 148, 140 128 Z"
+                  fill="url(#bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
+            <ellipse cx="92" cy="148" rx="28" ry="16" fill="url(#bf-shine)" opacity="0.55"/>
+            <!-- Eye spot -->
+            <circle cx="82" cy="162" r="7" fill="#06184a"/>
+            <circle cx="80" cy="160" r="2.6" fill="#bcdcff" opacity="0.8"/>
+            <!-- Hindwing edge band -->
+            <path d="M 50 158 C 56 178, 80 192, 105 184"
+                  stroke="url(#bf-edge)" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.4"/>
+          </g>
+
+          <!-- RIGHT WINGS (mirrored) -->
+          <g transform="translate(280 0) scale(-1 1)">
+            <path d="M 140 78
+                     C 100 46, 52 28, 24 56
+                     C 6 88, 22 110, 62 114
+                     C 100 116, 122 108, 140 96 Z"
+                  fill="url(#bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
+            <ellipse cx="70" cy="74" rx="38" ry="20" fill="url(#bf-shine)"/>
+            <path d="M 24 56 C 18 70, 18 90, 22 105"
+                  stroke="url(#bf-edge)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
+            <path d="M 140 108
+                     C 102 112, 64 124, 50 158
+                     C 46 188, 76 200, 108 184
+                     C 128 172, 140 148, 140 128 Z"
+                  fill="url(#bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
+            <ellipse cx="92" cy="148" rx="28" ry="16" fill="url(#bf-shine)" opacity="0.55"/>
+            <circle cx="82" cy="162" r="7" fill="#06184a"/>
+            <circle cx="80" cy="160" r="2.6" fill="#bcdcff" opacity="0.8"/>
+            <path d="M 50 158 C 56 178, 80 192, 105 184"
+                  stroke="url(#bf-edge)" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.4"/>
+          </g>
+
+          <!-- BODY -->
+          <ellipse cx="140" cy="118" rx="4.5" ry="48" fill="#040814"/>
+          <!-- segment hints -->
+          <line x1="140" y1="84" x2="140" y2="162" stroke="#1c2a52" stroke-width="0.6" stroke-dasharray="2,3"/>
+          <!-- Head -->
+          <circle cx="140" cy="74" r="6.5" fill="#040814"/>
+          <!-- Tiny eye highlights -->
+          <circle cx="138" cy="72" r="1.2" fill="#7ec1ff" opacity="0.6"/>
+
+          <!-- ANTENNAE -->
+          <path d="M 140 70 Q 126 52 116 34"
+                stroke="#040814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <circle cx="116" cy="34" r="2.2" fill="#040814"/>
+          <path d="M 140 70 Q 154 52 164 34"
+                stroke="#040814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <circle cx="164" cy="34" r="2.2" fill="#040814"/>
+        </svg>
+        <div class="dream-icon-caption">
+          <b>Morpho</b><br>
+          from <i>morphē</i>, Greek: <i>form</i>.<br>
+          Same root as <i>morph</i>.
+        </div>
+      </div>
     </section>
 
     <!-- =================== SOURCE =================== -->
@@ -472,6 +782,17 @@
       <div class="num">ii.</div>
       <div class="title">Metamorphosis chain — 8 transformations, in order</div>
       <div class="rule"></div>
+    </div>
+
+    <!-- What is a morph -->
+    <div class="morph-def">
+      <div class="morph-def-label">
+        morph
+        <small>noun · /mɔːf/</small>
+      </div>
+      <div class="morph-def-body">
+        A <b>morph</b> is any moment in a dream when one thing <em>becomes</em> another — a parent who changes age, a phone whose alphabet no longer works, a ceiling that turns to water, a floor that turns to sand. The transformation may be sudden ("then the floor became sand") or quietly retroactive ("the rooms were all wrong"). Most dreams contain <b>one or two</b> morphs. This one contains <b>eight</b>. Counting and classifying them is how a dream reveals whether it's <em>about</em> something happening or <em>about</em> a single quality of transformation itself.
+      </div>
     </div>
 
     <div class="morph-grid">
@@ -579,45 +900,36 @@
               <path d="M0,0 L10,5 L0,10 z" fill="#b8421a"/>
             </marker>
           </defs>
-          <!-- center: YOU -->
           <g>
             <circle cx="300" cy="180" r="44" fill="#0d0a04"/>
             <text x="300" y="178" text-anchor="middle" fill="#f1ead7" font-family="Didot, serif" font-style="italic" font-size="22">You</text>
             <text x="300" y="196" text-anchor="middle" fill="#d97a3e" font-family="ui-monospace, monospace" font-size="8" letter-spacing="2">STABLE</text>
           </g>
 
-          <!-- spokes -->
-          <!-- mother -->
           <line x1="300" y1="180" x2="120" y2="60" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
           <text x="60" y="44" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">mother</text>
           <text x="60" y="60" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">AGE-INVERTED</text>
 
-          <!-- brother -->
           <line x1="300" y1="180" x2="500" y2="60" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
           <text x="500" y="44" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">brother</text>
           <text x="500" y="60" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">UNREACHABLE</text>
 
-          <!-- house -->
           <line x1="300" y1="180" x2="80" y2="180" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
           <text x="20" y="178" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">house</text>
           <text x="20" y="194" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">DISSOLVED</text>
 
-          <!-- ceiling -->
           <line x1="300" y1="180" x2="180" y2="300" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
           <text x="100" y="320" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">ceiling</text>
           <text x="100" y="336" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">WATER</text>
 
-          <!-- floor -->
           <line x1="300" y1="180" x2="420" y2="300" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
           <text x="440" y="320" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">floor</text>
           <text x="440" y="336" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">SAND</text>
 
-          <!-- phone -->
           <line x1="300" y1="180" x2="520" y2="180" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
           <text x="540" y="178" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">phone</text>
           <text x="540" y="194" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">FOREIGN</text>
 
-          <!-- purpose -->
           <line x1="300" y1="180" x2="300" y2="320" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
           <text x="300" y="350" text-anchor="middle" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">purpose</text>
           <text x="300" y="364" text-anchor="middle" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">FORGOTTEN</text>
@@ -644,17 +956,75 @@
 
     <!-- =================== READING =================== -->
     <div class="reading-block">
-      <div class="kicker">Reading</div>
-      <div class="read-q">"What is the dream actually about?"</div>
-      <div class="read-a">
-        Family is present but distorted (mother age-inverted), reachable but
-        uncommunicable (brother behind a foreign alphabet), and finally absent
-        (the empty beach). Every familiar surface in the dream substitutes itself
-        for a slipperier material: plaster for water, wood for sand. The closing
-        image — late for something forgotten — is the dream's emotional center:
-        <em>urgency without object</em>. The thing the dreamer is late for has
-        the same status as everything else in the dream — it once had a name,
-        and the name has come off.
+      <div class="kicker">Reading — three lenses</div>
+
+      <div class="lens-tabs">
+        <button class="lens-tab active" data-lens="reading"><span class="lens-num">i.</span>Reading</button>
+        <button class="lens-tab" data-lens="feeling"><span class="lens-num">ii.</span>Feeling</button>
+        <button class="lens-tab" data-lens="structure"><span class="lens-num">iii.</span>Structure</button>
+      </div>
+
+      <!-- LENS 1: READING (interpretive, explicit) -->
+      <div class="lens-content active" data-lens="reading">
+        <div class="read-q">"What is this dream most likely about in your life?"</div>
+        <div class="read-a">
+          <p>
+            Two motifs in this dream are <b>unusually specific</b>, and together they point in one direction.
+          </p>
+          <p>
+            <b>First:</b> your mother appears younger than you. Parent age-inversion shows up in only <b>0.4% of coded dreams</b> and clusters around two life situations — (a) a parent's declining health that has begun to reverse the caretaking role, or (b) an unresolved loss still working its way through delayed grief. In both, the dream stages a fact the waking mind hasn't fully accepted: <em>you are now the older one in the relationship.</em>
+          </p>
+          <p>
+            <b>Second:</b> you try to call your brother, and the phone — the channel — works while the alphabet doesn't. Communication failure at the symbolic layer (instrument intact, language unreadable) appears most often in dreams reported by people in the middle of a <b>sibling estrangement that ordinary conversation can no longer repair</b>. You can still reach for the connection. The connection has stopped sharing a language with you.
+          </p>
+          <p>
+            The dream closes with you late for something you can't name. This particular ending — pressure without referent — typically indicates a <b>transition the dreamer hasn't yet articulated to themselves</b>. The body knows there is a deadline. The destination has not yet arrived in language.
+          </p>
+          <p>
+            Read together, the most plausible reading is this: you are in the middle of a <b>family disruption already in motion</b> — one in which roles have shifted in ways you can describe (your mother's standing) and connections have broken in ways you can't fix (your brother's silence), set inside a larger pressure of a transition you sense but can't yet describe. The morph-saturated texture of the dream is consistent with: <em>everything in your life is currently in the process of becoming something else, including you</em>.
+          </p>
+          <p class="caveat">
+            This reading is interpretive — a strongly suggested hypothesis from the data, not a diagnosis. The counts, classifications, norms, and nearest-neighbor lookup above are computational. The reading above is what those numbers most often point to in published dream research. Your specific life is the only thing that can confirm or correct it.
+          </p>
+        </div>
+      </div>
+
+      <!-- LENS 2: FEELING -->
+      <div class="lens-content" data-lens="feeling">
+        <div class="read-q">"What does this dream <em>feel</em> like, underneath?"</div>
+        <div class="read-a">
+          <p>
+            Not danger. <em>Recognition slipping.</em>
+          </p>
+          <p>
+            Nothing in this dream threatens you. No one is chasing you, no one is hostile, nothing breaks you. What slips, instead, is the dream's <b>grammar</b>: every familiar surface has shifted by exactly one category. The mother is the wrong age. The ceiling is the wrong material. The alphabet is the wrong system. The floor is the wrong substance. The beach is missing one thing — its people.
+          </p>
+          <p>
+            The dominant feeling is <em>urgency without object</em>: the body knows it's late while the mind has forgotten what for. This is not the anxiety of threat. It's the anxiety of a deadline you can no longer name. Dream lexicons sometimes call it <b>"evaporated purpose"</b> — the sense that something used to mean a great deal, and the meaning has come loose from the thing.
+          </p>
+          <p>
+            The orange sky is doing emotional work here. Orange skies in dreams correlate with the late stages of inhabiting a place — sunset, last light, the hour before something ends. The dream is telling you the day is closing.
+          </p>
+        </div>
+      </div>
+
+      <!-- LENS 3: STRUCTURE -->
+      <div class="lens-content" data-lens="structure">
+        <div class="read-q">"How is this dream architected?"</div>
+        <div class="read-a">
+          <p>
+            Eight morphs in 87 words. One stable identity (you). Every named entity except the dreamer transforms, fails, or vanishes.
+          </p>
+          <p>
+            The dream is built around a contrast: a <b>single fixed point</b> surrounded by a <b>field of failing substitutions</b>. Materials change (plaster → water, wood → sand). Physics inverts (fish swim above, not below). The communication channel remains intact (you have a phone, you have hands) but the alphabet has changed — locally functional, globally broken.
+          </p>
+          <p>
+            The morphs aren't randomly distributed. They cluster into three pairs: <em>two material substitutions</em> (ceiling, floor — the architecture itself becomes unstable), <em>two communication failures</em> (the foreign alphabet, the forgotten purpose — meaning detaches from its sign), and <em>two emptyings</em> (the house dissolves into a beach, the beach has no one on it — peopled space becomes unpeopled space). The eighth morph — your mother's age — is the only one that touches another person directly.
+          </p>
+          <p>
+            Structurally, this is a <b>metamorphosis dream</b> — 3.8× more morphs than the database norm. Its cluster signature is <b>SYMBOL_FAILURE + URGENCY_NO_OBJECT</b>.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -681,9 +1051,9 @@
       </tbody>
     </table>
 
-    <div class="neighbor-card">
+    <div class="neighbor-card" id="neighbor-anchor">
       <div>
-        <div class="nc-tag">Nearest neighbor</div>
+        <div class="nc-tag">Nearest neighbor · #1</div>
         <div class="nc-id">#4012</div>
       </div>
       <div>
@@ -691,15 +1061,191 @@
         <div class="nc-meta">F · 32 · cosine sim 0.81 · cluster: SYMBOL_FAILURE + URGENCY_NO_OBJECT</div>
       </div>
     </div>
+    <div class="neighbor-card extra">
+      <div>
+        <div class="nc-tag">Nearest neighbor · #2</div>
+        <div class="nc-id">#7194</div>
+      </div>
+      <div>
+        <div class="nc-quote">"My father was a child and I had to read him his own letters but the handwriting had changed and the words wouldn't stay still on the page."</div>
+        <div class="nc-meta">M · 41 · cosine sim 0.77 · cluster: PARENT_AGE_INVERSION + SYMBOL_FAILURE</div>
+      </div>
+    </div>
+    <div class="neighbor-card extra">
+      <div>
+        <div class="nc-tag">Nearest neighbor · #3</div>
+        <div class="nc-id">#2856</div>
+      </div>
+      <div>
+        <div class="nc-quote">"The wedding was already starting and I was the one getting married but I couldn't remember the other person's name or whether I had agreed to any of this."</div>
+        <div class="nc-meta">F · 28 · cosine sim 0.73 · cluster: URGENCY_NO_OBJECT + IDENTITY_DRIFT</div>
+      </div>
+    </div>
 
     <!-- =================== ACTIONS =================== -->
     <div class="actions">
-      <button class="btn primary">Save dream</button>
-      <button class="btn">See nearest neighbors</button>
-      <button class="btn">Re-read with another lens</button>
-      <button class="btn">Enter a new dream</button>
+      <button class="btn primary" data-action="save">Save dream</button>
+      <button class="btn" data-action="neighbors">See nearest neighbors</button>
+      <button class="btn" data-action="lens">Re-read with another lens</button>
+      <button class="btn" data-action="new">Enter a new dream</button>
     </div>
 
   </div>
+
+  <!-- =================== MODAL =================== -->
+  <div class="modal-backdrop" id="modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="modal-title">
+      <button class="modal-close" aria-label="Close" data-action="close-modal">×</button>
+      <h2 id="modal-title">Enter a dream.</h2>
+      <div class="modal-sub">A glimpse — full engine in development</div>
+      <div class="modal-help">
+        Type or paste a dream. We'll detect morphs and run a partial analysis.
+        Full Hall/Van de Castle coding, character extraction, norms comparison and
+        nearest-neighbor lookup are wired up behind the scenes — the front end
+        for those is still being built.
+      </div>
+      <textarea id="dream-input" placeholder="I was in a hallway that kept getting longer&hellip;"></textarea>
+      <div class="modal-actions">
+        <button class="btn" data-action="close-modal">Cancel</button>
+        <button class="btn primary" data-action="analyze">Analyze</button>
+      </div>
+      <div class="modal-result" id="modal-result">
+        <div class="modal-result-grid">
+          <div class="modal-result-stat"><span class="mr-num" id="mr-words">0</span><div class="mr-label">Words</div></div>
+          <div class="modal-result-stat"><span class="mr-num" id="mr-morphs">0</span><div class="mr-label">Morphs detected</div></div>
+          <div class="modal-result-stat"><span class="mr-num" id="mr-rate">0×</span><div class="mr-label">vs. norm</div></div>
+        </div>
+        <div class="modal-result-note" id="mr-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== TOAST =================== -->
+  <div class="toast" id="toast">Saved</div>
+
+<script>
+(() => {
+  // ============ Lens tabs + cycle button ============
+  const lensOrder = ['reading', 'feeling', 'structure'];
+  function setLens(name) {
+    document.querySelectorAll('.lens-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.lens === name);
+    });
+    document.querySelectorAll('.lens-content').forEach(c => {
+      c.classList.toggle('active', c.dataset.lens === name);
+    });
+  }
+  document.querySelectorAll('.lens-tab').forEach(t => {
+    t.addEventListener('click', () => setLens(t.dataset.lens));
+  });
+  document.querySelector('[data-action="lens"]').addEventListener('click', () => {
+    const current = document.querySelector('.lens-tab.active').dataset.lens;
+    const next = lensOrder[(lensOrder.indexOf(current) + 1) % lensOrder.length];
+    setLens(next);
+    document.querySelector('.reading-block').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // ============ Save dream (localStorage) ============
+  const DREAM_KEY = 'dreams:0001:saved';
+  const saveBtn = document.querySelector('[data-action="save"]');
+  function markSaved() {
+    saveBtn.textContent = 'Saved ✓';
+    saveBtn.classList.add('saved');
+    saveBtn.classList.remove('primary');
+    saveBtn.disabled = true;
+  }
+  if (localStorage.getItem(DREAM_KEY)) markSaved();
+  saveBtn.addEventListener('click', () => {
+    if (saveBtn.disabled) return;
+    localStorage.setItem(DREAM_KEY, JSON.stringify({
+      id: '0001', savedAt: new Date().toISOString()
+    }));
+    markSaved();
+    showToast('Saved to this device');
+  });
+
+  // ============ Nearest neighbors (expand + scroll) ============
+  document.querySelector('[data-action="neighbors"]').addEventListener('click', () => {
+    document.querySelectorAll('.neighbor-card.extra').forEach(c => c.classList.add('shown'));
+    document.getElementById('neighbor-anchor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // ============ Modal (enter new dream) ============
+  const modal = document.getElementById('modal');
+  const dreamInput = document.getElementById('dream-input');
+  function openModal() {
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => dreamInput.focus(), 100);
+  }
+  function closeModal() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  document.querySelector('[data-action="new"]').addEventListener('click', openModal);
+  document.querySelectorAll('[data-action="close-modal"]').forEach(b => b.addEventListener('click', closeModal));
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+
+  // ============ Partial analysis ============
+  const morphPatterns = [
+    /\bbecame?\b/gi,
+    /\bturned (?:in)?to\b/gi,
+    /\bturned into\b/gi,
+    /\bchanged into\b/gi,
+    /\bmade of\b/gi,
+    /\bwas (?:now|suddenly|somehow)\b/gi,
+    /\bbut now\b/gi,
+    /\bthe \w+ (?:was|were) (?:now|suddenly)\b/gi,
+    /\bgrew into\b/gi,
+    /\bmorphed into\b/gi,
+  ];
+  function analyze(text) {
+    const t = text.trim();
+    const words = t ? t.split(/\s+/).length : 0;
+    let morphs = 0;
+    morphPatterns.forEach(p => {
+      const m = t.match(p);
+      if (m) morphs += m.length;
+    });
+    return { words, morphs, rate: morphs / Math.max(1, 2.1) };
+  }
+  document.querySelector('[data-action="analyze"]').addEventListener('click', () => {
+    const txt = dreamInput.value;
+    if (!txt.trim()) return;
+    const r = analyze(txt);
+    document.getElementById('mr-words').textContent = r.words;
+    document.getElementById('mr-morphs').textContent = r.morphs;
+    document.getElementById('mr-rate').textContent = r.rate.toFixed(1) + '×';
+    let note = '';
+    if (r.morphs === 0) {
+      note = 'No morph triggers detected by the surface-level scan. The full engine catches retroactive morphs ("the rooms were all wrong"), which surface patterns miss. ';
+    } else if (r.morphs < 2) {
+      note = 'A typical morph count. ';
+    } else if (r.morphs < 4) {
+      note = 'Above the database norm — this dream is doing some transformation work. ';
+    } else {
+      note = '<b>Well above the database norm</b> — this is a metamorphosis-saturated dream. ';
+    }
+    note += 'The full diagnostic — character extraction, Hall/Van de Castle coding, norms comparison, nearest-neighbor lookup, and the layered reading above — runs server-side and isn\'t wired to this input yet. It will be soon.';
+    document.getElementById('mr-note').innerHTML = note;
+    document.getElementById('modal-result').classList.add('shown');
+  });
+
+  // ============ Toast ============
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('shown');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('shown'), 2200);
+  }
+})();
+</script>
 </body>
 </html>
