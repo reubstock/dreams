@@ -642,6 +642,25 @@
     color: var(--paper);
     margin-bottom: 22px;
   }
+  .dreamer-photo {
+    width: 100%; max-width: 180px;
+    height: auto; display: block;
+    margin: 0 auto 14px;
+    filter: grayscale(0.25) contrast(1.05) brightness(0.94);
+    border: 1px solid rgba(241, 234, 215, 0.15);
+  }
+  .dreamer-photo-credit {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 8.5px; letter-spacing: 0.14em;
+    color: rgba(241, 234, 215, 0.42);
+    text-transform: uppercase;
+    margin: -4px 0 16px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .dreamer-portrait.has-photo .dreamer-monogram { display: none; }
+  .dreamer-portrait:not(.has-photo) .dreamer-photo,
+  .dreamer-portrait:not(.has-photo) .dreamer-photo-credit { display: none; }
   .dreamer-dates {
     font-family: ui-monospace, Menlo, monospace; font-size: 11px;
     letter-spacing: 0.2em; color: var(--rust-soft);
@@ -1430,8 +1449,10 @@
     </div>
 
     <div class="dreamer-card">
-      <div class="dreamer-portrait">
+      <div class="dreamer-portrait has-photo">
+        <img class="dreamer-photo" id="kafka-photo" alt="Franz Kafka" loading="lazy">
         <div class="dreamer-monogram"><i>FK</i></div>
+        <div class="dreamer-photo-credit">photograph · public domain · Wikimedia</div>
         <div class="dreamer-dates">1883 — 1924</div>
         <div class="dreamer-cluster">
           Metamorphosis<br>
@@ -1911,6 +1932,24 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && shareModal.classList.contains('open')) closeShare();
   });
+
+  // ============ Kafka portrait — Wikimedia URL fallback chain ============
+  (function loadKafkaPhoto() {
+    const img = document.getElementById('kafka-photo');
+    if (!img) return;
+    // Both URLs below verified via curl 2026-05-21 — return 200 image/jpeg
+    const urls = [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Franz_Kafka,_1923.jpg?width=400',
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Franz_Kafka_from_National_Library_Israel.jpg?width=400'
+    ];
+    let i = 0;
+    img.onerror = function() {
+      i++;
+      if (i < urls.length) { img.src = urls[i]; }
+      else { img.parentElement.classList.remove('has-photo'); }
+    };
+    img.src = urls[0];
+  })();
 
   document.querySelector('[data-action="download-share"]').addEventListener('click', async () => {
     const card = document.getElementById('share-card');
