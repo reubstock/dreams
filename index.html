@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Dream 0001 — Reading</title>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 <style>
   :root {
     --paper: #f1ead7;
@@ -576,6 +577,204 @@
     letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
   }
 
+  /* ============ LENS PLAYER (TTS) ============ */
+  .lens-player {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 26px; padding: 12px 14px;
+    border: 1px solid rgba(241, 234, 215, 0.18);
+    background: rgba(241, 234, 215, 0.04);
+    flex-wrap: wrap;
+  }
+  .player-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--rust); border: none; color: var(--paper);
+    padding: 9px 16px; cursor: pointer;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    transition: background 0.15s;
+  }
+  .player-btn:hover { background: var(--rust-soft); }
+  .player-btn svg { width: 10px; height: 10px; fill: currentColor; flex-shrink: 0; }
+  .player-btn.playing { background: var(--paper); color: var(--ink); }
+  .player-btn.playing:hover { background: var(--paper-2); }
+  .persona-select {
+    background: transparent; color: var(--paper);
+    border: 1px solid rgba(241, 234, 215, 0.3);
+    padding: 8px 12px 8px 14px; cursor: pointer;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 28px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M0 0 L5 6 L10 0' fill='%23f1ead7' opacity='0.6'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .persona-select option { background: var(--ink); color: var(--paper); }
+  .persona-select:hover { border-color: rgba(241, 234, 215, 0.55); }
+  .player-state {
+    margin-left: auto;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.06em; color: rgba(241, 234, 215, 0.4);
+  }
+
+  /* ============ DREAMER CARD ============ */
+  .dreamer-card {
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    display: grid;
+    grid-template-columns: 260px 1fr;
+  }
+  .dreamer-portrait {
+    background: var(--ink);
+    color: var(--paper);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    border-right: 1px solid var(--ink);
+    position: relative;
+  }
+  .dreamer-monogram {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 110px; line-height: 0.9; font-style: italic;
+    color: var(--paper);
+    margin-bottom: 22px;
+  }
+  .dreamer-dates {
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+    letter-spacing: 0.2em; color: var(--rust-soft);
+    text-transform: uppercase;
+  }
+  .dreamer-cluster {
+    margin-top: 18px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.18em; color: rgba(241, 234, 215, 0.55);
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+  .dreamer-body { padding: 36px 40px; }
+  .dreamer-name {
+    font-family: 'Didot', serif; font-size: 36px; font-style: italic;
+    color: var(--ink); line-height: 1; margin: 0;
+  }
+  .dreamer-meta {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    margin-top: 10px;
+  }
+  .dreamer-quote {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 21px; font-style: italic; line-height: 1.45;
+    color: var(--ink);
+    margin: 26px 0 6px;
+    border-left: 3px solid var(--rust);
+    padding-left: 20px;
+  }
+  .dreamer-source {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    color: var(--muted); margin-left: 23px; letter-spacing: 0.04em;
+  }
+  .dreamer-source i { font-style: italic; }
+  .dreamer-why {
+    margin-top: 26px; padding-top: 22px;
+    border-top: 1px solid var(--ink);
+  }
+  .dreamer-why h4 {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--rust);
+    margin: 0 0 14px; font-weight: 600;
+  }
+  .dreamer-why p {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 15.5px; line-height: 1.6; color: var(--ink-2);
+    margin: 0 0 12px;
+  }
+  .dreamer-why p:last-child { margin-bottom: 0; }
+  .dreamer-why b { color: var(--ink); font-weight: 600; }
+  .dreamer-why i { font-style: italic; }
+
+  /* ============ SHARE CARD ============ */
+  .share-card-wrap {
+    overflow: auto;
+    margin: 18px -8px;
+    padding: 8px;
+    max-height: 60vh;
+  }
+  .share-card {
+    width: 540px; height: 675px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 40px 36px 30px;
+    position: relative;
+    display: flex; flex-direction: column;
+    margin: 0 auto;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  }
+  .sc-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 12px; border-bottom: 2px solid var(--ink);
+  }
+  .sc-brand {
+    font-family: 'Didot', serif; font-size: 24px; line-height: 1;
+    color: var(--ink);
+  }
+  .sc-brand i { font-style: italic; color: var(--rust); }
+  .sc-head-meta {
+    font-family: ui-monospace, Menlo, monospace; font-size: 8.5px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    text-align: right; line-height: 1.7;
+  }
+  .sc-head-meta b { color: var(--ink); font-weight: 600; }
+  .sc-butterfly {
+    width: 140px; height: auto; margin: 14px auto 4px; display: block;
+  }
+  .sc-kicker {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--rust);
+    text-align: center;
+    margin-top: 4px;
+  }
+  .sc-headline {
+    font-family: 'Didot', serif; font-size: 48px; font-weight: 400;
+    letter-spacing: -0.015em; line-height: 0.96; text-align: center;
+    color: var(--ink); margin: 6px 0 14px;
+  }
+  .sc-headline em { font-style: italic; color: var(--rust); }
+  .sc-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin: 10px 0 16px;
+  }
+  .sc-stat {
+    border: 1px solid var(--ink); padding: 10px 8px; text-align: center;
+    background: var(--paper);
+  }
+  .sc-stat .num {
+    font-family: 'Didot', serif; font-size: 30px; color: var(--rust);
+    line-height: 1; font-style: italic;
+  }
+  .sc-stat .label {
+    font-family: ui-monospace, Menlo, monospace; font-size: 7.5px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    margin-top: 6px;
+  }
+  .sc-quote {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-style: italic; font-size: 13.5px; line-height: 1.5;
+    color: var(--ink-2); text-align: center; padding: 0 8px;
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sc-foot {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-top: 12px; border-top: 1px solid var(--ink);
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+  }
+  .sc-foot .pattern-name { color: var(--rust); font-weight: 600; }
+
   /* toast */
   .toast {
     position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
@@ -701,6 +900,31 @@
     .modal { padding: 28px 22px 24px; }
     .modal h2 { font-size: 24px; }
     .modal-result-grid { grid-template-columns: repeat(2, 1fr); }
+
+    /* lens player on mobile */
+    .lens-player { gap: 10px; padding: 10px 12px; }
+    .player-state { display: none; }
+    .persona-select { font-size: 9.5px; padding: 7px 26px 7px 12px; }
+    .player-btn { font-size: 9.5px; padding: 8px 12px; }
+
+    /* dreamer card on mobile */
+    .dreamer-card { grid-template-columns: 1fr; }
+    .dreamer-portrait { padding: 28px 24px; border-right: none; border-bottom: 1px solid var(--ink); flex-direction: column; }
+    .dreamer-monogram { font-size: 72px; margin-bottom: 14px; }
+    .dreamer-cluster { margin-top: 14px; }
+    .dreamer-body { padding: 28px 22px; }
+    .dreamer-name { font-size: 28px; }
+    .dreamer-quote { font-size: 17px; padding-left: 16px; margin: 20px 0 6px; }
+    .dreamer-source { margin-left: 19px; font-size: 10px; }
+    .dreamer-why p { font-size: 14.5px; }
+
+    /* share card preview on mobile */
+    .share-card-wrap { max-height: 50vh; padding: 4px; margin: 12px -4px; }
+    .share-card {
+      transform: scale(0.62);
+      transform-origin: top center;
+      margin-bottom: -260px;
+    }
   }
 
   @media (max-width: 380px) {
@@ -1061,6 +1285,19 @@
     <div class="reading-block">
       <div class="kicker">Reading — three lenses</div>
 
+      <div class="lens-player">
+        <button class="player-btn" data-action="speak" aria-label="Read aloud">
+          <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg"><polygon points="2,1 9,5 2,9"/></svg>
+          <span class="player-label">Listen</span>
+        </button>
+        <select class="persona-select" data-action="persona" aria-label="Narrator voice">
+          <option value="oracle">Oracle voice</option>
+          <option value="therapist">Therapist voice</option>
+          <option value="researcher">Researcher voice</option>
+        </select>
+        <div class="player-state" id="player-state">browser voice · quality varies by device</div>
+      </div>
+
       <div class="lens-tabs">
         <button class="lens-tab active" data-lens="reading"><span class="lens-num">i.</span>Reading</button>
         <button class="lens-tab" data-lens="feeling"><span class="lens-num">ii.</span>Feeling</button>
@@ -1185,11 +1422,48 @@
       </div>
     </div>
 
+    <!-- =================== HISTORICAL DREAMER =================== -->
+    <div class="section-head">
+      <div class="num">v.</div>
+      <div class="title">Closest historical dreamer</div>
+      <div class="rule"></div>
+    </div>
+
+    <div class="dreamer-card">
+      <div class="dreamer-portrait">
+        <div class="dreamer-monogram"><i>FK</i></div>
+        <div class="dreamer-dates">1883 — 1924</div>
+        <div class="dreamer-cluster">
+          Metamorphosis<br>
+          + Symbol failure<br>
+          + Family inversion
+        </div>
+      </div>
+      <div class="dreamer-body">
+        <div class="dreamer-name">Franz Kafka</div>
+        <div class="dreamer-meta">Prague · Diarist, novelist · Writing in German</div>
+        <div class="dreamer-quote">
+          "As Gregor Samsa awoke one morning from uneasy dreams he found himself transformed in his bed into a gigantic insect."
+        </div>
+        <div class="dreamer-source">— Opening line of <i>The Metamorphosis</i>, 1915</div>
+        <div class="dreamer-why">
+          <h4>Why this is your cultural match</h4>
+          <p>
+            Kafka's journals between 1911 and 1915 record many transformation dreams — bodies that change species, voices that lose their family's language, mornings that arrive in the wrong room. <i>The Metamorphosis</i> is the most famous dream-state metamorphosis in modern literature, and its opening sentence is itself a description of waking into one.
+          </p>
+          <p>
+            It shares your dream's exact signature: <b>METAMORPHOSIS</b> + <b>SYMBOL FAILURE</b> + <b>FAMILY INVERSION</b>. Kafka's Gregor wakes transformed, finds his voice no longer intelligible to his family, and is overwhelmed by a sense of being <i>late for work he can no longer perform</i> — a near-perfect echo of your closing image. Estimated cosine similarity to your dream: <b>0.87</b>, closer than any single neighbor in the database above.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- =================== ACTIONS =================== -->
     <div class="actions">
       <button class="btn primary" data-action="save">Save dream</button>
       <button class="btn" data-action="neighbors">See nearest neighbors</button>
       <button class="btn" data-action="lens">Re-read with another lens</button>
+      <button class="btn" data-action="share">Share as image</button>
       <button class="btn" data-action="new">Enter a new dream</button>
     </div>
 
@@ -1238,6 +1512,83 @@
       <div class="nm-section-h">Their morph chain</div>
       <div class="nm-morph-chips" id="nm-morphs"></div>
       <div class="nm-footer">Full diagnostic for this dream — coming soon</div>
+    </div>
+  </div>
+
+  <!-- =================== SHARE MODAL =================== -->
+  <div class="modal-backdrop" id="share-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="share-title">
+      <button class="modal-close" aria-label="Close" data-action="close-share">×</button>
+      <h2 id="share-title">Share this dream.</h2>
+      <div class="modal-sub">Save as image · 1080 × 1350 portrait</div>
+      <div class="share-card-wrap">
+        <div class="share-card" id="share-card">
+          <div class="sc-head">
+            <div class="sc-brand">D<i>r</i>eams</div>
+            <div class="sc-head-meta">
+              <div><b>DREAM 0001</b></div>
+              <div>2026 · 05 · 20</div>
+            </div>
+          </div>
+          <svg class="sc-butterfly" viewBox="0 0 280 230" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="sc-bf-blue" x1="0.5" y1="0" x2="0.5" y2="1">
+                <stop offset="0%" stop-color="#7ec1ff"/>
+                <stop offset="22%" stop-color="#4d8fe8"/>
+                <stop offset="55%" stop-color="#1e4cb4"/>
+                <stop offset="85%" stop-color="#0e2a78"/>
+                <stop offset="100%" stop-color="#06184a"/>
+              </linearGradient>
+              <radialGradient id="sc-bf-shine" cx="0.32" cy="0.28" r="0.7">
+                <stop offset="0%" stop-color="#bcdcff" stop-opacity="0.95"/>
+                <stop offset="35%" stop-color="#7ec1ff" stop-opacity="0.55"/>
+                <stop offset="80%" stop-color="#4d8fe8" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#1e4cb4" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g>
+              <path d="M 140 78 C 100 46, 52 28, 24 56 C 6 88, 22 110, 62 114 C 100 116, 122 108, 140 96 Z" fill="url(#sc-bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
+              <ellipse cx="70" cy="74" rx="38" ry="20" fill="url(#sc-bf-shine)"/>
+              <path d="M 140 108 C 102 112, 64 124, 50 158 C 46 188, 76 200, 108 184 C 128 172, 140 148, 140 128 Z" fill="url(#sc-bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
+              <ellipse cx="92" cy="148" rx="28" ry="16" fill="url(#sc-bf-shine)" opacity="0.55"/>
+              <circle cx="82" cy="162" r="7" fill="#06184a"/>
+              <circle cx="80" cy="160" r="2.6" fill="#bcdcff" opacity="0.8"/>
+            </g>
+            <g transform="translate(280 0) scale(-1 1)">
+              <path d="M 140 78 C 100 46, 52 28, 24 56 C 6 88, 22 110, 62 114 C 100 116, 122 108, 140 96 Z" fill="url(#sc-bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
+              <ellipse cx="70" cy="74" rx="38" ry="20" fill="url(#sc-bf-shine)"/>
+              <path d="M 140 108 C 102 112, 64 124, 50 158 C 46 188, 76 200, 108 184 C 128 172, 140 148, 140 128 Z" fill="url(#sc-bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
+              <ellipse cx="92" cy="148" rx="28" ry="16" fill="url(#sc-bf-shine)" opacity="0.55"/>
+              <circle cx="82" cy="162" r="7" fill="#06184a"/>
+              <circle cx="80" cy="160" r="2.6" fill="#bcdcff" opacity="0.8"/>
+            </g>
+            <ellipse cx="140" cy="118" rx="4.5" ry="48" fill="#040814"/>
+            <circle cx="140" cy="74" r="6.5" fill="#040814"/>
+            <path d="M 140 70 Q 126 52 116 34" stroke="#040814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <circle cx="116" cy="34" r="2.2" fill="#040814"/>
+            <path d="M 140 70 Q 154 52 164 34" stroke="#040814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <circle cx="164" cy="34" r="2.2" fill="#040814"/>
+          </svg>
+          <div class="sc-kicker">Primary pattern detected</div>
+          <div class="sc-headline">A dream of <em>metamorphoses.</em></div>
+          <div class="sc-stats">
+            <div class="sc-stat"><div class="num">8</div><div class="label">Morphs</div></div>
+            <div class="sc-stat"><div class="num">1</div><div class="label">Stable identity</div></div>
+            <div class="sc-stat"><div class="num">3.8×</div><div class="label">vs. norm</div></div>
+          </div>
+          <div class="sc-quote">
+            "The ceiling was made of water and I could see fish swimming above. I was late for something important but couldn't remember what."
+          </div>
+          <div class="sc-foot">
+            <span class="pattern-name">METAMORPHOSIS + SYMBOL_FAILURE</span>
+            <span>dreams-livid.vercel.app</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" data-action="close-share">Close</button>
+        <button class="btn primary" data-action="download-share">Download PNG</button>
+      </div>
     </div>
   </div>
 
@@ -1443,6 +1794,150 @@
   neighborModal.addEventListener('click', e => { if (e.target === neighborModal) closeNeighbor(); });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && neighborModal.classList.contains('open')) closeNeighbor();
+  });
+
+  // ============ Voice narration (SpeechSynthesis) ============
+  const personas = {
+    oracle:     { rate: 0.82, pitch: 0.65, voiceHints: ['Daniel', 'Google UK English Male', 'Microsoft George', 'Alex', 'Albert'] },
+    therapist:  { rate: 0.95, pitch: 1.00, voiceHints: ['Samantha', 'Karen', 'Google US English', 'Microsoft Aria', 'Moira'] },
+    researcher: { rate: 1.05, pitch: 0.92, voiceHints: ['Fred', 'Google UK English Male', 'Microsoft David', 'Tom', 'Ralph'] }
+  };
+
+  function pickVoice(hints) {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    for (const hint of hints) {
+      const v = voices.find(v => v.name === hint || v.name.includes(hint));
+      if (v) return v;
+    }
+    return voices.find(v => v.lang && v.lang.startsWith('en')) || voices[0];
+  }
+
+  function gatherLensText() {
+    const active = document.querySelector('.lens-content.active');
+    if (!active) return '';
+    const q = active.querySelector('.read-q');
+    const a = active.querySelector('.read-a');
+    let parts = [];
+    if (q) parts.push(q.textContent.replace(/[""]/g, '').replace(/[?!]/g, '.'));
+    if (a) {
+      a.querySelectorAll('p:not(.caveat)').forEach(p => parts.push(p.textContent));
+    }
+    return parts.join(' ').replace(/\s+/g, ' ').trim();
+  }
+
+  const speakBtn = document.querySelector('[data-action="speak"]');
+  const personaSelect = document.querySelector('[data-action="persona"]');
+  const playerState = document.getElementById('player-state');
+  let currentUtterance = null;
+
+  function stopSpeaking() {
+    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+      window.speechSynthesis.cancel();
+    }
+    speakBtn.classList.remove('playing');
+    speakBtn.querySelector('.player-label').textContent = 'Listen';
+    speakBtn.querySelector('svg').innerHTML = '<polygon points="2,1 9,5 2,9"/>';
+    if (playerState) playerState.textContent = 'browser voice · quality varies by device';
+  }
+
+  function startSpeaking() {
+    if (!('speechSynthesis' in window)) {
+      if (playerState) playerState.textContent = 'speech not supported in this browser';
+      return;
+    }
+    const text = gatherLensText();
+    if (!text) return;
+    const persona = personas[personaSelect.value] || personas.oracle;
+    const voice = pickVoice(persona.voiceHints);
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.rate = persona.rate;
+    u.pitch = persona.pitch;
+    u.onend = stopSpeaking;
+    u.onerror = stopSpeaking;
+    currentUtterance = u;
+    window.speechSynthesis.speak(u);
+    speakBtn.classList.add('playing');
+    speakBtn.querySelector('.player-label').textContent = 'Stop';
+    speakBtn.querySelector('svg').innerHTML = '<rect x="2" y="2" width="6" height="6"/>';
+    if (playerState && voice) playerState.textContent = 'voice · ' + voice.name;
+  }
+
+  speakBtn.addEventListener('click', () => {
+    if (window.speechSynthesis.speaking) stopSpeaking();
+    else startSpeaking();
+  });
+
+  // Stop and restart if persona or lens changes mid-playback
+  personaSelect.addEventListener('change', () => {
+    if (window.speechSynthesis.speaking) { stopSpeaking(); startSpeaking(); }
+  });
+  document.querySelectorAll('.lens-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      if (window.speechSynthesis.speaking) { stopSpeaking(); startSpeaking(); }
+    });
+  });
+
+  // Voices may load async — refresh hint label once available
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      const v = pickVoice(personas[personaSelect.value].voiceHints);
+      if (v && playerState && !window.speechSynthesis.speaking) {
+        playerState.textContent = 'ready · ' + v.name;
+      }
+    };
+  }
+  // Cancel any in-flight speech on unload
+  window.addEventListener('beforeunload', () => {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  });
+
+  // ============ Share modal ============
+  const shareModal = document.getElementById('share-modal');
+  function openShare() {
+    shareModal.classList.add('open');
+    shareModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeShare() {
+    shareModal.classList.remove('open');
+    shareModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  document.querySelector('[data-action="share"]').addEventListener('click', openShare);
+  document.querySelectorAll('[data-action="close-share"]').forEach(b => b.addEventListener('click', closeShare));
+  shareModal.addEventListener('click', e => { if (e.target === shareModal) closeShare(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && shareModal.classList.contains('open')) closeShare();
+  });
+
+  document.querySelector('[data-action="download-share"]').addEventListener('click', async () => {
+    const card = document.getElementById('share-card');
+    const downloadBtn = document.querySelector('[data-action="download-share"]');
+    const originalText = downloadBtn.textContent;
+    downloadBtn.textContent = 'Rendering…';
+    downloadBtn.disabled = true;
+    try {
+      const dataUrl = await window.htmlToImage.toPng(card, {
+        pixelRatio: 2,
+        backgroundColor: '#f1ead7',
+        cacheBust: true,
+        width: card.offsetWidth,
+        height: card.offsetHeight,
+      });
+      const link = document.createElement('a');
+      link.download = 'dream-0001.png';
+      link.href = dataUrl;
+      link.click();
+      showToast('Image downloaded');
+    } catch (err) {
+      console.error('Share card render failed:', err);
+      showToast('Download failed — see console');
+    } finally {
+      downloadBtn.textContent = originalText;
+      downloadBtn.disabled = false;
+    }
   });
 })();
 </script>
