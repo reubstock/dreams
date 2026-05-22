@@ -1410,25 +1410,34 @@
   body.dream-page .dream-frame {
     display: grid;
     grid-template-columns: 1fr 360px;
-    gap: 0;
+    gap: 24px;
     align-items: stretch;
     margin-bottom: 32px;
   }
+  /* The hero-image section stretches to the capture banner's height so that
+     the sticky hero-image-frame inside it has travel room — the user scrolls
+     through the analysis on the left while the image stays pinned on the right. */
   body.dream-page .capture {
     margin-bottom: 0;
     grid-column: 1;
-    border-right: 1px solid rgba(241, 234, 215, 0.08);
   }
   body.dream-page .hero-image {
     margin: 0;
     grid-column: 2;
   }
   body.dream-page .hero-image-frame {
-    max-width: none;
-    height: 100%;
-    aspect-ratio: auto;
-    min-height: 360px;
-    border: none;
+    max-width: 360px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    border: 1px solid var(--ink);
+    position: sticky;
+    top: 16px;
+  }
+  body.dream-page .hero-caption {
+    max-width: 360px;
+    margin: 8px 0 0;
+    text-align: left;
   }
   @media (max-width: 900px) {
     body.dream-page .dream-frame {
