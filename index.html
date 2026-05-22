@@ -138,6 +138,15 @@
     font-size: 10px; letter-spacing: 0.22em;
     text-transform: uppercase;
     color: rgba(241, 234, 215, 0.55);
+    text-align: center;
+    max-width: 280px;
+  }
+  .hero-elapsed {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 26px; font-style: italic;
+    color: var(--rust-soft);
+    margin-top: 8px;
+    line-height: 1;
   }
   .hero-reroll {
     position: absolute; bottom: 14px; right: 14px;
@@ -546,6 +555,22 @@
     max-width: 540px;
   }
   .brand i { font-style: italic; color: var(--rust); }
+  .brand-link {
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none; color: inherit;
+    transition: opacity 0.15s;
+  }
+  .brand-link:hover { opacity: 0.72; }
+  .brand-butterfly {
+    width: 40px; height: auto;
+    flex-shrink: 0;
+    filter:
+      drop-shadow(1px 0 0 var(--ink))
+      drop-shadow(-1px 0 0 var(--ink))
+      drop-shadow(0 1px 0 var(--ink))
+      drop-shadow(0 -1px 0 var(--ink))
+      drop-shadow(0 3px 5px rgba(10, 31, 92, 0.2));
+  }
   .masthead-meta {
     font-family: ui-monospace, Menlo, monospace; font-size: 11px;
     letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
@@ -1483,6 +1508,8 @@
 
     .masthead { flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 0 12px; }
     .brand { font-size: 21px; }
+    .brand-butterfly { width: 32px; }
+    .brand-link { gap: 10px; }
 
     /* dream title on mobile */
     .dream-title-section { padding: 22px 0 16px; margin-bottom: 22px; }
@@ -1670,7 +1697,10 @@
 
     <!-- =================== MASTHEAD =================== -->
     <header class="masthead">
-      <div class="brand">Discover people who <i>share your dreams.</i></div>
+      <a class="brand-link" href="/" aria-label="Home — Dreams">
+        <img class="brand-butterfly" src="/images/morpho.png" alt="" loading="eager">
+        <div class="brand">Discover people who <i>share your dreams.</i></div>
+      </a>
       <div class="masthead-meta">
         <div><b>DREAM 0001</b> · SUBJECT 0341</div>
         <div>2026 · 05 · 20 · 87 WORDS</div>
@@ -1797,7 +1827,8 @@
         <div class="hero-loading" id="hero-loading">
           <div class="hero-spinner"></div>
           <div class="hero-loading-text">Painting your dream…</div>
-          <div class="hero-loading-sub">gpt-image-1 · 20–30 seconds</div>
+          <div class="hero-loading-sub">gpt-image-1 · usually 20–30 seconds</div>
+          <div class="hero-elapsed" id="hero-elapsed">0:00</div>
         </div>
         <button class="hero-reroll" id="hero-reroll" type="button" hidden>↻ Re-roll</button>
       </figure>
@@ -2736,7 +2767,19 @@
       loading.hidden = false;
       reroll.hidden = true;
       if (loadingText) loadingText.textContent = opts.force ? 'Painting again…' : 'Painting your dream…';
-      if (loadingSub) loadingSub.textContent = 'gpt-image-1 · 20–30 seconds · stay on this page';
+      if (loadingSub) loadingSub.textContent = 'gpt-image-1 · 20–30 seconds';
+      // Elapsed time counter — ticks every second so the wait feels measurable
+      const elapsedEl = document.getElementById('hero-elapsed');
+      const loadStart = Date.now();
+      if (elapsedEl) elapsedEl.textContent = '0:00';
+      const tickTimer = setInterval(() => {
+        const e = Math.floor((Date.now() - loadStart) / 1000);
+        const m = Math.floor(e / 60);
+        const s = String(e % 60).padStart(2, '0');
+        if (elapsedEl) elapsedEl.textContent = `${m}:${s}`;
+        if (e === 45 && loadingSub) loadingSub.textContent = 'Taking a little longer — the model sometimes queues';
+        else if (e === 75 && loadingSub) loadingSub.textContent = 'Rate-limit retry in progress — hang on';
+      }, 1000);
       // (No phrase cycling — spinner + one phrase is the visual cue.)
 
       try {
@@ -2746,6 +2789,7 @@
           body: JSON.stringify({ id: dream.id, force: !!opts.force }),
         });
         if (!r.ok) {
+          clearInterval(tickTimer);
           const data = await r.json().catch(() => ({}));
           let title = 'Image generation failed';
           let detail = data.message || `HTTP ${r.status}`;
@@ -2765,6 +2809,7 @@
         const { image_url, prompt } = await r.json();
         img.src = image_url;
         img.onload = () => {
+          clearInterval(tickTimer);
           img.hidden = false;
           loading.hidden = true;
           reroll.hidden = false;
@@ -2778,8 +2823,10 @@
         dream.image_prompt = prompt;
         wireReroll(dream);
       } catch (err) {
+        clearInterval(tickTimer);
         if (loadingText) loadingText.textContent = 'Could not generate image';
-        if (loadingSub) loadingSub.textContent = err.message || String(err);
+        if (loadingSub) loadingSub.textContent = (err.message || String(err)).slice(0, 220);
+        if (reroll) reroll.hidden = false;
       }
     }
 
