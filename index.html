@@ -1821,7 +1821,7 @@
     <section class="hero-image" id="hero-image" hidden>
       <figure class="hero-image-frame">
         <img id="hero-img" alt="Generated dream image" hidden>
-        <div class="hero-loading" id="hero-loading">
+        <div class="hero-loading" id="hero-loading" hidden>
           <div class="hero-spinner"></div>
           <div class="hero-loading-text">Painting your dream…</div>
           <div class="hero-loading-sub">gpt-image-1 · usually 20–30 seconds</div>
@@ -2745,11 +2745,20 @@
 
       hero.hidden = false;
 
-      // If we already have an image and we're not forcing a re-roll, just show it
+      // If we already have an image and we're not forcing a re-roll, just show it.
+      // Loading element is hidden by default in the HTML; we never reveal it on the
+      // cached path. If the cached URL fails to load (rare — Blob URLs are permanent),
+      // we transparently fall back to regeneration.
       if (dream.image_url && !opts.force) {
-        img.src = dream.image_url;
-        img.hidden = false;
         loading.hidden = true;
+        img.hidden = false;
+        img.onerror = () => {
+          console.warn('Cached image failed to load, regenerating:', dream.image_url);
+          delete dream.image_url;
+          img.onerror = null;
+          loadHeroImage(dream);
+        };
+        img.src = dream.image_url;
         reroll.hidden = false;
         if (caption && dream.image_prompt) {
           caption.textContent = dream.image_prompt;
