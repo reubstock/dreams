@@ -2383,6 +2383,26 @@
         }
         const { analysis } = await res.json();
         renderAnalysis(text, analysis);
+
+        // Persist to server + redirect to permalink — ONLY for fresh analyses,
+        // not when loadDreamFromUrl re-renders an already-saved dream.
+        try {
+          const records = JSON.parse(localStorage.getItem('dreams:records') || '[]');
+          records.push({ id: 'd' + Date.now(), text, analysis, recordedAt: new Date().toISOString() });
+          localStorage.setItem('dreams:records', JSON.stringify(records));
+        } catch (_) {}
+        showToast('Saved · ' + (analysis.pattern_name || (text.split(/\s+/).length + ' words')));
+
+        const saved = await saveToServer(text, analysis);
+        if (saved && saved.id) {
+          try {
+            const mine = JSON.parse(localStorage.getItem('dreams:my_ids') || '[]');
+            mine.push(saved.id);
+            localStorage.setItem('dreams:my_ids', JSON.stringify(mine));
+          } catch (_) {}
+          // Redirect to the dream's own page — one dream, one page
+          window.location.href = saved.permalink;
+        }
       } catch (err) {
         renderAnalyzeError('Could not reach the analysis service', err.message || String(err));
       } finally {
@@ -2468,33 +2488,10 @@
       statsEl.hidden = false;
       statsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-      // Save dream record to localStorage
-      try {
-        const records = JSON.parse(localStorage.getItem('dreams:records') || '[]');
-        records.push({
-          id: 'd' + Date.now(),
-          text,
-          analysis: a,
-          recordedAt: new Date().toISOString(),
-        });
-        localStorage.setItem('dreams:records', JSON.stringify(records));
-      } catch (_) {}
-      showToast('Saved · ' + (a.pattern_name || words + ' words'));
-
-      // Persist to server (Redis via Upstash) so the dream gets a permalink
-      // and joins the public "recent dreams" feed.
-      saveToServer(text, a).then((saved) => {
-        if (saved && saved.id) {
-          // Track our own dream IDs locally so /library (step 4) can list them
-          try {
-            const mine = JSON.parse(localStorage.getItem('dreams:my_ids') || '[]');
-            mine.push(saved.id);
-            localStorage.setItem('dreams:my_ids', JSON.stringify(mine));
-          } catch (_) {}
-          // Redirect to the dream's own page — one dream, one page
-          window.location.href = saved.permalink;
-        }
-      });
+      // (Note: persistence + redirect happens in analyzeRecording AFTER this
+      // function returns — NOT inside renderAnalysis, because renderAnalysis
+      // is also called from loadDreamFromUrl when displaying an already-saved
+      // dream. Calling save here would create infinite duplicates + redirects.)
     }
 
     function getDeviceId() {
