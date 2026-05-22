@@ -32,6 +32,141 @@
   .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
   .container { max-width: 1240px; margin: 0 auto; padding: 0 56px; }
 
+  /* ============ VOICE CAPTURE BANNER ============ */
+  .capture {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 22px 28px;
+    margin: 0 0 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    align-items: center;
+    border-bottom: 1px solid var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+  .capture[data-state="recording"] { background: linear-gradient(90deg, #2c0a0a 0%, var(--ink) 100%); }
+  .capture[data-state="transcribing"] { background: linear-gradient(90deg, #0a1a2c 0%, var(--ink) 100%); }
+  .capture[data-state="done"] { background: var(--ink); grid-template-columns: 1fr; }
+  .capture[data-state="error"] { background: linear-gradient(90deg, #2c1f0a 0%, var(--ink) 100%); }
+  .capture-pane { display: none; }
+  .capture[data-state="idle"] .pane-idle,
+  .capture[data-state="requesting"] .pane-idle,
+  .capture[data-state="recording"] .pane-recording,
+  .capture[data-state="transcribing"] .pane-transcribing,
+  .capture[data-state="done"] .pane-done,
+  .capture[data-state="error"] .pane-error { display: contents; }
+  .capture-title {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 24px; font-style: italic; line-height: 1.1;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .capture-title em { color: var(--rust-soft); font-style: italic; }
+  .capture-sub {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(241, 234, 215, 0.55);
+  }
+  .capture-btn {
+    background: var(--rust);
+    border: none;
+    color: var(--paper);
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+    box-shadow: 0 6px 18px rgba(184, 66, 26, 0.4);
+    flex-shrink: 0;
+  }
+  .capture-btn:hover { background: var(--rust-soft); }
+  .capture-btn:active { transform: translateY(1px); }
+  .capture-btn svg { width: 28px; height: 28px; }
+  .capture-btn.stop { background: #c43e1a; animation: rec-pulse 1.5s ease-in-out infinite; }
+  @keyframes rec-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(196, 62, 26, 0.7); }
+    50% { box-shadow: 0 0 0 12px rgba(196, 62, 26, 0); }
+  }
+  .rec-dot {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 50%; background: #ff5640;
+    animation: dot-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes dot-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+  .rec-timer {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 22px; font-weight: 600;
+    color: #ff8870; letter-spacing: 0.04em;
+  }
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(241, 234, 215, 0.2);
+    border-top-color: var(--rust-soft);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .capture-textarea {
+    width: 100%; min-height: 120px;
+    margin-top: 12px;
+    background: rgba(241, 234, 215, 0.05);
+    border: 1px solid rgba(241, 234, 215, 0.2);
+    color: var(--paper);
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 15.5px; line-height: 1.55;
+    padding: 12px 14px;
+    resize: vertical;
+    outline: none;
+  }
+  .capture-textarea:focus { border-color: var(--rust-soft); }
+  .capture-actions {
+    display: flex; gap: 10px; margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .capture-actions .btn {
+    background: transparent; border: 1px solid rgba(241, 234, 215, 0.3);
+    color: var(--paper);
+    padding: 10px 16px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .capture-actions .btn:hover { background: rgba(241, 234, 215, 0.08); }
+  .capture-actions .btn.primary { background: var(--rust); border-color: var(--rust); }
+  .capture-actions .btn.primary:hover { background: var(--rust-soft); border-color: var(--rust-soft); }
+  .capture-result-stats {
+    display: flex; gap: 24px; margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(241, 234, 215, 0.15);
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+    color: rgba(241, 234, 215, 0.7);
+    flex-wrap: wrap;
+  }
+  .capture-result-stats b {
+    font-family: 'Didot', serif; font-size: 22px;
+    color: var(--rust-soft); font-style: italic; font-weight: 400;
+    display: block; line-height: 1;
+  }
+  .capture-result-stats .rs-note {
+    flex-basis: 100%;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 13.5px; color: rgba(241, 234, 215, 0.75);
+    line-height: 1.5;
+    text-transform: none; letter-spacing: 0;
+    margin-top: 6px;
+  }
+  .capture-fineprint {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.12em; color: rgba(241, 234, 215, 0.4);
+    margin-top: 8px;
+  }
+
   /* ============ MASTHEAD ============ */
   .masthead {
     border-bottom: 2px solid var(--ink);
@@ -104,6 +239,16 @@
   }
   .dream-icon-caption b { color: var(--ink); font-weight: 600; }
   .dream-icon-caption i { font-style: italic; text-transform: none; letter-spacing: 0; color: var(--ink-2); }
+  .dream-icon-credit {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    opacity: 0.7;
+    color: var(--muted);
+    font-style: normal;
+  }
 
   /* ============ SECTION HEADER ============ */
   .section-head {
@@ -159,6 +304,85 @@
     font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--muted);
   }
+
+  /* ============ CULTURAL RELATIVES ============ */
+  .relatives-header {
+    margin: 36px 0 18px;
+    padding-top: 28px;
+    border-top: 1px dashed var(--ink-2);
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 18px; flex-wrap: wrap;
+  }
+  .relatives-label {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--rust);
+  }
+  .relatives-sub {
+    font-family: 'Iowan Old Style', Georgia, serif; font-style: italic;
+    font-size: 14px; color: var(--ink-2);
+  }
+  .relatives-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 12px;
+  }
+  .relative-card {
+    margin: 0;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.12s, box-shadow 0.15s;
+  }
+  .relative-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(13, 10, 4, 0.12);
+  }
+  .rel-img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--paper-2);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rel-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    filter: contrast(1.02) saturate(0.96);
+  }
+  .rel-cap { padding: 14px 16px 16px; }
+  .rel-n {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--rust); font-weight: 700;
+  }
+  .rel-phrase {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-style: italic; font-size: 15.5px;
+    color: var(--ink); line-height: 1.35;
+    margin: 6px 0 10px;
+  }
+  .rel-attr {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9.5px; letter-spacing: 0.04em;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dotted var(--ink-2);
+  }
+  .rel-attr b { color: var(--ink); font-weight: 600; }
+  .rel-attr i { font-style: italic; }
+  .rel-why {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 13.5px; line-height: 1.55;
+    color: var(--ink-2);
+  }
+  .rel-why em { font-style: italic; color: var(--rust-deep); }
 
   /* ============ MORPH DEFINITION ============ */
   .morph-def {
@@ -818,6 +1042,7 @@
     .morph:nth-last-child(-n+2) { border-bottom: none; }
     .reading-block { margin: 64px -32px 0; padding: 48px 32px; }
     .headline-block { grid-template-columns: 1fr 160px; gap: 32px; }
+    .relatives-grid { grid-template-columns: repeat(2, 1fr); }
     .dream-icon { width: 160px; }
     .dream-icon-caption { max-width: 160px; }
   }
@@ -944,6 +1169,36 @@
       transform-origin: top center;
       margin-bottom: -260px;
     }
+
+    /* voice capture banner on mobile */
+    .capture {
+      padding: 18px 18px;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+    }
+    .capture-title { font-size: 19px; }
+    .capture-sub { font-size: 9.5px; }
+    .capture-btn { width: 56px; height: 56px; }
+    .capture-btn svg { width: 24px; height: 24px; }
+    .rec-timer { font-size: 18px; }
+    .capture-textarea { min-height: 140px; font-size: 15px; }
+    .capture-actions { gap: 8px; }
+    .capture-actions .btn { padding: 9px 12px; font-size: 9.5px; flex: 1; min-width: 0; text-align: center; }
+    .capture-result-stats { gap: 16px; font-size: 10px; }
+    .capture-result-stats b { font-size: 18px; }
+    .capture-result-stats .rs-note { font-size: 13px; }
+
+    /* cultural relatives on mobile */
+    .relatives-header { margin: 28px 0 14px; padding-top: 22px; flex-direction: column; gap: 6px; align-items: flex-start; }
+    .relatives-sub { font-size: 13px; }
+    .relatives-grid { grid-template-columns: 1fr; gap: 14px; }
+    .relative-card { display: grid; grid-template-columns: 120px 1fr; align-items: stretch; }
+    .rel-img { aspect-ratio: auto; height: 100%; }
+    .rel-img img { object-fit: cover; }
+    .rel-cap { padding: 12px 14px 14px; }
+    .rel-phrase { font-size: 14px; margin: 4px 0 8px; }
+    .rel-attr { font-size: 9px; margin-bottom: 8px; padding-bottom: 8px; }
+    .rel-why { font-size: 12.5px; line-height: 1.5; }
   }
 
   @media (max-width: 380px) {
@@ -951,6 +1206,13 @@
     .source-text { font-size: 16.5px; }
     .source-stats { grid-template-columns: 1fr; }
     .dream-icon { width: 80px; }
+    .capture { padding: 14px 14px; gap: 10px; }
+    .capture-title { font-size: 17px; }
+    .capture-btn { width: 48px; height: 48px; }
+    .capture-btn svg { width: 20px; height: 20px; }
+    /* relatives go to single column with image-on-top below 380 */
+    .relative-card { grid-template-columns: 1fr; }
+    .rel-img { aspect-ratio: 4/3; }
   }
 </style>
 </head>
@@ -970,6 +1232,77 @@
       <span>Confidence 0.78</span>
     </div>
 
+    <!-- =================== VOICE CAPTURE =================== -->
+    <section class="capture" data-state="idle" id="capture">
+      <!-- IDLE -->
+      <div class="capture-pane pane-idle">
+        <div>
+          <div class="capture-title">Record <em>your</em> dream.</div>
+          <div class="capture-sub">Speak it · we'll transcribe with Whisper · diagnose what it's doing</div>
+        </div>
+        <button class="capture-btn" data-action="record-start" aria-label="Start recording">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- RECORDING -->
+      <div class="capture-pane pane-recording">
+        <div>
+          <div class="capture-title"><span class="rec-dot"></span> Recording <span class="rec-timer" id="rec-timer">0:00</span></div>
+          <div class="capture-sub">Speak naturally · tap stop when done</div>
+        </div>
+        <button class="capture-btn stop" data-action="record-stop" aria-label="Stop recording">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="6" y="6" width="12" height="12" fill="currentColor" rx="1"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- TRANSCRIBING -->
+      <div class="capture-pane pane-transcribing">
+        <div>
+          <div class="capture-title"><span class="spinner"></span> Transcribing your dream…</div>
+          <div class="capture-sub">Whisper · usually under 10 seconds</div>
+        </div>
+      </div>
+
+      <!-- DONE -->
+      <div class="capture-pane pane-done">
+        <div>
+          <div class="capture-title">Your dream — <em>edit if you want.</em></div>
+          <div class="capture-sub">Transcribed by Whisper · audio saved on this device</div>
+          <textarea class="capture-textarea" id="capture-textarea" placeholder="Your transcribed dream appears here…"></textarea>
+          <div class="capture-actions">
+            <button class="btn" data-action="play-recording">▶ Play recording</button>
+            <button class="btn primary" data-action="analyze-recording">Analyze</button>
+            <button class="btn" data-action="discard-recording">Discard &amp; record again</button>
+          </div>
+          <div class="capture-result-stats" id="capture-result-stats" hidden>
+            <div><b id="rs-words">0</b><span>words</span></div>
+            <div><b id="rs-morphs">0</b><span>morphs detected</span></div>
+            <div><b id="rs-ratio">0×</b><span>vs. database norm</span></div>
+            <div class="rs-note" id="rs-note"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ERROR -->
+      <div class="capture-pane pane-error">
+        <div>
+          <div class="capture-title">⚠ <span id="capture-err-title">Couldn't record</span></div>
+          <div class="capture-sub" id="capture-err-detail">—</div>
+          <div class="capture-fineprint" id="capture-err-fineprint" hidden>Server transcription not yet configured. To enable: <code>vercel env add OPENAI_API_KEY production</code> then redeploy. Until then, browsers with SpeechRecognition (Chrome/Edge) can fall back automatically.</div>
+        </div>
+        <button class="capture-btn" data-action="reset-capture" aria-label="Try again">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M17.65 6.35A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L13 11h7V4l-2.35 2.35z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
     <!-- =================== HEADLINE =================== -->
     <section class="headline-block">
       <div class="headline-text">
@@ -983,98 +1316,15 @@
         </p>
       </div>
       <div class="dream-icon-wrap">
-        <svg class="dream-icon" viewBox="0 0 280 230" xmlns="http://www.w3.org/2000/svg" aria-label="Morpho butterfly">
-          <defs>
-            <linearGradient id="bf-blue" x1="0.5" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stop-color="#7ec1ff"/>
-              <stop offset="22%" stop-color="#4d8fe8"/>
-              <stop offset="55%" stop-color="#1e4cb4"/>
-              <stop offset="85%" stop-color="#0e2a78"/>
-              <stop offset="100%" stop-color="#06184a"/>
-            </linearGradient>
-            <radialGradient id="bf-shine" cx="0.32" cy="0.28" r="0.7">
-              <stop offset="0%" stop-color="#bcdcff" stop-opacity="0.95"/>
-              <stop offset="35%" stop-color="#7ec1ff" stop-opacity="0.55"/>
-              <stop offset="80%" stop-color="#4d8fe8" stop-opacity="0.15"/>
-              <stop offset="100%" stop-color="#1e4cb4" stop-opacity="0"/>
-            </radialGradient>
-            <linearGradient id="bf-edge" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#0a1230"/>
-              <stop offset="100%" stop-color="#1c3168"/>
-            </linearGradient>
-          </defs>
-
-          <!-- LEFT WINGS -->
-          <g>
-            <!-- Forewing -->
-            <path d="M 140 78
-                     C 100 46, 52 28, 24 56
-                     C 6 88, 22 110, 62 114
-                     C 100 116, 122 108, 140 96 Z"
-                  fill="url(#bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
-            <ellipse cx="70" cy="74" rx="38" ry="20" fill="url(#bf-shine)"/>
-            <!-- Forewing edge band -->
-            <path d="M 24 56 C 18 70, 18 90, 22 105"
-                  stroke="url(#bf-edge)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
-
-            <!-- Hindwing -->
-            <path d="M 140 108
-                     C 102 112, 64 124, 50 158
-                     C 46 188, 76 200, 108 184
-                     C 128 172, 140 148, 140 128 Z"
-                  fill="url(#bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
-            <ellipse cx="92" cy="148" rx="28" ry="16" fill="url(#bf-shine)" opacity="0.55"/>
-            <!-- Eye spot -->
-            <circle cx="82" cy="162" r="7" fill="#06184a"/>
-            <circle cx="80" cy="160" r="2.6" fill="#bcdcff" opacity="0.8"/>
-            <!-- Hindwing edge band -->
-            <path d="M 50 158 C 56 178, 80 192, 105 184"
-                  stroke="url(#bf-edge)" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.4"/>
-          </g>
-
-          <!-- RIGHT WINGS (mirrored) -->
-          <g transform="translate(280 0) scale(-1 1)">
-            <path d="M 140 78
-                     C 100 46, 52 28, 24 56
-                     C 6 88, 22 110, 62 114
-                     C 100 116, 122 108, 140 96 Z"
-                  fill="url(#bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
-            <ellipse cx="70" cy="74" rx="38" ry="20" fill="url(#bf-shine)"/>
-            <path d="M 24 56 C 18 70, 18 90, 22 105"
-                  stroke="url(#bf-edge)" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
-            <path d="M 140 108
-                     C 102 112, 64 124, 50 158
-                     C 46 188, 76 200, 108 184
-                     C 128 172, 140 148, 140 128 Z"
-                  fill="url(#bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
-            <ellipse cx="92" cy="148" rx="28" ry="16" fill="url(#bf-shine)" opacity="0.55"/>
-            <circle cx="82" cy="162" r="7" fill="#06184a"/>
-            <circle cx="80" cy="160" r="2.6" fill="#bcdcff" opacity="0.8"/>
-            <path d="M 50 158 C 56 178, 80 192, 105 184"
-                  stroke="url(#bf-edge)" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.4"/>
-          </g>
-
-          <!-- BODY -->
-          <ellipse cx="140" cy="118" rx="4.5" ry="48" fill="#040814"/>
-          <!-- segment hints -->
-          <line x1="140" y1="84" x2="140" y2="162" stroke="#1c2a52" stroke-width="0.6" stroke-dasharray="2,3"/>
-          <!-- Head -->
-          <circle cx="140" cy="74" r="6.5" fill="#040814"/>
-          <!-- Tiny eye highlights -->
-          <circle cx="138" cy="72" r="1.2" fill="#7ec1ff" opacity="0.6"/>
-
-          <!-- ANTENNAE -->
-          <path d="M 140 70 Q 126 52 116 34"
-                stroke="#040814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          <circle cx="116" cy="34" r="2.2" fill="#040814"/>
-          <path d="M 140 70 Q 154 52 164 34"
-                stroke="#040814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          <circle cx="164" cy="34" r="2.2" fill="#040814"/>
-        </svg>
+        <img class="dream-icon"
+             src="https://commons.wikimedia.org/wiki/Special:FilePath/Morpho%20didius%20Male%20Dos%20MHNT.jpg?width=800"
+             alt="Morpho didius male, dorsal view — Muséum d'Histoire Naturelle de Toulouse"
+             loading="lazy">
         <div class="dream-icon-caption">
-          <b>Morpho</b><br>
+          <b>Morpho didius</b><br>
           from <i>morphē</i>, Greek: <i>form</i>.<br>
-          Same root as <i>morph</i>.
+          Same root as <i>morph</i>.<br>
+          <span class="dream-icon-credit">Photo: D. Descouens · MHNT · CC BY-SA</span>
         </div>
       </div>
     </section>
@@ -1121,6 +1371,104 @@
           <span class="stat-label">Norm rate of morphs</span>
         </div>
       </aside>
+    </div>
+
+    <!-- =================== CULTURAL RELATIVES =================== -->
+    <div class="relatives-header">
+      <div class="relatives-label">Cultural relatives</div>
+      <div class="relatives-sub">each unusual element in your dream has a documented predecessor</div>
+    </div>
+    <div class="relatives-grid">
+      <figure class="relative-card" data-mark="1">
+        <div class="rel-img">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Piranesi-Carceri-07Zugbr%C3%BCcke.jpg?width=480"
+               alt="Piranesi, Carceri Plate VII — The Drawbridge" loading="lazy">
+        </div>
+        <figcaption class="rel-cap">
+          <span class="rel-n">[1]</span>
+          <div class="rel-phrase">"the rooms were all wrong"</div>
+          <div class="rel-attr"><b>Giovanni Battista Piranesi</b> · <i>Carceri d'invenzione</i>, Plate VII (The Drawbridge) · 1761</div>
+          <div class="rel-why">A series of imaginary prisons whose stairs lead nowhere and whose rooms don't connect. The canonical depiction of a space that keeps its name but loses its geometry.</div>
+        </figcaption>
+      </figure>
+
+      <figure class="relative-card" data-mark="2">
+        <div class="rel-img">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Madonna%20of%20the%20Magnificat.png?width=480"
+               alt="Botticelli, Madonna of the Magnificat" loading="lazy">
+        </div>
+        <figcaption class="rel-cap">
+          <span class="rel-n">[2]</span>
+          <div class="rel-phrase">"my mother was there but younger than me"</div>
+          <div class="rel-attr"><b>Sandro Botticelli</b> · <i>Madonna of the Magnificat</i> · c. 1483</div>
+          <div class="rel-why">Mary reads barely older than her child. Five centuries of Madonna painting wrestle with the same uncanny inversion — when does the parent stop being older than the child?</div>
+        </figcaption>
+      </figure>
+
+      <figure class="relative-card" data-mark="3">
+        <div class="rel-img">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Wave_off_Kanagawa.jpg?width=480"
+               alt="Hokusai, The Great Wave off Kanagawa" loading="lazy">
+        </div>
+        <figcaption class="rel-cap">
+          <span class="rel-n">[3]</span>
+          <div class="rel-phrase">"the ceiling was made of water"</div>
+          <div class="rel-attr"><b>Katsushika Hokusai</b> · <i>The Great Wave off Kanagawa</i> · c. 1831</div>
+          <div class="rel-why">The most famous image in history of water that's <em>above</em> you rather than below. The wave reads as a ceiling about to fall — your dream literalized that.</div>
+        </figcaption>
+      </figure>
+
+      <figure class="relative-card" data-mark="4">
+        <div class="rel-img">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Red%20fish%20detail%2C%20Kuniyoshi%20Utagawa%2C%20octopus%2C%20red%20fish%20%28cropped%29.jpg?width=480"
+               alt="Kuniyoshi, red fish detail" loading="lazy">
+        </div>
+        <figcaption class="rel-cap">
+          <span class="rel-n">[4]</span>
+          <div class="rel-phrase">"fish swimming above"</div>
+          <div class="rel-attr"><b>Utagawa Kuniyoshi</b> · red fish, detail · 19th century</div>
+          <div class="rel-why">Ukiyo-e fish prints isolate the creature from its element — fish suspended in negative space, the way yours swim in the wrong stratum.</div>
+        </figcaption>
+      </figure>
+
+      <figure class="relative-card" data-mark="5">
+        <div class="rel-img">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Voynich%20Manuscript%20-%20folio%201r%20d%C3%A9tail.jpg?width=480"
+               alt="Voynich Manuscript folio 1r" loading="lazy">
+        </div>
+        <figcaption class="rel-cap">
+          <span class="rel-n">[5]</span>
+          <div class="rel-phrase">"letters in a language I didn't recognize"</div>
+          <div class="rel-attr"><b>Voynich Manuscript</b> · folio 1r · 15th century</div>
+          <div class="rel-why">A real book written in a script no one has ever decoded. The visual experience of looking at a page whose letters refuse to add up — exactly the texture of your dream-phone.</div>
+        </figcaption>
+      </figure>
+
+      <figure class="relative-card" data-mark="7">
+        <div class="rel-img">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer.jpg?width=480"
+               alt="Caspar David Friedrich, The Monk by the Sea" loading="lazy">
+        </div>
+        <figcaption class="rel-cap">
+          <span class="rel-n">[6/7]</span>
+          <div class="rel-phrase">"the floor became sand · a beach with no one around"</div>
+          <div class="rel-attr"><b>Caspar David Friedrich</b> · <i>Der Mönch am Meer</i> (The Monk by the Sea) · 1808–1810</div>
+          <div class="rel-why">The canonical painting of one figure facing an empty shore. When first exhibited, viewers reported feeling that their own eyelids had been cut off — the same dream-stage of being alone on a beach that shouldn't be empty.</div>
+        </figcaption>
+      </figure>
+
+      <figure class="relative-card" data-mark="8">
+        <div class="rel-img">
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Albrecht%20D%C3%BCrer%2C%20Melencolia%20I%2C%201514%2C%20NGA%206640.jpg?width=480"
+               alt="Albrecht Dürer, Melencolia I" loading="lazy">
+        </div>
+        <figcaption class="rel-cap">
+          <span class="rel-n">[8]</span>
+          <div class="rel-phrase">"late for something important but couldn't remember what"</div>
+          <div class="rel-attr"><b>Albrecht Dürer</b> · <i>Melencolia I</i> · 1514</div>
+          <div class="rel-why">The canonical engraving of consequential dread with no defined object. The instruments scattered around the angel are all the things she could be doing; she is doing none of them. Your dream's emotional core.</div>
+        </figcaption>
+      </figure>
     </div>
 
     <!-- =================== MORPH CHAIN =================== -->
@@ -1551,45 +1899,9 @@
               <div>2026 · 05 · 20</div>
             </div>
           </div>
-          <svg class="sc-butterfly" viewBox="0 0 280 230" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="sc-bf-blue" x1="0.5" y1="0" x2="0.5" y2="1">
-                <stop offset="0%" stop-color="#7ec1ff"/>
-                <stop offset="22%" stop-color="#4d8fe8"/>
-                <stop offset="55%" stop-color="#1e4cb4"/>
-                <stop offset="85%" stop-color="#0e2a78"/>
-                <stop offset="100%" stop-color="#06184a"/>
-              </linearGradient>
-              <radialGradient id="sc-bf-shine" cx="0.32" cy="0.28" r="0.7">
-                <stop offset="0%" stop-color="#bcdcff" stop-opacity="0.95"/>
-                <stop offset="35%" stop-color="#7ec1ff" stop-opacity="0.55"/>
-                <stop offset="80%" stop-color="#4d8fe8" stop-opacity="0.15"/>
-                <stop offset="100%" stop-color="#1e4cb4" stop-opacity="0"/>
-              </radialGradient>
-            </defs>
-            <g>
-              <path d="M 140 78 C 100 46, 52 28, 24 56 C 6 88, 22 110, 62 114 C 100 116, 122 108, 140 96 Z" fill="url(#sc-bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
-              <ellipse cx="70" cy="74" rx="38" ry="20" fill="url(#sc-bf-shine)"/>
-              <path d="M 140 108 C 102 112, 64 124, 50 158 C 46 188, 76 200, 108 184 C 128 172, 140 148, 140 128 Z" fill="url(#sc-bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
-              <ellipse cx="92" cy="148" rx="28" ry="16" fill="url(#sc-bf-shine)" opacity="0.55"/>
-              <circle cx="82" cy="162" r="7" fill="#06184a"/>
-              <circle cx="80" cy="160" r="2.6" fill="#bcdcff" opacity="0.8"/>
-            </g>
-            <g transform="translate(280 0) scale(-1 1)">
-              <path d="M 140 78 C 100 46, 52 28, 24 56 C 6 88, 22 110, 62 114 C 100 116, 122 108, 140 96 Z" fill="url(#sc-bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
-              <ellipse cx="70" cy="74" rx="38" ry="20" fill="url(#sc-bf-shine)"/>
-              <path d="M 140 108 C 102 112, 64 124, 50 158 C 46 188, 76 200, 108 184 C 128 172, 140 148, 140 128 Z" fill="url(#sc-bf-blue)" stroke="#06184a" stroke-width="1.6" stroke-linejoin="round"/>
-              <ellipse cx="92" cy="148" rx="28" ry="16" fill="url(#sc-bf-shine)" opacity="0.55"/>
-              <circle cx="82" cy="162" r="7" fill="#06184a"/>
-              <circle cx="80" cy="160" r="2.6" fill="#bcdcff" opacity="0.8"/>
-            </g>
-            <ellipse cx="140" cy="118" rx="4.5" ry="48" fill="#040814"/>
-            <circle cx="140" cy="74" r="6.5" fill="#040814"/>
-            <path d="M 140 70 Q 126 52 116 34" stroke="#040814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-            <circle cx="116" cy="34" r="2.2" fill="#040814"/>
-            <path d="M 140 70 Q 154 52 164 34" stroke="#040814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-            <circle cx="164" cy="34" r="2.2" fill="#040814"/>
-          </svg>
+          <img class="sc-butterfly"
+                 src="https://commons.wikimedia.org/wiki/Special:FilePath/Morpho%20didius%20Male%20Dos%20MHNT.jpg?width=600"
+                 alt="Morpho didius">
           <div class="sc-kicker">Primary pattern detected</div>
           <div class="sc-headline">A dream of <em>metamorphoses.</em></div>
           <div class="sc-stats">
@@ -1978,6 +2290,227 @@
       downloadBtn.disabled = false;
     }
   });
+
+  // ============ Voice capture (record → Whisper → dream record) ============
+  // Pipeline:
+  //   1. getUserMedia({audio:true}) — request mic permission
+  //   2. MediaRecorder captures audio Blob in browser (WebM/Opus or MP4/AAC)
+  //   3. Blob POSTed to /api/transcribe (Vercel serverless function)
+  //   4. Function forwards to OpenAI Whisper API, returns {text:...}
+  //   5. Text auto-fills editable textarea; audio kept in memory for playback
+  //   6. Analyze button runs the same regex morph counter as the typed-dream path
+  const capture = document.getElementById('capture');
+  if (capture) {
+    const setState = (state) => capture.setAttribute('data-state', state);
+    const errTitleEl = document.getElementById('capture-err-title');
+    const errDetailEl = document.getElementById('capture-err-detail');
+    const errFineprintEl = document.getElementById('capture-err-fineprint');
+    const timerEl = document.getElementById('rec-timer');
+    const textareaEl = document.getElementById('capture-textarea');
+    const statsEl = document.getElementById('capture-result-stats');
+    let mediaRecorder = null;
+    let mediaStream = null;
+    let audioChunks = [];
+    let audioBlob = null;
+    let recordingMime = 'audio/webm';
+    let recordStart = 0;
+    let timerInterval = null;
+    let audioPlayer = null;
+
+    function fmtTime(ms) {
+      const total = Math.floor(ms / 1000);
+      const m = Math.floor(total / 60);
+      const s = total % 60;
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    function pickMimeType() {
+      const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+      for (const t of candidates) {
+        if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) {
+          return t;
+        }
+      }
+      return '';
+    }
+
+    function showError(title, detail, fineprint) {
+      if (errTitleEl) errTitleEl.textContent = title;
+      if (errDetailEl) errDetailEl.textContent = detail || '';
+      if (errFineprintEl) {
+        errFineprintEl.hidden = !fineprint;
+      }
+      setState('error');
+    }
+
+    async function startRecording() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showError('Microphone not available', 'Your browser does not expose getUserMedia. Try Chrome, Edge, Firefox, or Safari 14.5+.');
+        return;
+      }
+      if (typeof MediaRecorder === 'undefined') {
+        showError('Recording not supported', 'MediaRecorder API is missing. Try Chrome, Edge, or Firefox.');
+        return;
+      }
+      setState('requesting');
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (err) {
+        if (err.name === 'NotAllowedError') {
+          showError('Microphone permission denied', 'Allow microphone access in your browser settings and try again.');
+        } else {
+          showError('Could not access microphone', err.message || String(err));
+        }
+        return;
+      }
+      recordingMime = pickMimeType();
+      try {
+        mediaRecorder = recordingMime
+          ? new MediaRecorder(mediaStream, { mimeType: recordingMime })
+          : new MediaRecorder(mediaStream);
+      } catch (err) {
+        showError('Recorder init failed', err.message || String(err));
+        return;
+      }
+      audioChunks = [];
+      audioBlob = null;
+      mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = onRecordingStopped;
+      mediaRecorder.onerror = (e) => showError('Recorder error', (e.error && e.error.message) || 'Unknown recorder error');
+      mediaRecorder.start();
+      recordStart = Date.now();
+      setState('recording');
+      timerEl.textContent = '0:00';
+      timerInterval = setInterval(() => { timerEl.textContent = fmtTime(Date.now() - recordStart); }, 200);
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    }
+
+    async function onRecordingStopped() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((t) => t.stop());
+        mediaStream = null;
+      }
+      const type = recordingMime || (mediaRecorder && mediaRecorder.mimeType) || 'audio/webm';
+      audioBlob = new Blob(audioChunks, { type });
+      if (audioBlob.size === 0) {
+        showError('No audio captured', 'The recording was empty. Try again, and make sure your microphone is unmuted.');
+        return;
+      }
+      await transcribeAndShow(audioBlob);
+    }
+
+    async function transcribeAndShow(blob) {
+      setState('transcribing');
+      try {
+        const res = await fetch('/api/transcribe', {
+          method: 'POST',
+          headers: { 'Content-Type': blob.type || 'audio/webm' },
+          body: blob,
+        });
+        if (!res.ok) {
+          let data = {};
+          try { data = await res.json(); } catch (_) {}
+          if (data && data.error === 'transcription_not_configured') {
+            const ok = await tryBrowserFallback();
+            if (ok) return;
+            showError('Transcription not yet configured', data.message || 'Add OPENAI_API_KEY env var on Vercel.', true);
+            return;
+          }
+          showError('Transcription failed', (data && data.message) || `HTTP ${res.status}`);
+          return;
+        }
+        const data = await res.json();
+        showTranscript(data.text || '');
+      } catch (err) {
+        const ok = await tryBrowserFallback();
+        if (ok) return;
+        showError('Could not reach transcription service', err.message || String(err));
+      }
+    }
+
+    function tryBrowserFallback() {
+      // Browser SpeechRecognition won't work on a finished audio Blob — it streams live.
+      // We surface this as a hint rather than auto-fallback.
+      return Promise.resolve(false);
+    }
+
+    function showTranscript(text) {
+      textareaEl.value = text.trim();
+      statsEl.hidden = true;
+      setState('done');
+    }
+
+    function discardRecording() {
+      audioChunks = [];
+      audioBlob = null;
+      if (audioPlayer) { audioPlayer.pause(); audioPlayer = null; }
+      textareaEl.value = '';
+      statsEl.hidden = true;
+      setState('idle');
+    }
+
+    function playRecording() {
+      if (!audioBlob) return;
+      if (audioPlayer) { audioPlayer.pause(); audioPlayer = null; }
+      const url = URL.createObjectURL(audioBlob);
+      audioPlayer = new Audio(url);
+      audioPlayer.onended = () => URL.revokeObjectURL(url);
+      audioPlayer.play().catch((err) => showToast('Playback blocked: ' + err.message));
+    }
+
+    function analyzeRecording() {
+      const text = textareaEl.value.trim();
+      if (!text) return;
+      // Reuse the morph regex from the typed-dream modal
+      const morphPatterns = [
+        /\bbecame?\b/gi, /\bturned (?:in)?to\b/gi, /\bchanged into\b/gi,
+        /\bmade of\b/gi, /\bwas (?:now|suddenly|somehow)\b/gi,
+        /\bbut now\b/gi, /\bgrew into\b/gi, /\bmorphed into\b/gi,
+      ];
+      const words = text.split(/\s+/).filter(Boolean).length;
+      let morphs = 0;
+      morphPatterns.forEach((p) => { const m = text.match(p); if (m) morphs += m.length; });
+      document.getElementById('rs-words').textContent = words;
+      document.getElementById('rs-morphs').textContent = morphs;
+      document.getElementById('rs-ratio').textContent = (morphs / 2.1).toFixed(1) + '×';
+      let note = '';
+      if (morphs === 0) note = "No surface-level morph triggers detected. The full engine catches retroactive morphs (“the rooms were all wrong”) that surface regex misses — coming soon.";
+      else if (morphs < 2) note = 'A typical morph count for a dream of this length.';
+      else if (morphs < 4) note = 'Above the database norm — this dream is doing real transformation work.';
+      else note = 'Well above the database norm — this is a metamorphosis-saturated dream, like the sample diagnostic on this page.';
+      document.getElementById('rs-note').textContent = note;
+      statsEl.hidden = false;
+      // Save to localStorage as a personal dream record
+      try {
+        const records = JSON.parse(localStorage.getItem('dreams:records') || '[]');
+        records.push({
+          id: 'd' + Date.now(),
+          text,
+          words,
+          morphs,
+          recordedAt: new Date().toISOString(),
+        });
+        localStorage.setItem('dreams:records', JSON.stringify(records));
+      } catch (_) {}
+      showToast('Saved · ' + words + ' words · ' + morphs + ' morph' + (morphs === 1 ? '' : 's'));
+    }
+
+    capture.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      if (action === 'record-start') startRecording();
+      else if (action === 'record-stop') stopRecording();
+      else if (action === 'play-recording') playRecording();
+      else if (action === 'analyze-recording') analyzeRecording();
+      else if (action === 'discard-recording') discardRecording();
+      else if (action === 'reset-capture') setState('idle');
+    });
+  }
 })();
 </script>
 </body>
