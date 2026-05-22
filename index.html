@@ -1974,22 +1974,6 @@
         <div class="rd-text">"My father was a child and I had to read him his own letters but the handwriting had changed and the words wouldn't stay still on the page."</div>
         <div class="rd-foot">M · 41 · 7h ago · 5 morphs</div>
       </article>
-      <article class="recent-dream">
-        <div class="rd-meta">
-          <span class="rd-id">#5821</span>
-          <span class="rd-pattern">UNNAMED PURPOSE</span>
-        </div>
-        <div class="rd-text">"I was flying just above the rooftops, but I couldn't tell anyone because no one I called knew my name anymore."</div>
-        <div class="rd-foot">F · 28 · today · 4 morphs</div>
-      </article>
-      <article class="recent-dream">
-        <div class="rd-meta">
-          <span class="rd-id">#9933</span>
-          <span class="rd-pattern">CIRCULAR PURSUIT</span>
-        </div>
-        <div class="rd-text">"I kept running through the same school I went to as a kid, but every classroom led back to the same hallway and the bell wouldn't stop."</div>
-        <div class="rd-foot">M · 35 · yesterday · 6 morphs</div>
-      </article>
     </div>
     <div class="recent-foot">→ all dreams (coming soon)</div>
 
@@ -2815,7 +2799,7 @@
     const feed = document.getElementById('recent-feed');
     if (!feed) return;
     try {
-      const r = await fetch('/api/dreams/recent?limit=8');
+      const r = await fetch('/api/dreams/recent?limit=2');
       if (!r.ok) return; // silently keep static placeholders
       const { dreams } = await r.json();
       if (!Array.isArray(dreams) || dreams.length === 0) return;
