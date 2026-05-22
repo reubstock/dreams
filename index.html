@@ -1364,7 +1364,42 @@
 
   /* ============ DREAM PAGE — one dream, one page ============ */
   body.dream-page .example-only { display: none !important; }
-  body.dream-page .capture { margin-bottom: 32px; }
+  .dream-frame { display: block; }
+  body.dream-page .dream-frame {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 0;
+    align-items: stretch;
+    margin-bottom: 32px;
+  }
+  body.dream-page .capture {
+    margin-bottom: 0;
+    grid-column: 1;
+    border-right: 1px solid rgba(241, 234, 215, 0.08);
+  }
+  body.dream-page .hero-image {
+    margin: 0;
+    grid-column: 2;
+  }
+  body.dream-page .hero-image-frame {
+    max-width: none;
+    height: 100%;
+    aspect-ratio: auto;
+    min-height: 360px;
+    border: none;
+  }
+  @media (max-width: 900px) {
+    body.dream-page .dream-frame {
+      grid-template-columns: 1fr;
+    }
+    body.dream-page .capture { grid-column: 1; border-right: none; }
+    body.dream-page .hero-image { grid-column: 1; }
+    body.dream-page .hero-image-frame {
+      aspect-ratio: 1 / 1;
+      min-height: 0;
+      max-width: 100%;
+    }
+  }
   body.dream-page .recent-feed-header-on-dream {
     margin-top: 48px; padding-top: 28px;
     border-top: 1px solid var(--ink);
@@ -1584,20 +1619,8 @@
       <span>Confidence 0.78</span>
     </div>
 
-    <!-- =================== HERO IMAGE (dream pages only) =================== -->
-    <section class="hero-image" id="hero-image" hidden>
-      <figure class="hero-image-frame">
-        <img id="hero-img" alt="Generated dream image" hidden>
-        <div class="hero-loading" id="hero-loading">
-          <div class="hero-spinner"></div>
-          <div class="hero-loading-text">Generating dream image…</div>
-          <div class="hero-loading-sub">gpt-image-1 · usually 20–30 seconds</div>
-        </div>
-        <button class="hero-reroll" id="hero-reroll" type="button" hidden>↻ Re-roll</button>
-      </figure>
-      <figcaption class="hero-caption" id="hero-caption" hidden></figcaption>
-    </section>
-
+    <!-- =================== DREAM FRAME (capture + hero side-by-side on /d/:id) =================== -->
+    <div class="dream-frame">
     <!-- =================== VOICE CAPTURE =================== -->
     <section class="capture" data-state="idle" id="capture">
       <!-- IDLE -->
@@ -1694,6 +1717,21 @@
         </div>
       </div>
     </section>
+
+    <!-- =================== HERO IMAGE (dream pages only) =================== -->
+    <section class="hero-image" id="hero-image" hidden>
+      <figure class="hero-image-frame">
+        <img id="hero-img" alt="Generated dream image" hidden>
+        <div class="hero-loading" id="hero-loading">
+          <div class="hero-spinner"></div>
+          <div class="hero-loading-text">Painting your dream…</div>
+          <div class="hero-loading-sub">gpt-image-1 · 20–30 seconds</div>
+        </div>
+        <button class="hero-reroll" id="hero-reroll" type="button" hidden>↻ Re-roll</button>
+      </figure>
+      <figcaption class="hero-caption" id="hero-caption" hidden></figcaption>
+    </section>
+    </div><!-- /.dream-frame -->
 
     <!-- =================== SOURCE =================== -->
     <div class="section-head example-only">
@@ -2597,10 +2635,19 @@
         });
         if (!r.ok) {
           const data = await r.json().catch(() => ({}));
-          if (loadingText) loadingText.textContent = data.error === 'blob_not_configured'
-            ? 'Image storage not yet enabled'
-            : 'Image generation failed';
-          if (loadingSub) loadingSub.textContent = data.message || `HTTP ${r.status}`;
+          let title = 'Image generation failed';
+          let detail = data.message || `HTTP ${r.status}`;
+          if (data.error === 'blob_not_configured') title = 'Image storage not yet enabled';
+          else if (r.status === 429 || /rate limit/i.test(detail)) {
+            title = 'Rate limit — too many images this minute';
+            detail = 'gpt-image-1 caps at 5/min per org. Tap ↻ Re-roll in about a minute.';
+          }
+          // Strip leading "Image API 502:" / "image model failed" prefixes
+          detail = detail.replace(/^Image API \d+:\s*/i, '').replace(/^image model failed \d+:\s*/i, '').trim();
+          if (detail.length > 220) detail = detail.slice(0, 217) + '…';
+          if (loadingText) loadingText.textContent = title;
+          if (loadingSub) loadingSub.textContent = detail;
+          if (reroll) { reroll.hidden = false; }
           return;
         }
         const { image_url, prompt } = await r.json();

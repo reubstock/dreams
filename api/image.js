@@ -66,7 +66,7 @@ ${motifs ? `Key transformations: ${motifs}` : ''}`;
   return data.choices?.[0]?.message?.content?.trim() || text.slice(0, 400);
 }
 
-async function generateImage(promptText) {
+async function generateImage(promptText, attempt = 0) {
   const fullPrompt = `${promptText}\n\n${STYLE_DIRECTION}`;
   const res = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
@@ -79,14 +79,32 @@ async function generateImage(promptText) {
       n: 1,
     }),
   });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`image model failed ${res.status}: ${t.slice(0, 300)}`);
+
+  if (res.ok) {
+    const data = await res.json();
+    const b64 = data.data?.[0]?.b64_json;
+    if (!b64) throw new Error('image model returned no b64_json');
+    return b64;
   }
-  const data = await res.json();
-  const b64 = data.data?.[0]?.b64_json;
-  if (!b64) throw new Error('image model returned no b64_json');
-  return b64;
+
+  // Error path: parse the OpenAI response so the message is human-readable
+  const raw = await res.text();
+  let humanMessage = raw;
+  try { humanMessage = JSON.parse(raw).error?.message || raw; } catch (_) {}
+
+  // 429 rate limit — auto-retry once if the suggested wait is short enough
+  if (res.status === 429 && attempt < 1) {
+    const m = humanMessage.match(/try again in (\d+(?:\.\d+)?)\s*s/i);
+    const waitSec = Math.min(m ? Math.ceil(parseFloat(m[1])) + 1 : 15, 30);
+    console.log(`gpt-image-1 rate limited; waiting ${waitSec}s before retry`);
+    await new Promise((r) => setTimeout(r, waitSec * 1000));
+    return generateImage(promptText, attempt + 1);
+  }
+
+  if (res.status === 429) {
+    throw new Error(`Rate limited — gpt-image-1 caps at 5 images/min per org. Wait a minute and tap Re-roll.`);
+  }
+  throw new Error(`Image API ${res.status}: ${humanMessage.slice(0, 240)}`);
 }
 
 export default async function handler(req, res) {
