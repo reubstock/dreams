@@ -75,7 +75,7 @@
       transparent 0deg, rgba(216, 122, 62, 0.08) 60deg,
       transparent 120deg, rgba(110, 76, 184, 0.1) 180deg,
       transparent 240deg, rgba(126, 193, 255, 0.06) 300deg, transparent 360deg);
-    animation: hero-rotate 18s linear infinite;
+    animation: hero-rotate 26s linear infinite;
     pointer-events: none;
   }
   @keyframes hero-rotate { to { transform: rotate(360deg); } }
@@ -231,20 +231,24 @@
   .capture-actions .btn:hover { background: rgba(241, 234, 215, 0.08); }
   .capture-actions .btn.primary { background: var(--rust); border-color: var(--rust); }
   .capture-actions .btn.primary:hover { background: var(--rust-soft); border-color: var(--rust-soft); }
-  .capture-actions .btn.analyzing {
-    background: linear-gradient(90deg,
-      #ff5e57 0%, #ff9c4a 16%, #ffd23e 32%, #57e08a 48%,
-      #4abff5 64%, #8a7bff 80%, #ff5e57 100%);
-    background-size: 250% 100%;
-    animation: dreams-rainbow 2.4s linear infinite;
-    color: var(--ink) !important;
+  .capture-actions .btn.analyzing,
+  .btn.analyzing {
+    background-image: linear-gradient(90deg,
+      #ff5e57 0%, #ff9c4a 14%, #ffd23e 28%, #57e08a 42%,
+      #4abff5 57%, #8a7bff 71%, #d96ad9 85%, #ff5e57 100%) !important;
+    background-color: transparent !important;
+    background-size: 300% 100% !important;
+    animation: dreams-rainbow 3s linear infinite !important;
+    color: #0d0a04 !important;
     border-color: transparent !important;
-    text-shadow: 0 0 4px rgba(255,255,255,0.4);
-    cursor: progress;
+    text-shadow: 0 0 6px rgba(255,255,255,0.55) !important;
+    cursor: progress !important;
+    transition: none !important;
+    font-weight: 600 !important;
   }
   @keyframes dreams-rainbow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 250% 50%; }
+    0%   { background-position: 0% 50%; }
+    100% { background-position: -300% 50%; }
   }
   .capture-result-stats {
     display: flex; gap: 24px; margin-top: 14px;
@@ -2581,30 +2585,9 @@
       img.hidden = true;
       loading.hidden = false;
       reroll.hidden = true;
-      if (loadingText) loadingText.textContent = opts.force ? 'Re-mixing the pigments…' : 'Stretching the canvas…';
-      if (loadingSub) loadingSub.textContent = 'gpt-image-1 · 20–30 seconds';
-      // Cycle painterly phrases so the wait feels intentional
-      const phrases = [
-        'Stretching the canvas…',
-        'Sketching the figures…',
-        'Mixing the pigments…',
-        'Painting the background…',
-        'Adding lamp light…',
-        'Glazing the iridescence…',
-        'Catching the brushstroke…',
-        'Letting it dry…',
-      ];
-      let phraseIdx = 0;
-      const phraseTimer = setInterval(() => {
-        phraseIdx = (phraseIdx + 1) % phrases.length;
-        if (loadingText) {
-          loadingText.style.opacity = '0';
-          setTimeout(() => {
-            loadingText.textContent = phrases[phraseIdx];
-            loadingText.style.opacity = '1';
-          }, 280);
-        }
-      }, 2400);
+      if (loadingText) loadingText.textContent = opts.force ? 'Painting again…' : 'Painting your dream…';
+      if (loadingSub) loadingSub.textContent = 'gpt-image-1 · 20–30 seconds · stay on this page';
+      // (No phrase cycling — spinner + one phrase is the visual cue.)
 
       try {
         const r = await fetch('/api/image', {
@@ -2613,7 +2596,6 @@
           body: JSON.stringify({ id: dream.id, force: !!opts.force }),
         });
         if (!r.ok) {
-          clearInterval(phraseTimer);
           const data = await r.json().catch(() => ({}));
           if (loadingText) loadingText.textContent = data.error === 'blob_not_configured'
             ? 'Image storage not yet enabled'
@@ -2624,7 +2606,6 @@
         const { image_url, prompt } = await r.json();
         img.src = image_url;
         img.onload = () => {
-          clearInterval(phraseTimer);
           img.hidden = false;
           loading.hidden = true;
           reroll.hidden = false;
@@ -2638,7 +2619,6 @@
         dream.image_prompt = prompt;
         wireReroll(dream);
       } catch (err) {
-        clearInterval(phraseTimer);
         if (loadingText) loadingText.textContent = 'Could not generate image';
         if (loadingSub) loadingSub.textContent = err.message || String(err);
       }
