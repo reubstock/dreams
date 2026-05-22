@@ -350,7 +350,8 @@
   }
   .brand {
     font-family: 'Didot', 'Bodoni 72', 'Playfair Display', serif;
-    font-size: 38px; font-weight: 400; letter-spacing: 0.02em; line-height: 1;
+    font-size: 26px; font-weight: 400; letter-spacing: 0.005em; line-height: 1.15;
+    max-width: 540px;
   }
   .brand i { font-style: italic; color: var(--rust); }
   .masthead-meta {
@@ -404,7 +405,8 @@
   }
   .dream-icon {
     width: 200px; height: auto; display: block;
-    filter: drop-shadow(0 8px 14px rgba(10, 31, 92, 0.18));
+    filter: drop-shadow(0 8px 14px rgba(10, 31, 92, 0.15)) contrast(1.04) saturate(1.05);
+    mix-blend-mode: multiply;
   }
   .dream-icon-caption {
     font-family: ui-monospace, Menlo, monospace; font-size: 10px;
@@ -1227,7 +1229,7 @@
     .container { padding: 0 18px; }
 
     .masthead { flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 0 12px; }
-    .brand { font-size: 30px; }
+    .brand { font-size: 21px; }
     .masthead-meta { text-align: left; font-size: 10px; }
     .sub-bar { font-size: 9px; flex-direction: column; gap: 4px; }
 
@@ -1409,7 +1411,7 @@
 
     <!-- =================== MASTHEAD =================== -->
     <header class="masthead">
-      <div class="brand">D<i>r</i>eams</div>
+      <div class="brand">Record your dream. <i>Find its kin.</i></div>
       <div class="masthead-meta">
         <div><b>DREAM 0001</b> · SUBJECT 0341</div>
         <div>2026 · 05 · 20 · 87 WORDS</div>
@@ -1494,7 +1496,7 @@
     <!-- =================== HEADLINE =================== -->
     <section class="headline-block">
       <div class="headline-text">
-        <div class="kicker">Primary pattern detected</div>
+        <div class="kicker">Example diagnosis · Dream 0001</div>
         <h1 class="pattern">A dream of <em>metamorphoses.</em></h1>
         <p class="one-liner">
           Eight things transform or break in eighty-seven words.
@@ -1520,7 +1522,7 @@
     <!-- =================== SOURCE =================== -->
     <div class="section-head">
       <div class="num">i.</div>
-      <div class="title">Source — annotated</div>
+      <div class="title">Example dream — Subject 0341, annotated</div>
       <div class="rule"></div>
     </div>
     <div class="source-grid">
@@ -1545,31 +1547,6 @@
       <div class="relatives-sub">each unusual element in your dream has a documented predecessor</div>
     </div>
     <div class="relatives-grid">
-      <figure class="relative-card" data-mark="1">
-        <div class="rel-img">
-          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Piranesi-Carceri-07Zugbr%C3%BCcke.jpg?width=480"
-               alt="Piranesi, Carceri Plate VII — The Drawbridge" loading="lazy">
-        </div>
-        <figcaption class="rel-cap">
-          <span class="rel-n">[1]</span>
-          <div class="rel-phrase">"the rooms were all wrong"</div>
-          <div class="rel-attr"><b>Giovanni Battista Piranesi</b> · <i>Carceri d'invenzione</i>, Plate VII (The Drawbridge) · 1761</div>
-          <div class="rel-why">A series of imaginary prisons whose stairs lead nowhere and whose rooms don't connect. The canonical depiction of a space that keeps its name but loses its geometry.</div>
-        </figcaption>
-      </figure>
-
-      <figure class="relative-card" data-mark="2">
-        <div class="rel-img">
-          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Madonna%20of%20the%20Magnificat.png?width=480"
-               alt="Botticelli, Madonna of the Magnificat" loading="lazy">
-        </div>
-        <figcaption class="rel-cap">
-          <span class="rel-n">[2]</span>
-          <div class="rel-phrase">"my mother was there but younger than me"</div>
-          <div class="rel-attr"><b>Sandro Botticelli</b> · <i>Madonna of the Magnificat</i> · c. 1483</div>
-          <div class="rel-why">Mary reads barely older than her child. Five centuries of Madonna painting wrestle with the same uncanny inversion — when does the parent stop being older than the child?</div>
-        </figcaption>
-      </figure>
 
       <figure class="relative-card" data-mark="3">
         <div class="rel-img">
@@ -1581,32 +1558,6 @@
           <div class="rel-phrase">"the ceiling was made of water"</div>
           <div class="rel-attr"><b>Katsushika Hokusai</b> · <i>The Great Wave off Kanagawa</i> · c. 1831</div>
           <div class="rel-why">The most famous image in history of water that's <em>above</em> you rather than below. The wave reads as a ceiling about to fall — your dream literalized that.</div>
-        </figcaption>
-      </figure>
-
-      <figure class="relative-card" data-mark="4">
-        <div class="rel-img">
-          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Red%20fish%20detail%2C%20Kuniyoshi%20Utagawa%2C%20octopus%2C%20red%20fish%20%28cropped%29.jpg?width=480"
-               alt="Kuniyoshi, red fish detail" loading="lazy">
-        </div>
-        <figcaption class="rel-cap">
-          <span class="rel-n">[4]</span>
-          <div class="rel-phrase">"fish swimming above"</div>
-          <div class="rel-attr"><b>Utagawa Kuniyoshi</b> · red fish, detail · 19th century</div>
-          <div class="rel-why">Ukiyo-e fish prints isolate the creature from its element — fish suspended in negative space, the way yours swim in the wrong stratum.</div>
-        </figcaption>
-      </figure>
-
-      <figure class="relative-card" data-mark="5">
-        <div class="rel-img">
-          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Voynich%20Manuscript%20-%20folio%201r%20d%C3%A9tail.jpg?width=480"
-               alt="Voynich Manuscript folio 1r" loading="lazy">
-        </div>
-        <figcaption class="rel-cap">
-          <span class="rel-n">[5]</span>
-          <div class="rel-phrase">"letters in a language I didn't recognize"</div>
-          <div class="rel-attr"><b>Voynich Manuscript</b> · folio 1r · 15th century</div>
-          <div class="rel-why">A real book written in a script no one has ever decoded. The visual experience of looking at a page whose letters refuse to add up — exactly the texture of your dream-phone.</div>
         </figcaption>
       </figure>
 
@@ -1652,7 +1603,7 @@
         <div class="player-state" id="player-state">browser voice · quality varies by device</div>
       </div><!-- LENS 1: READING (interpretive, explicit) -->
       <div class="lens-content active" data-lens="reading">
-        <div class="read-q">"What is this dream most likely about in your life?"</div>
+        <div class="read-q">"What is this dream most likely about in the dreamer's life?"</div>
         <div class="read-a">
           <p>
             Two motifs in this dream are <b>unusually specific</b>, and together they point in one direction.
@@ -1783,7 +1734,7 @@
         </div>
         <div class="dreamer-source">— Opening line of <i>The Metamorphosis</i>, 1915</div>
         <div class="dreamer-why">
-          <h4>Why this is your cultural match</h4>
+          <h4>Why this matches Dream 0001</h4>
           <p>
             Kafka's journals between 1911 and 1915 record many transformation dreams — bodies that change species, voices that lose their family's language, mornings that arrive in the wrong room. <i>The Metamorphosis</i> is the most famous dream-state metamorphosis in modern literature, and its opening sentence is itself a description of waking into one.
           </p>
@@ -1806,46 +1757,7 @@
           <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" fill="currentColor"/>
         </svg>
       </button>
-    </section>
-
-    <!-- =================== ACTIONS =================== -->
-    <div class="actions">
-      <button class="btn primary" data-action="save">Save dream</button>
-      <button class="btn" data-action="neighbors">See nearest neighbors</button>
-      <button class="btn" data-action="lens">Re-read with another lens</button>
-      <button class="btn" data-action="share">Share as image</button>
-      <button class="btn" data-action="new">Enter a new dream</button>
-    </div>
-
-  </div>
-
-  <!-- =================== MODAL =================== -->
-  <div class="modal-backdrop" id="modal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-labelledby="modal-title">
-      <button class="modal-close" aria-label="Close" data-action="close-modal">×</button>
-      <h2 id="modal-title">Enter a dream.</h2>
-      <div class="modal-sub">A glimpse — full engine in development</div>
-      <div class="modal-help">
-        Type or paste a dream. We'll detect morphs and run a partial analysis.
-        Full Hall/Van de Castle coding, character extraction, norms comparison and
-        nearest-neighbor lookup are wired up behind the scenes — the front end
-        for those is still being built.
-      </div>
-      <textarea id="dream-input" placeholder="I was in a hallway that kept getting longer&hellip;"></textarea>
-      <div class="modal-actions">
-        <button class="btn" data-action="close-modal">Cancel</button>
-        <button class="btn primary" data-action="analyze">Analyze</button>
-      </div>
-      <div class="modal-result" id="modal-result">
-        <div class="modal-result-grid">
-          <div class="modal-result-stat"><span class="mr-num" id="mr-words">0</span><div class="mr-label">Words</div></div>
-          <div class="modal-result-stat"><span class="mr-num" id="mr-morphs">0</span><div class="mr-label">Morphs detected</div></div>
-          <div class="modal-result-stat"><span class="mr-num" id="mr-rate">0×</span><div class="mr-label">vs. norm</div></div>
-        </div>
-        <div class="modal-result-note" id="mr-note"></div>
-      </div>
-    </div>
-  </div>
+    </section></div>
 
   <!-- =================== NEIGHBOR MODAL =================== -->
   <div class="modal-backdrop" id="neighbor-modal" aria-hidden="true">
@@ -1857,52 +1769,11 @@
       </div>
       <div class="neighbor-modal-meta" id="nm-meta"></div>
       <div class="neighbor-modal-dream" id="nm-dream"></div>
-      <div class="nm-section-h">Why this is a neighbor</div>
+      <div class="nm-section-h">Why this is a similar dream</div>
       <ul class="nm-overlap-list" id="nm-overlap"></ul>
       <div class="nm-section-h">Their morph chain</div>
       <div class="nm-morph-chips" id="nm-morphs"></div>
       <div class="nm-footer">Full diagnostic for this dream — coming soon</div>
-    </div>
-  </div>
-
-  <!-- =================== SHARE MODAL =================== -->
-  <div class="modal-backdrop" id="share-modal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-labelledby="share-title">
-      <button class="modal-close" aria-label="Close" data-action="close-share">×</button>
-      <h2 id="share-title">Share this dream.</h2>
-      <div class="modal-sub">Save as image · 1080 × 1350 portrait</div>
-      <div class="share-card-wrap">
-        <div class="share-card" id="share-card">
-          <div class="sc-head">
-            <div class="sc-brand">D<i>r</i>eams</div>
-            <div class="sc-head-meta">
-              <div><b>DREAM 0001</b></div>
-              <div>2026 · 05 · 20</div>
-            </div>
-          </div>
-          <img class="sc-butterfly"
-                 src="https://commons.wikimedia.org/wiki/Special:FilePath/Morpho%20didius%20Male%20Dos%20MHNT.jpg?width=600"
-                 alt="Morpho didius">
-          <div class="sc-kicker">Primary pattern detected</div>
-          <div class="sc-headline">A dream of <em>metamorphoses.</em></div>
-          <div class="sc-stats">
-            <div class="sc-stat"><div class="num">8</div><div class="label">Morphs</div></div>
-            <div class="sc-stat"><div class="num">1</div><div class="label">Stable identity</div></div>
-            <div class="sc-stat"><div class="num">3.8×</div><div class="label">vs. norm</div></div>
-          </div>
-          <div class="sc-quote">
-            "The ceiling was made of water and I could see fish swimming above. I was late for something important but couldn't remember what."
-          </div>
-          <div class="sc-foot">
-            <span class="pattern-name">METAMORPHOSIS + SYMBOL_FAILURE</span>
-            <span>dreams-livid.vercel.app</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn" data-action="close-share">Close</button>
-        <button class="btn primary" data-action="download-share">Download PNG</button>
-      </div>
     </div>
   </div>
 
@@ -1911,116 +1782,6 @@
 
 <script>
 (() => {
-  // ============ Lens tabs + cycle button ============
-  const lensOrder = ['reading', 'feeling', 'structure'];
-  function setLens(name) {
-    document.querySelectorAll('.lens-tab').forEach(t => {
-      t.classList.toggle('active', t.dataset.lens === name);
-    });
-    document.querySelectorAll('.lens-content').forEach(c => {
-      c.classList.toggle('active', c.dataset.lens === name);
-    });
-  }
-  document.querySelectorAll('.lens-tab').forEach(t => {
-    t.addEventListener('click', () => setLens(t.dataset.lens));
-  });
-  document.querySelector('[data-action="lens"]').addEventListener('click', () => {
-    const current = document.querySelector('.lens-tab.active').dataset.lens;
-    const next = lensOrder[(lensOrder.indexOf(current) + 1) % lensOrder.length];
-    setLens(next);
-    document.querySelector('.reading-block').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  // ============ Save dream (localStorage) ============
-  const DREAM_KEY = 'dreams:0001:saved';
-  const saveBtn = document.querySelector('[data-action="save"]');
-  function markSaved() {
-    saveBtn.textContent = 'Saved ✓';
-    saveBtn.classList.add('saved');
-    saveBtn.classList.remove('primary');
-    saveBtn.disabled = true;
-  }
-  if (localStorage.getItem(DREAM_KEY)) markSaved();
-  saveBtn.addEventListener('click', () => {
-    if (saveBtn.disabled) return;
-    localStorage.setItem(DREAM_KEY, JSON.stringify({
-      id: '0001', savedAt: new Date().toISOString()
-    }));
-    markSaved();
-    showToast('Saved to this device');
-  });
-
-  // ============ Nearest neighbors (expand + scroll) ============
-  document.querySelector('[data-action="neighbors"]').addEventListener('click', () => {
-    document.querySelectorAll('.neighbor-card.extra').forEach(c => c.classList.add('shown'));
-    document.getElementById('neighbor-anchor').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  // ============ Modal (enter new dream) ============
-  const modal = document.getElementById('modal');
-  const dreamInput = document.getElementById('dream-input');
-  function openModal() {
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => dreamInput.focus(), 100);
-  }
-  function closeModal() {
-    modal.classList.remove('open');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  }
-  document.querySelector('[data-action="new"]').addEventListener('click', openModal);
-  document.querySelectorAll('[data-action="close-modal"]').forEach(b => b.addEventListener('click', closeModal));
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
-  });
-
-  // ============ Partial analysis ============
-  const morphPatterns = [
-    /\bbecame?\b/gi,
-    /\bturned (?:in)?to\b/gi,
-    /\bturned into\b/gi,
-    /\bchanged into\b/gi,
-    /\bmade of\b/gi,
-    /\bwas (?:now|suddenly|somehow)\b/gi,
-    /\bbut now\b/gi,
-    /\bthe \w+ (?:was|were) (?:now|suddenly)\b/gi,
-    /\bgrew into\b/gi,
-    /\bmorphed into\b/gi,
-  ];
-  function analyze(text) {
-    const t = text.trim();
-    const words = t ? t.split(/\s+/).length : 0;
-    let morphs = 0;
-    morphPatterns.forEach(p => {
-      const m = t.match(p);
-      if (m) morphs += m.length;
-    });
-    return { words, morphs, rate: morphs / Math.max(1, 2.1) };
-  }
-  document.querySelector('[data-action="analyze"]').addEventListener('click', () => {
-    const txt = dreamInput.value;
-    if (!txt.trim()) return;
-    const r = analyze(txt);
-    document.getElementById('mr-words').textContent = r.words;
-    document.getElementById('mr-morphs').textContent = r.morphs;
-    document.getElementById('mr-rate').textContent = r.rate.toFixed(1) + '×';
-    let note = '';
-    if (r.morphs === 0) {
-      note = 'No morph triggers detected by the surface-level scan. The full engine catches retroactive morphs ("the rooms were all wrong"), which surface patterns miss. ';
-    } else if (r.morphs < 2) {
-      note = 'A typical morph count. ';
-    } else if (r.morphs < 4) {
-      note = 'Above the database norm — this dream is doing some transformation work. ';
-    } else {
-      note = '<b>Well above the database norm</b> — this is a metamorphosis-saturated dream. ';
-    }
-    note += 'The full diagnostic — character extraction, Hall/Van de Castle coding, norms comparison, nearest-neighbor lookup, and the layered reading above — runs server-side and isn\'t wired to this input yet. It will be soon.';
-    document.getElementById('mr-note').innerHTML = note;
-    document.getElementById('modal-result').classList.add('shown');
-  });
 
   // ============ Toast ============
   let toastTimer;
@@ -2205,71 +1966,6 @@
   // Cancel any in-flight speech on unload
   window.addEventListener('beforeunload', () => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-  });
-
-  // ============ Share modal ============
-  const shareModal = document.getElementById('share-modal');
-  function openShare() {
-    shareModal.classList.add('open');
-    shareModal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeShare() {
-    shareModal.classList.remove('open');
-    shareModal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  }
-  document.querySelector('[data-action="share"]').addEventListener('click', openShare);
-  document.querySelectorAll('[data-action="close-share"]').forEach(b => b.addEventListener('click', closeShare));
-  shareModal.addEventListener('click', e => { if (e.target === shareModal) closeShare(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && shareModal.classList.contains('open')) closeShare();
-  });
-
-  // ============ Kafka portrait — Wikimedia URL fallback chain ============
-  (function loadKafkaPhoto() {
-    const img = document.getElementById('kafka-photo');
-    if (!img) return;
-    // Both URLs below verified via curl 2026-05-21 — return 200 image/jpeg
-    const urls = [
-      'https://commons.wikimedia.org/wiki/Special:FilePath/Franz_Kafka,_1923.jpg?width=400',
-      'https://commons.wikimedia.org/wiki/Special:FilePath/Franz_Kafka_from_National_Library_Israel.jpg?width=400'
-    ];
-    let i = 0;
-    img.onerror = function() {
-      i++;
-      if (i < urls.length) { img.src = urls[i]; }
-      else { img.parentElement.classList.remove('has-photo'); }
-    };
-    img.src = urls[0];
-  })();
-
-  document.querySelector('[data-action="download-share"]').addEventListener('click', async () => {
-    const card = document.getElementById('share-card');
-    const downloadBtn = document.querySelector('[data-action="download-share"]');
-    const originalText = downloadBtn.textContent;
-    downloadBtn.textContent = 'Rendering…';
-    downloadBtn.disabled = true;
-    try {
-      const dataUrl = await window.htmlToImage.toPng(card, {
-        pixelRatio: 2,
-        backgroundColor: '#f1ead7',
-        cacheBust: true,
-        width: card.offsetWidth,
-        height: card.offsetHeight,
-      });
-      const link = document.createElement('a');
-      link.download = 'dream-0001.png';
-      link.href = dataUrl;
-      link.click();
-      showToast('Image downloaded');
-    } catch (err) {
-      console.error('Share card render failed:', err);
-      showToast('Download failed — see console');
-    } finally {
-      downloadBtn.textContent = originalText;
-      downloadBtn.disabled = false;
-    }
   });
 
   // ============ Voice capture (record → Whisper → dream record) ============
