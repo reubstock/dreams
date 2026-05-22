@@ -24,6 +24,7 @@ You must obey these rules:
 Return only valid JSON matching the schema. Do not wrap in markdown.`;
 
 const SCHEMA_HINT = {
+  title: "string — a 3 to 6 word title for this dream, drawn from its most specific concrete image. Examples: 'The Frog in the Bathtub', 'A Phone with Foreign Letters', 'My Mother Made Younger', 'Late for the Wrong Train'. Specific, not generic. Title case. No quotes.",
   pattern_name: "string (2-5 words, the dream's dominant pattern, e.g. 'A dream of metamorphoses', 'A dream of pursuit', 'A dream of falling identities')",
   one_liner: "string (one sentence — the dream's structural verdict)",
   morphs: [{

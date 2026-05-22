@@ -45,6 +45,7 @@ export default async function handler(req, res) {
       .filter(Boolean)
       .map((d) => ({
         id: d.id,
+        title: d.title || d.analysis?.title || null,
         text_preview: (d.text || '').slice(0, 200),
         pattern_name: d.analysis?.pattern_name || null,
         morph_count: Array.isArray(d.analysis?.morphs) ? d.analysis.morphs.length : 0,

@@ -59,6 +59,7 @@ export default async function handler(req, res) {
   const record = {
     id,
     text: text.trim(),
+    title: (analysis && typeof analysis.title === 'string' && analysis.title.trim()) || null,
     analysis: analysis || null,
     device_id: typeof device_id === 'string' ? device_id.slice(0, 64) : null,
     created_at: new Date().toISOString(),

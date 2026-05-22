@@ -32,6 +32,42 @@
   .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
   .container { max-width: 1240px; margin: 0 auto; padding: 0 56px; }
 
+  /* ============ DREAM TITLE (on /d/:id only) ============ */
+  .dream-title-section { display: none; padding: 28px 0 22px; border-bottom: 1px solid var(--ink); margin-bottom: 28px; }
+  body.dream-page .dream-title-section { display: block; }
+  .dream-title-meta {
+    display: flex; align-items: baseline; justify-content: space-between;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    margin-bottom: 12px;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .dream-title-kicker { color: var(--rust); }
+  .dream-title-id { color: var(--muted); font-size: 9.5px; }
+  h1.dream-title {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 54px; font-style: italic; font-weight: 400;
+    color: var(--ink); line-height: 1.05;
+    margin: 0;
+    outline: none;
+    cursor: text;
+    border-radius: 2px;
+    padding: 4px 10px;
+    margin-left: -10px;
+    transition: background 0.15s, outline-color 0.15s;
+    word-break: break-word;
+    letter-spacing: -0.01em;
+  }
+  h1.dream-title:hover { background: var(--paper-2); }
+  h1.dream-title:focus { background: var(--paper-2); outline: 2px solid var(--rust); }
+  h1.dream-title:empty::before { content: 'Untitled'; color: var(--muted); }
+  .dream-title-hint {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted); margin-top: 12px;
+  }
+  body.dream-page .pane-done .capture-textarea { opacity: 0.85; }
+
   /* ============ HERO DREAM IMAGE (on /d/:id only) ============ */
   .hero-image {
     margin: 32px 0 32px;
@@ -459,10 +495,16 @@
   }
   .rd-id { color: var(--rust); font-weight: 700; }
   .rd-pattern { color: var(--muted); }
+  .rd-title {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 22px; font-style: italic; font-weight: 400;
+    color: var(--ink); line-height: 1.15;
+    margin-bottom: 10px;
+  }
   .rd-text {
     font-family: 'Iowan Old Style', Georgia, serif;
-    font-style: italic; font-size: 15.5px;
-    line-height: 1.5; color: var(--ink);
+    font-style: italic; font-size: 14px;
+    line-height: 1.5; color: var(--ink-2);
     margin-bottom: 12px;
     flex: 1;
   }
@@ -1427,6 +1469,12 @@
 
     .masthead { flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 0 12px; }
     .brand { font-size: 21px; }
+
+    /* dream title on mobile */
+    .dream-title-section { padding: 22px 0 16px; margin-bottom: 22px; }
+    h1.dream-title { font-size: 36px; letter-spacing: -0.005em; }
+    .dream-title-meta { font-size: 9.5px; }
+    .dream-title-hint { font-size: 9px; }
     .masthead-meta { text-align: left; font-size: 10px; }
     .sub-bar { font-size: 9px; flex-direction: column; gap: 4px; }
 
@@ -1619,6 +1667,16 @@
       <span>Confidence 0.78</span>
     </div>
 
+    <!-- =================== DREAM TITLE (only shown on /d/:id) =================== -->
+    <section class="dream-title-section" id="dream-title-section" hidden>
+      <div class="dream-title-meta">
+        <span class="dream-title-kicker">Your dream</span>
+        <span class="dream-title-id" id="dream-title-id"></span>
+      </div>
+      <h1 class="dream-title" id="dream-title" contenteditable="true" spellcheck="false">Untitled</h1>
+      <div class="dream-title-hint">Click the title to edit · enter to save · esc to cancel</div>
+    </section>
+
     <!-- =================== DREAM FRAME (capture + hero side-by-side on /d/:id) =================== -->
     <div class="dream-frame">
     <!-- =================== VOICE CAPTURE =================== -->
@@ -1660,7 +1718,7 @@
       <!-- DONE -->
       <div class="capture-pane pane-done">
         <div>
-          <div class="capture-title">Your dream — <em>edit if you want.</em></div>
+          <div class="capture-title">Your dream</div>
           <div class="capture-sub">Transcribed by Whisper · audio saved on this device</div>
           <textarea class="capture-textarea" id="capture-textarea" placeholder="Your transcribed dream appears here…"></textarea>
           <div class="capture-actions">
@@ -2558,6 +2616,63 @@
       else if (action === 'reset-capture') setState('idle');
     });
 
+    // ============ Dream title (editable, on /d/:id) ============
+    function showDreamTitle(dream) {
+      const section = document.getElementById('dream-title-section');
+      const titleEl = document.getElementById('dream-title');
+      const idEl = document.getElementById('dream-title-id');
+      if (!section || !titleEl) return;
+      const fallback = (dream.text || '').trim().split(/\s+/).slice(0, 5).join(' ');
+      const llmTitle = dream.analysis && dream.analysis.title;
+      const t = (dream.title && dream.title.trim())
+        || (llmTitle && llmTitle.trim())
+        || (fallback ? fallback + '…' : 'Untitled');
+      titleEl.textContent = t;
+      titleEl.dataset.id = dream.id;
+      titleEl.dataset.savedValue = t;
+      if (idEl) idEl.textContent = '#' + dream.id;
+      section.hidden = false;
+      try { document.title = t + ' · Dreams'; } catch (_) {}
+    }
+    (function setupTitleEditing() {
+      const titleEl = document.getElementById('dream-title');
+      if (!titleEl) return;
+      titleEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+        if (e.key === 'Escape') {
+          titleEl.textContent = titleEl.dataset.savedValue || 'Untitled';
+          titleEl.blur();
+        }
+      });
+      titleEl.addEventListener('blur', async () => {
+        const newTitle = (titleEl.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 120);
+        if (!newTitle) {
+          titleEl.textContent = titleEl.dataset.savedValue || 'Untitled';
+          return;
+        }
+        if (newTitle === titleEl.dataset.savedValue) return;
+        const id = titleEl.dataset.id;
+        if (!id) return;
+        try {
+          const r = await fetch('/api/dream/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, title: newTitle }),
+          });
+          if (r.ok) {
+            titleEl.dataset.savedValue = newTitle;
+            try { document.title = newTitle + ' · Dreams'; } catch (_) {}
+            showToast('Title saved');
+          } else {
+            titleEl.textContent = titleEl.dataset.savedValue;
+            showToast('Could not save title');
+          }
+        } catch (err) {
+          titleEl.textContent = titleEl.dataset.savedValue;
+        }
+      });
+    })();
+
     // ============ Permalink loader — when URL is /d/:id ============
     (async function loadDreamFromUrl() {
       const m = window.location.pathname.match(/^\/d\/([A-Za-z0-9_-]{8,20})/);
@@ -2577,6 +2692,8 @@
           return;
         }
         textareaEl.value = dream.text;
+        textareaEl.readOnly = true; // no re-edit after the dream is saved
+        showDreamTitle(dream);
         if (dream.analysis) {
           renderAnalysis(dream.text, dream.analysis);
           appendPermalinkPill(dream.id, '/d/' + dream.id);
@@ -2703,15 +2820,18 @@
 
       feed.innerHTML = dreams.map((d) => {
         const pattern = d.pattern_name ? d.pattern_name.toUpperCase() : 'UNCATEGORIZED';
+        const fallbackTitle = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
+        const title = (d.title && d.title.trim()) || (fallbackTitle ? fallbackTitle + '…' : 'Untitled');
         const preview = d.text_preview.length >= 200 ? d.text_preview + '…' : d.text_preview;
         const morphs = d.morph_count || 0;
         const words = d.word_count || 0;
         return `
           <article class="recent-dream" data-href="/d/${escapeHTML(d.id)}">
             <div class="rd-meta">
-              <span class="rd-id">#${escapeHTML(d.id).slice(0, 6)}</span>
               <span class="rd-pattern">${escapeHTML(pattern)}</span>
+              <span class="rd-id">#${escapeHTML(d.id).slice(0, 6)}</span>
             </div>
+            <div class="rd-title">${escapeHTML(title)}</div>
             <div class="rd-text">"${escapeHTML(preview)}"</div>
             <div class="rd-foot">${fmtAgo(d.created_at)} · ${words} words · ${morphs} morph${morphs === 1 ? '' : 's'}</div>
           </article>`;
