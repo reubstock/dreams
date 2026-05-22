@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const { text, analysis, device_id } = req.body || {};
+  const { text, analysis, device_id, dreamer } = req.body || {};
   if (!text || typeof text !== 'string' || text.trim().length < 20) {
     return res.status(400).json({ error: 'dream_too_short' });
   }
@@ -56,11 +56,21 @@ export default async function handler(req, res) {
   // Generate URL-safe 11-char ID (~2^48 entropy)
   const id = crypto.randomBytes(8).toString('base64url');
 
+  // Sanitize dreamer profile
+  let dreamerClean = null;
+  if (dreamer && typeof dreamer === 'object') {
+    const validGenders = ['man', 'woman', 'nonbinary', 'other'];
+    const g = typeof dreamer.gender === 'string' && validGenders.includes(dreamer.gender) ? dreamer.gender : null;
+    const a = Number.isFinite(dreamer.age) && dreamer.age > 0 && dreamer.age < 130 ? dreamer.age : null;
+    if (g || a) dreamerClean = { ...(g && { gender: g }), ...(a && { age: a }) };
+  }
+
   const record = {
     id,
     text: text.trim(),
     title: (analysis && typeof analysis.title === 'string' && analysis.title.trim()) || null,
     analysis: analysis || null,
+    dreamer: dreamerClean,
     device_id: typeof device_id === 'string' ? device_id.slice(0, 64) : null,
     created_at: new Date().toISOString(),
     word_count: text.trim().split(/\s+/).length,

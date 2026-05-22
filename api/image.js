@@ -37,9 +37,19 @@ async function kvSet(id, value) {
   return r.ok;
 }
 
-async function craftPrompt(text, analysis) {
+async function craftPrompt(text, analysis, dreamer) {
   const motifs = analysis?.morphs?.slice(0, 6).map((m) => `${m.before} → ${m.after}`).join('; ') || '';
-  const userPrompt = `Compress this dream into a single tight image prompt for a surrealist painting. Include 4–6 VERY SPECIFIC visual elements directly from the dream — specific people, objects, settings, transformations. Be concrete: not "a figure" but "a woman in a white nightgown"; not "a body of water" but "a clawfoot bathtub overflowing onto the floor". One paragraph, ~80 words. Do NOT add style direction (that's appended automatically). Output only the prompt text — no preamble, no commentary, no quotes.
+
+  // Build the dreamer instruction — this is the key fix for "renders me as a woman".
+  // If we know gender/age, the prompt-crafter MUST describe the dreamer consistently.
+  let dreamerLine = '';
+  if (dreamer && (dreamer.gender || dreamer.age)) {
+    const ageDesc = dreamer.age ? `${dreamer.age}-year-old ` : '';
+    const genderDesc = dreamer.gender || 'person';
+    dreamerLine = `\n\nDREAMER IDENTITY (CRITICAL): The person whose dream this is, is a ${ageDesc}${genderDesc}. Whenever the dreamer appears in the image, describe them as a ${ageDesc}${genderDesc}. Do NOT default to any other gender or age. If the dream text says "I" or "my", that refers to this ${genderDesc}.`;
+  }
+
+  const userPrompt = `Compress this dream into a single tight image prompt for a surrealist painting. Include 4–6 VERY SPECIFIC visual elements directly from the dream — specific people, objects, settings, transformations. Be concrete: not "a figure" but "a 35-year-old man in a white nightgown"; not "a body of water" but "a clawfoot bathtub overflowing onto the floor". One paragraph, ~80 words. Do NOT add style direction (that's appended automatically). Output only the prompt text — no preamble, no commentary, no quotes.${dreamerLine}
 
 Dream:
 "${text}"
@@ -121,7 +131,7 @@ export default async function handler(req, res) {
     message: 'Enable Vercel Blob storage in the dashboard (Storage → Blob → Create) and connect it to the dreams project. The next deploy picks up BLOB_READ_WRITE_TOKEN automatically.',
   });
 
-  const { id, force } = req.body || {};
+  const { id, force, dreamer: requestDreamer } = req.body || {};
   if (!id || !/^[A-Za-z0-9_-]{8,20}$/.test(id)) {
     return res.status(400).json({ error: 'bad_id' });
   }
@@ -133,8 +143,14 @@ export default async function handler(req, res) {
     return res.status(200).json({ image_url: dream.image_url, prompt: dream.image_prompt, cached: true });
   }
 
+  // Prefer the dreamer profile from the current request (so re-rolls reflect
+  // updated settings); fall back to whatever's saved on the dream record.
+  const effectiveDreamer = (requestDreamer && (requestDreamer.gender || requestDreamer.age))
+    ? requestDreamer
+    : dream.dreamer || null;
+
   try {
-    const prompt = await craftPrompt(dream.text, dream.analysis);
+    const prompt = await craftPrompt(dream.text, dream.analysis, effectiveDreamer);
     const b64 = await generateImage(prompt);
     const buffer = Buffer.from(b64, 'base64');
 
@@ -148,6 +164,9 @@ export default async function handler(req, res) {
     dream.image_url = blob.url;
     dream.image_prompt = prompt;
     dream.image_generated_at = new Date().toISOString();
+    // Persist the dreamer profile that was actually used, so future re-rolls
+    // (or other clients viewing this dream) know how it was rendered.
+    if (effectiveDreamer) dream.dreamer = effectiveDreamer;
     await kvSet(id, dream);
 
     return res.status(200).json({ image_url: blob.url, prompt, cached: false });

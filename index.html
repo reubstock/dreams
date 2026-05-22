@@ -333,6 +333,35 @@
     margin-top: 8px;
   }
 
+  /* ============ DREAMER PROFILE (inside capture banner) ============ */
+  .dreamer-profile {
+    display: flex; align-items: center; gap: 10px;
+    margin: 14px 0 4px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    color: rgba(241, 234, 215, 0.7);
+    flex-wrap: wrap;
+  }
+  .dp-label {
+    letter-spacing: 0.16em; text-transform: uppercase;
+    font-size: 9.5px; color: rgba(241, 234, 215, 0.5);
+  }
+  .dp-input {
+    background: rgba(241, 234, 215, 0.06);
+    border: 1px solid rgba(241, 234, 215, 0.25);
+    color: var(--paper);
+    font: inherit;
+    padding: 5px 9px;
+    outline: none;
+  }
+  .dp-input:focus { border-color: var(--rust-soft); }
+  .dp-age { width: 60px; text-align: center; }
+  .dp-sep { color: rgba(241, 234, 215, 0.3); }
+  .dp-hint {
+    font-size: 9.5px; color: rgba(241, 234, 215, 0.4);
+    letter-spacing: 0.04em; flex-basis: 100%;
+  }
+
   /* ============ LLM ANALYSIS RESULT (inside capture banner) ============ */
   .capture-result-stats.ar-mode { display: block; }
   .ar-pattern { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(241, 234, 215, 0.18); }
@@ -1756,6 +1785,20 @@
           <div class="capture-title">Your dream</div>
           <div class="capture-sub">Transcribed by Whisper · audio saved on this device</div>
           <textarea class="capture-textarea" id="capture-textarea" placeholder="Your transcribed dream appears here…"></textarea>
+          <div class="dreamer-profile">
+            <span class="dp-label">I am</span>
+            <select class="dp-input" id="dreamer-gender" aria-label="Dreamer gender">
+              <option value="">—</option>
+              <option value="man">man</option>
+              <option value="woman">woman</option>
+              <option value="nonbinary">non-binary</option>
+              <option value="other">other</option>
+            </select>
+            <span class="dp-sep">·</span>
+            <span class="dp-label">age</span>
+            <input class="dp-input dp-age" id="dreamer-age" type="number" min="1" max="120" placeholder="—" aria-label="Dreamer age">
+            <span class="dp-hint">saved on this device · used so the image renders you correctly</span>
+          </div>
           <div class="capture-actions">
             <button class="btn" data-action="play-recording">▶ Play recording</button>
             <button class="btn primary" data-action="analyze-recording">Analyze</button>
@@ -2447,7 +2490,7 @@
         const res = await fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, dreamer: getDreamer() }),
         });
         if (!res.ok) {
           let data = {};
@@ -2572,6 +2615,32 @@
       // dream. Calling save here would create infinite duplicates + redirects.)
     }
 
+    function getDreamer() {
+      const g = document.getElementById('dreamer-gender');
+      const a = document.getElementById('dreamer-age');
+      const out = {};
+      if (g && g.value) out.gender = g.value;
+      if (a && a.value) out.age = Number(a.value);
+      return Object.keys(out).length ? out : null;
+    }
+    function persistDreamer() {
+      const d = getDreamer();
+      try { localStorage.setItem('dreams:dreamer', JSON.stringify(d || {})); } catch (_) {}
+    }
+    (function loadDreamer() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dreams:dreamer') || '{}');
+        const g = document.getElementById('dreamer-gender');
+        const a = document.getElementById('dreamer-age');
+        if (g && d.gender) g.value = d.gender;
+        if (a && d.age != null) a.value = d.age;
+      } catch (_) {}
+      ['dreamer-gender', 'dreamer-age'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', persistDreamer);
+      });
+    })();
+
     function getDeviceId() {
       let id = localStorage.getItem('dreams:device_id');
       if (!id) {
@@ -2588,7 +2657,7 @@
         const res = await fetch('/api/dream/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, analysis, device_id: getDeviceId() }),
+          body: JSON.stringify({ text, analysis, device_id: getDeviceId(), dreamer: getDreamer() }),
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -2796,7 +2865,7 @@
         const r = await fetch('/api/image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: dream.id, force: !!opts.force }),
+          body: JSON.stringify({ id: dream.id, force: !!opts.force, dreamer: getDreamer() }),
         });
         if (!r.ok) {
           clearInterval(tickTimer);
