@@ -32,6 +32,72 @@
   .mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
   .container { max-width: 1240px; margin: 0 auto; padding: 0 56px; }
 
+  /* ============ HERO DREAM IMAGE (on /d/:id only) ============ */
+  .hero-image {
+    margin: 32px 0 32px;
+  }
+  .hero-image-frame {
+    max-width: 720px;
+    margin: 0 auto;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    overflow: hidden;
+  }
+  .hero-image-frame img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-loading {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px;
+    background: linear-gradient(180deg, #1a0e1f 0%, #0a0a14 100%);
+    color: var(--paper);
+    padding: 24px;
+  }
+  .hero-spinner {
+    width: 38px; height: 38px;
+    border: 3px solid rgba(241, 234, 215, 0.18);
+    border-top-color: var(--rust-soft);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  .hero-loading-text {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 20px; font-style: italic;
+    color: var(--paper);
+    text-align: center;
+  }
+  .hero-loading-sub {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(241, 234, 215, 0.4);
+  }
+  .hero-reroll {
+    position: absolute; bottom: 14px; right: 14px;
+    background: rgba(13, 10, 4, 0.78); color: var(--paper);
+    border: 1px solid rgba(241, 234, 215, 0.3);
+    padding: 9px 16px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .hero-reroll:hover { background: var(--rust); border-color: var(--rust); }
+  .hero-reroll:disabled { opacity: 0.5; cursor: not-allowed; }
+  .hero-caption {
+    max-width: 720px; margin: 10px auto 0;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.06em; color: var(--muted);
+    text-align: center;
+  }
+
   /* ============ VOICE CAPTURE BANNER ============ */
   .capture {
     background: var(--ink);
@@ -1460,6 +1526,20 @@
       <span>Confidence 0.78</span>
     </div>
 
+    <!-- =================== HERO IMAGE (dream pages only) =================== -->
+    <section class="hero-image" id="hero-image" hidden>
+      <figure class="hero-image-frame">
+        <img id="hero-img" alt="Generated dream image" hidden>
+        <div class="hero-loading" id="hero-loading">
+          <div class="hero-spinner"></div>
+          <div class="hero-loading-text">Generating dream image…</div>
+          <div class="hero-loading-sub">gpt-image-1 · usually 20–30 seconds</div>
+        </div>
+        <button class="hero-reroll" id="hero-reroll" type="button" hidden>↻ Re-roll</button>
+      </figure>
+      <figcaption class="hero-caption" id="hero-caption" hidden></figcaption>
+    </section>
+
     <!-- =================== VOICE CAPTURE =================== -->
     <section class="capture" data-state="idle" id="capture">
       <!-- IDLE -->
@@ -2395,14 +2475,94 @@
         textareaEl.value = dream.text;
         if (dream.analysis) {
           renderAnalysis(dream.text, dream.analysis);
-          // Show the permalink pill on a loaded dream too
           appendPermalinkPill(dream.id, '/d/' + dream.id);
         }
         setState('done');
+        // Hero image: show + load (cached if already generated, generates on demand otherwise)
+        loadHeroImage(dream);
       } catch (err) {
         showError('Could not load this dream', err.message || String(err));
       }
     })();
+
+    // ============ Hero dream image ============
+    async function loadHeroImage(dream, opts = {}) {
+      const hero = document.getElementById('hero-image');
+      const img = document.getElementById('hero-img');
+      const loading = document.getElementById('hero-loading');
+      const loadingText = loading?.querySelector('.hero-loading-text');
+      const loadingSub = loading?.querySelector('.hero-loading-sub');
+      const reroll = document.getElementById('hero-reroll');
+      const caption = document.getElementById('hero-caption');
+      if (!hero || !img || !loading) return;
+
+      hero.hidden = false;
+
+      // If we already have an image and we're not forcing a re-roll, just show it
+      if (dream.image_url && !opts.force) {
+        img.src = dream.image_url;
+        img.hidden = false;
+        loading.hidden = true;
+        reroll.hidden = false;
+        if (caption && dream.image_prompt) {
+          caption.textContent = dream.image_prompt;
+          caption.hidden = false;
+        }
+        wireReroll(dream);
+        return;
+      }
+
+      // Generate
+      img.hidden = true;
+      loading.hidden = false;
+      reroll.hidden = true;
+      if (loadingText) loadingText.textContent = opts.force ? 'Re-generating…' : 'Generating dream image…';
+      if (loadingSub) loadingSub.textContent = 'gpt-image-1 · usually 20–30 seconds';
+
+      try {
+        const r = await fetch('/api/image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: dream.id, force: !!opts.force }),
+        });
+        if (!r.ok) {
+          const data = await r.json().catch(() => ({}));
+          if (loadingText) loadingText.textContent = data.error === 'blob_not_configured'
+            ? 'Image storage not yet enabled'
+            : 'Image generation failed';
+          if (loadingSub) loadingSub.textContent = data.message || `HTTP ${r.status}`;
+          return;
+        }
+        const { image_url, prompt } = await r.json();
+        img.src = image_url;
+        img.onload = () => {
+          img.hidden = false;
+          loading.hidden = true;
+          reroll.hidden = false;
+        };
+        if (caption && prompt) {
+          caption.textContent = prompt;
+          caption.hidden = false;
+        }
+        // Mutate the dream object so re-rolls work
+        dream.image_url = image_url;
+        dream.image_prompt = prompt;
+        wireReroll(dream);
+      } catch (err) {
+        if (loadingText) loadingText.textContent = 'Could not generate image';
+        if (loadingSub) loadingSub.textContent = err.message || String(err);
+      }
+    }
+
+    function wireReroll(dream) {
+      const reroll = document.getElementById('hero-reroll');
+      if (!reroll) return;
+      reroll.onclick = () => {
+        if (!confirm('Re-roll this image? Costs ~$0.04. The current image will be replaced.')) return;
+        reroll.disabled = true;
+        loadHeroImage(dream, { force: true }).finally(() => { reroll.disabled = false; });
+      };
+    }
   }
 
   // ============ Recent dreams feed — populate from /api/dreams/recent ============
