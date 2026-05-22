@@ -405,8 +405,12 @@
   }
   .dream-icon {
     width: 200px; height: auto; display: block;
-    filter: drop-shadow(0 8px 14px rgba(10, 31, 92, 0.15)) contrast(1.04) saturate(1.05);
-    mix-blend-mode: multiply;
+    filter:
+      drop-shadow(1px 0 0 var(--ink))
+      drop-shadow(-1px 0 0 var(--ink))
+      drop-shadow(0 1px 0 var(--ink))
+      drop-shadow(0 -1px 0 var(--ink))
+      drop-shadow(0 8px 14px rgba(10, 31, 92, 0.22));
   }
   .dream-icon-caption {
     font-family: ui-monospace, Menlo, monospace; font-size: 10px;
@@ -1411,7 +1415,7 @@
 
     <!-- =================== MASTHEAD =================== -->
     <header class="masthead">
-      <div class="brand">Record your dream. <i>Find its kin.</i></div>
+      <div class="brand">Discover people who <i>share your dreams.</i></div>
       <div class="masthead-meta">
         <div><b>DREAM 0001</b> · SUBJECT 0341</div>
         <div>2026 · 05 · 20 · 87 WORDS</div>
@@ -1507,8 +1511,8 @@
       </div>
       <div class="dream-icon-wrap">
         <img class="dream-icon"
-             src="https://commons.wikimedia.org/wiki/Special:FilePath/Morpho%20didius%20Male%20Dos%20MHNT.jpg?width=800"
-             alt="Morpho didius male, dorsal view — Muséum d'Histoire Naturelle de Toulouse"
+             src="/images/morpho.png"
+             alt="Morpho didius male, dorsal view — chroma-keyed from Wikimedia / MHNT photo"
              loading="lazy">
         <div class="dream-icon-caption">
           <b>Morpho didius</b><br>
@@ -2281,6 +2285,23 @@
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
     });
   });
+
+  // ============ Kafka portrait — Wikimedia URL fallback chain ============
+  (function loadKafkaPhoto() {
+    const img = document.getElementById('kafka-photo');
+    if (!img) return;
+    const urls = [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Franz_Kafka,_1923.jpg?width=400',
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Franz_Kafka_from_National_Library_Israel.jpg?width=400'
+    ];
+    let i = 0;
+    img.onerror = function () {
+      i++;
+      if (i < urls.length) { img.src = urls[i]; }
+      else { img.parentElement.classList.remove('has-photo'); }
+    };
+    img.src = urls[0];
+  })();
 })();
 </script>
 </body>
