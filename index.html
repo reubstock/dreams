@@ -361,6 +361,20 @@
     font-size: 9.5px; color: rgba(241, 234, 215, 0.4);
     letter-spacing: 0.04em; flex-basis: 100%;
   }
+  .dp-selfie-btn { cursor: pointer; }
+  .dp-selfie-thumb {
+    width: 28px; height: 28px;
+    object-fit: cover;
+    border: 1px solid rgba(241, 234, 215, 0.3);
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .dp-selfie-remove {
+    cursor: pointer; color: rgba(241, 234, 215, 0.6);
+    font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .dp-selfie-remove:hover { color: var(--rust-soft); }
 
   /* ============ LLM ANALYSIS RESULT (inside capture banner) ============ */
   .capture-result-stats.ar-mode { display: block; }
@@ -1929,7 +1943,13 @@
             <span class="dp-sep">·</span>
             <span class="dp-label">age</span>
             <input class="dp-input dp-age" id="dreamer-age" type="number" min="1" max="120" placeholder="—" aria-label="Dreamer age">
-            <span class="dp-hint">saved on this device · used so the image renders you correctly</span>
+            <span class="dp-sep">·</span>
+            <span class="dp-label">your face</span>
+            <button class="dp-input dp-selfie-btn" id="selfie-upload-btn" type="button" data-action="upload-selfie">+ add reference photo</button>
+            <img class="dp-selfie-thumb" id="selfie-thumb" alt="" hidden>
+            <button class="dp-input dp-selfie-remove" id="selfie-remove-btn" type="button" data-action="remove-selfie" hidden>remove</button>
+            <input type="file" id="selfie-file-input" accept="image/jpeg,image/png,image/webp" hidden>
+            <span class="dp-hint">demographic info saved on this device · reference photo (for likeness in image) requires sign-in</span>
           </div>
           <div class="capture-actions">
             <button class="btn" data-action="play-recording">▶ Play recording</button>
@@ -2490,10 +2510,113 @@
       const data = await r.json();
       authState.signedIn = !!data.signed_in;
       authState.email = data.email || null;
+      authState.selfieUrl = data.selfie_url || null;
       renderAuthSlot();
+      renderSelfieState();
       maybeShowRecipientPrompt();
     } catch (_) {}
   }
+
+  function renderSelfieState() {
+    const uploadBtn = document.getElementById('selfie-upload-btn');
+    const thumb = document.getElementById('selfie-thumb');
+    const removeBtn = document.getElementById('selfie-remove-btn');
+    if (!uploadBtn || !thumb || !removeBtn) return;
+    if (authState.selfieUrl) {
+      uploadBtn.hidden = true;
+      thumb.src = authState.selfieUrl;
+      thumb.hidden = false;
+      removeBtn.hidden = false;
+    } else {
+      uploadBtn.hidden = false;
+      thumb.hidden = true;
+      removeBtn.hidden = true;
+    }
+  }
+
+  // First-upload privacy disclosure (shown once per device)
+  function showSelfieDisclosure() {
+    const already = localStorage.getItem('dreams:selfie_disclosure_ack');
+    if (already === '1') return true;
+    const ok = confirm(
+      'Reference photo — privacy notice:\n\n' +
+      '• Your photo will be sent to OpenAI on every dream-image generation\n' +
+      '• OpenAI states they do NOT use API data to train models\n' +
+      '• The photo is stored in Vercel Blob at an unguessable but technically public URL\n' +
+      '• You can remove it anytime from this same row\n\n' +
+      'Continue?'
+    );
+    if (ok) localStorage.setItem('dreams:selfie_disclosure_ack', '1');
+    return ok;
+  }
+
+  async function uploadSelfieFile(file) {
+    if (!authState.signedIn) {
+      showToast('Sign in first to save a reference photo');
+      openSignin();
+      return;
+    }
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Photo too large (max 10 MB)');
+      return;
+    }
+    if (!showSelfieDisclosure()) return;
+    showToast('Uploading…');
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const b64 = String(reader.result || '').split(',')[1];
+      try {
+        const r = await fetch('/api/profile/selfie', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ selfie_b64: b64, content_type: file.type }),
+        });
+        if (!r.ok) {
+          const data = await r.json().catch(() => ({}));
+          showToast(data.message || 'Upload failed');
+          return;
+        }
+        const data = await r.json();
+        authState.selfieUrl = data.selfie_url;
+        renderSelfieState();
+        showToast('Reference photo saved · new dreams will use it');
+      } catch (err) {
+        showToast('Upload error: ' + err.message);
+      }
+    };
+    reader.onerror = () => showToast('Could not read file');
+    reader.readAsDataURL(file);
+  }
+
+  async function removeSelfie() {
+    if (!confirm('Remove your reference photo? Future dream images will be generated without it.')) return;
+    try {
+      const r = await fetch('/api/profile/selfie', { method: 'DELETE' });
+      if (!r.ok) {
+        const data = await r.json().catch(() => ({}));
+        showToast(data.message || 'Remove failed');
+        return;
+      }
+      authState.selfieUrl = null;
+      renderSelfieState();
+      showToast('Reference photo removed');
+    } catch (err) {
+      showToast('Error: ' + err.message);
+    }
+  }
+
+  (function wireSelfieInputs() {
+    const fileInput = document.getElementById('selfie-file-input');
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        uploadSelfieFile(file);
+        // Clear so the same file can be picked again later
+        e.target.value = '';
+      });
+    }
+  })();
 
   function renderAuthSlot() {
     const slot = document.getElementById('auth-slot');
@@ -2575,6 +2698,11 @@
     if (action === 'open-signin') openSignin();
     else if (action === 'close-signin') closeSignin();
     else if (action === 'signout') signOut();
+    else if (action === 'upload-selfie') {
+      const input = document.getElementById('selfie-file-input');
+      if (input) input.click();
+    }
+    else if (action === 'remove-selfie') removeSelfie();
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && signinModal && signinModal.classList.contains('open')) closeSignin();

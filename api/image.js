@@ -37,7 +37,7 @@ async function kvSet(id, value) {
   return r.ok;
 }
 
-async function craftPrompt(text, analysis, dreamer) {
+async function craftPrompt(text, analysis, dreamer, hasSelfie) {
   const motifs = analysis?.morphs?.slice(0, 6).map((m) => `${m.before} → ${m.after}`).join('; ') || '';
 
   // Build the dreamer instruction — this is the key fix for "renders me as a woman".
@@ -49,7 +49,13 @@ async function craftPrompt(text, analysis, dreamer) {
     dreamerLine = `\n\nDREAMER IDENTITY (CRITICAL): The person whose dream this is, is a ${ageDesc}${genderDesc}. Whenever the dreamer appears in the image, describe them as a ${ageDesc}${genderDesc}. Do NOT default to any other gender or age. If the dream text says "I" or "my", that refers to this ${genderDesc}.`;
   }
 
-  const userPrompt = `Compress this dream into a single tight image prompt for a surrealist painting. Include 4–6 VERY SPECIFIC visual elements directly from the dream — specific people, objects, settings, transformations. Be concrete: not "a figure" but "a 35-year-old man in a white nightgown"; not "a body of water" but "a clawfoot bathtub overflowing onto the floor". One paragraph, ~80 words. Do NOT add style direction (that's appended automatically). Output only the prompt text — no preamble, no commentary, no quotes.${dreamerLine}
+  // If a reference selfie will be attached, tell the prompt-crafter to write the
+  // prompt in a way that uses the reference for face/likeness consistency.
+  const selfieLine = hasSelfie
+    ? `\n\nA REFERENCE PHOTO of the dreamer is attached to the image-generation request. When you mention the dreamer in the prompt, refer to them as "the person in the reference photo". The image model will use the reference to maintain facial likeness. Do not describe the dreamer's specific facial features in the prompt — the reference handles that. DO still describe what the dreamer is wearing, doing, and the surrounding scene in detail.`
+    : '';
+
+  const userPrompt = `Compress this dream into a single tight image prompt for a surrealist painting. Include 4–6 VERY SPECIFIC visual elements directly from the dream — specific people, objects, settings, transformations. Be concrete: not "a figure" but "a 35-year-old man in a white nightgown"; not "a body of water" but "a clawfoot bathtub overflowing onto the floor". One paragraph, ~80 words. Do NOT add style direction (that's appended automatically). Output only the prompt text — no preamble, no commentary, no quotes.${dreamerLine}${selfieLine}
 
 Dream:
 "${text}"
@@ -76,19 +82,42 @@ ${motifs ? `Key transformations: ${motifs}` : ''}`;
   return data.choices?.[0]?.message?.content?.trim() || text.slice(0, 400);
 }
 
-async function generateImage(promptText, attempt = 0) {
+async function generateImage(promptText, selfieBuffer, selfieContentType, attempt = 0) {
   const fullPrompt = `${promptText}\n\n${STYLE_DIRECTION}`;
-  const res = await fetch('https://api.openai.com/v1/images/generations', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'gpt-image-1',
-      prompt: fullPrompt,
-      size: '1024x1024',
-      quality: 'medium',
-      n: 1,
-    }),
-  });
+
+  let res;
+  if (selfieBuffer) {
+    // /v1/images/edits — pass the selfie as a reference for likeness consistency.
+    // Uses multipart/form-data.
+    const form = new FormData();
+    form.append('model', 'gpt-image-1');
+    form.append('prompt', fullPrompt);
+    form.append('size', '1024x1024');
+    form.append('quality', 'medium');
+    form.append('n', '1');
+    form.append(
+      'image',
+      new Blob([selfieBuffer], { type: selfieContentType || 'image/jpeg' }),
+      'selfie.jpg'
+    );
+    res = await fetch('https://api.openai.com/v1/images/edits', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${OPENAI_KEY}` },
+      body: form,
+    });
+  } else {
+    res = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gpt-image-1',
+        prompt: fullPrompt,
+        size: '1024x1024',
+        quality: 'medium',
+        n: 1,
+      }),
+    });
+  }
 
   if (res.ok) {
     const data = await res.json();
@@ -108,7 +137,7 @@ async function generateImage(promptText, attempt = 0) {
     const waitSec = Math.min(m ? Math.ceil(parseFloat(m[1])) + 1 : 15, 30);
     console.log(`gpt-image-1 rate limited; waiting ${waitSec}s before retry`);
     await new Promise((r) => setTimeout(r, waitSec * 1000));
-    return generateImage(promptText, attempt + 1);
+    return generateImage(promptText, selfieBuffer, selfieContentType, attempt + 1);
   }
 
   if (res.status === 429) {
@@ -149,9 +178,30 @@ export default async function handler(req, res) {
     ? requestDreamer
     : dream.dreamer || null;
 
+  // If the dream's owner has uploaded a selfie, fetch it so we can pass it as
+  // a reference to the image-edits endpoint. Best-effort; failure falls back to
+  // text-only generation.
+  let selfieBuffer = null;
+  let selfieContentType = null;
+  if (dream.owner_email) {
+    try {
+      const user = await kvGet(`user:${dream.owner_email}`);
+      if (user?.selfie_url) {
+        const r = await fetch(user.selfie_url);
+        if (r.ok) {
+          const ab = await r.arrayBuffer();
+          selfieBuffer = Buffer.from(ab);
+          selfieContentType = r.headers.get('content-type') || 'image/jpeg';
+        }
+      }
+    } catch (err) {
+      console.warn('Selfie fetch failed (falling back to text-only):', err.message);
+    }
+  }
+
   try {
-    const prompt = await craftPrompt(dream.text, dream.analysis, effectiveDreamer);
-    const b64 = await generateImage(prompt);
+    const prompt = await craftPrompt(dream.text, dream.analysis, effectiveDreamer, !!selfieBuffer);
+    const b64 = await generateImage(prompt, selfieBuffer, selfieContentType);
     const buffer = Buffer.from(b64, 'base64');
 
     const filename = `dreams/${id}-${Date.now()}.png`;
@@ -164,6 +214,7 @@ export default async function handler(req, res) {
     dream.image_url = blob.url;
     dream.image_prompt = prompt;
     dream.image_generated_at = new Date().toISOString();
+    dream.image_used_selfie = !!selfieBuffer;
     // Persist the dreamer profile that was actually used, so future re-rolls
     // (or other clients viewing this dream) know how it was rendered.
     if (effectiveDreamer) dream.dreamer = effectiveDreamer;

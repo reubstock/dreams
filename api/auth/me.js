@@ -36,8 +36,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ signed_in: false });
   }
 
+  // Also fetch user record for selfie + any other profile data
+  const user = (await kvGet(`user:${session.email}`)) || {};
+
   return res.status(200).json({
     signed_in: true,
     email: session.email,
+    selfie_url: user.selfie_url || null,
   });
 }
