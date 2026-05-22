@@ -167,6 +167,117 @@
     margin-top: 8px;
   }
 
+  /* ============ LLM ANALYSIS RESULT (inside capture banner) ============ */
+  .capture-result-stats.ar-mode { display: block; }
+  .ar-pattern { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(241, 234, 215, 0.18); }
+  .ar-kicker {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--rust-soft); margin-bottom: 8px;
+  }
+  .ar-pattern-name {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 36px; font-style: italic; line-height: 1.05;
+    color: var(--paper); margin-bottom: 10px;
+  }
+  .ar-oneliner {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 16.5px; line-height: 1.45;
+    color: rgba(241, 234, 215, 0.85);
+  }
+  .ar-quickstats {
+    display: flex; gap: 26px; margin: 18px 0 22px;
+    padding: 14px 0; border-top: 1px solid rgba(241, 234, 215, 0.18);
+    border-bottom: 1px solid rgba(241, 234, 215, 0.18);
+    flex-wrap: wrap;
+  }
+  .ar-quickstats > div {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(241, 234, 215, 0.6);
+  }
+  .ar-quickstats b {
+    font-family: 'Didot', serif; font-size: 24px; font-style: italic;
+    color: var(--rust-soft); font-weight: 400;
+    display: block; line-height: 1; margin-bottom: 4px;
+  }
+  .ar-section-h {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--rust-soft); margin: 22px 0 12px;
+    padding-top: 16px; border-top: 1px solid rgba(241, 234, 215, 0.15);
+  }
+  .ar-morphs {
+    list-style: none; padding: 0; margin: 0;
+  }
+  .ar-morph {
+    display: grid; grid-template-columns: 36px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px dotted rgba(241, 234, 215, 0.18);
+    align-items: start;
+  }
+  .ar-morph:last-child { border-bottom: none; }
+  .ar-morph-num {
+    font-family: 'Didot', serif; font-style: italic; font-size: 18px;
+    color: var(--rust-soft);
+  }
+  .ar-morph-kind {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(241, 234, 215, 0.55); margin-bottom: 4px;
+  }
+  .ar-morph-ba {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 15.5px; line-height: 1.35; color: var(--paper);
+    margin-bottom: 4px;
+  }
+  .ar-before { color: rgba(241, 234, 215, 0.55); text-decoration: line-through; text-decoration-color: rgba(241, 234, 215, 0.35); }
+  .ar-arrow { color: var(--rust-soft); margin: 0 6px; }
+  .ar-after { font-style: italic; }
+  .ar-morph-gloss {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 13px; line-height: 1.5;
+    color: rgba(241, 234, 215, 0.65);
+  }
+  .ar-reading {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 15.5px; line-height: 1.6; color: rgba(241, 234, 215, 0.88);
+    max-width: 720px;
+  }
+  .ar-reading p { margin: 0 0 12px; }
+  .ar-reading p:last-child { margin-bottom: 0; }
+  .ar-rels { list-style: none; padding: 0; margin: 0; }
+  .ar-rel {
+    padding: 10px 0; border-bottom: 1px dotted rgba(241, 234, 215, 0.18);
+  }
+  .ar-rel:last-child { border-bottom: none; }
+  .ar-rel-attr {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.04em; color: rgba(241, 234, 215, 0.7);
+    margin-bottom: 4px;
+  }
+  .ar-rel-attr b { color: var(--paper); font-weight: 600; }
+  .ar-rel-attr i { font-style: italic; }
+  .ar-rel-why {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 13.5px; line-height: 1.5; color: rgba(241, 234, 215, 0.7);
+  }
+  .ar-dreamer {
+    margin-top: 22px; padding-top: 18px;
+    border-top: 1px solid rgba(241, 234, 215, 0.15);
+    font-family: 'Iowan Old Style', Georgia, serif;
+    color: rgba(241, 234, 215, 0.8);
+  }
+  .ar-dreamer b { color: var(--paper); }
+  .ar-dreamer-work { font-style: italic; margin-top: 4px; font-size: 14px; }
+  .ar-dreamer-why { margin-top: 8px; font-size: 14px; line-height: 1.55; }
+  .ar-foot {
+    margin-top: 22px; padding-top: 14px;
+    border-top: 1px solid rgba(241, 234, 215, 0.12);
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(241, 234, 215, 0.4);
+  }
+
 
   /* ============ RECENT DREAMS FEED ============ */
   .recent-feed {
@@ -2320,6 +2431,8 @@
       if (audioPlayer) { audioPlayer.pause(); audioPlayer = null; }
       textareaEl.value = '';
       statsEl.hidden = true;
+      statsEl.classList.remove('ar-mode');
+      statsEl.innerHTML = '';
       setState('idle');
     }
 
@@ -2332,41 +2445,120 @@
       audioPlayer.play().catch((err) => showToast('Playback blocked: ' + err.message));
     }
 
-    function analyzeRecording() {
+    async function analyzeRecording() {
       const text = textareaEl.value.trim();
       if (!text) return;
-      // Reuse the morph regex from the typed-dream modal
-      const morphPatterns = [
-        /\bbecame?\b/gi, /\bturned (?:in)?to\b/gi, /\bchanged into\b/gi,
-        /\bmade of\b/gi, /\bwas (?:now|suddenly|somehow)\b/gi,
-        /\bbut now\b/gi, /\bgrew into\b/gi, /\bmorphed into\b/gi,
-      ];
-      const words = text.split(/\s+/).filter(Boolean).length;
-      let morphs = 0;
-      morphPatterns.forEach((p) => { const m = text.match(p); if (m) morphs += m.length; });
-      document.getElementById('rs-words').textContent = words;
-      document.getElementById('rs-morphs').textContent = morphs;
-      document.getElementById('rs-ratio').textContent = (morphs / 2.1).toFixed(1) + '×';
-      let note = '';
-      if (morphs === 0) note = "No surface-level morph triggers detected. The full engine catches retroactive morphs (“the rooms were all wrong”) that surface regex misses — coming soon.";
-      else if (morphs < 2) note = 'A typical morph count for a dream of this length.';
-      else if (morphs < 4) note = 'Above the database norm — this dream is doing real transformation work.';
-      else note = 'Well above the database norm — this is a metamorphosis-saturated dream, like the sample diagnostic on this page.';
-      document.getElementById('rs-note').textContent = note;
+      const analyzeBtn = document.querySelector('[data-action="analyze-recording"]');
+      const original = analyzeBtn.textContent;
+      analyzeBtn.textContent = 'Analyzing…';
+      analyzeBtn.disabled = true;
+      statsEl.hidden = true;
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text }),
+        });
+        if (!res.ok) {
+          let data = {};
+          try { data = await res.json(); } catch (_) {}
+          if (data.error === 'analyze_not_configured') {
+            renderAnalyzeError('Analysis not yet configured', 'Set OPENAI_API_KEY on Vercel, then redeploy.');
+          } else {
+            renderAnalyzeError('Analysis failed', (data && data.message) || `HTTP ${res.status}`);
+          }
+          return;
+        }
+        const { analysis } = await res.json();
+        renderAnalysis(text, analysis);
+      } catch (err) {
+        renderAnalyzeError('Could not reach the analysis service', err.message || String(err));
+      } finally {
+        analyzeBtn.textContent = original;
+        analyzeBtn.disabled = false;
+      }
+    }
+
+    function renderAnalyzeError(title, detail) {
+      statsEl.innerHTML = `
+        <div style="flex-basis:100%">
+          <div style="font-family:'Iowan Old Style',Georgia,serif;font-style:italic;font-size:18px;margin-bottom:6px;color:#ff9b6c;">⚠ ${escapeHTML(title)}</div>
+          <div style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:0.06em;opacity:0.7;">${escapeHTML(detail)}</div>
+        </div>`;
       statsEl.hidden = false;
-      // Save to localStorage as a personal dream record
+    }
+
+    function escapeHTML(s) {
+      return String(s || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    }
+
+    function renderAnalysis(text, a) {
+      if (!a) return renderAnalyzeError('Empty analysis', 'The model returned no analysis object.');
+      const morphs = Array.isArray(a.morphs) ? a.morphs : [];
+      const relatives = Array.isArray(a.cultural_relatives) ? a.cultural_relatives : [];
+      const words = text.split(/\s+/).filter(Boolean).length;
+      const norm = 2.1;
+      const ratio = (morphs.length / norm).toFixed(1);
+
+      const morphsHTML = morphs.map((m, i) => `
+        <li class="ar-morph">
+          <span class="ar-morph-num">${String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <div class="ar-morph-kind">${escapeHTML(m.kind || '')}</div>
+            <div class="ar-morph-ba"><span class="ar-before">${escapeHTML(m.before || '')}</span> <span class="ar-arrow">→</span> <span class="ar-after">${escapeHTML(m.after || '')}</span></div>
+            ${m.gloss ? `<div class="ar-morph-gloss">${escapeHTML(m.gloss)}</div>` : ''}
+          </div>
+        </li>`).join('');
+
+      const relsHTML = relatives.map((r) => `
+        <li class="ar-rel">
+          <div class="ar-rel-attr"><b>${escapeHTML(r.artist || '')}</b> · <i>${escapeHTML(r.title || '')}</i>${r.year ? ' · ' + escapeHTML(r.year) : ''}</div>
+          ${r.why ? `<div class="ar-rel-why">${escapeHTML(r.why)}</div>` : ''}
+        </li>`).join('');
+
+      const dreamer = a.closest_historical_dreamer || {};
+      const dreamerHTML = dreamer.name ? `
+        <div class="ar-dreamer">
+          <div class="ar-section-h">Closest historical dreamer</div>
+          <div><b>${escapeHTML(dreamer.name)}</b>${dreamer.years ? ' · ' + escapeHTML(dreamer.years) : ''}</div>
+          ${dreamer.work_or_dream ? `<div class="ar-dreamer-work"><i>${escapeHTML(dreamer.work_or_dream)}</i></div>` : ''}
+          ${dreamer.why_match ? `<div class="ar-dreamer-why">${escapeHTML(dreamer.why_match)}</div>` : ''}
+        </div>` : '';
+
+      statsEl.classList.add('ar-mode');
+      statsEl.innerHTML = `
+        <div class="ar-pattern">
+          <div class="ar-kicker">Primary pattern detected</div>
+          <div class="ar-pattern-name">${escapeHTML(a.pattern_name || 'A dream.')}</div>
+          ${a.one_liner ? `<div class="ar-oneliner">${escapeHTML(a.one_liner)}</div>` : ''}
+        </div>
+        <div class="ar-quickstats">
+          <div><b>${words}</b> words</div>
+          <div><b>${morphs.length}</b> morphs</div>
+          <div><b>${ratio}×</b> vs. norm</div>
+        </div>
+        ${morphs.length ? `<div class="ar-section-h">Metamorphosis chain</div><ol class="ar-morphs">${morphsHTML}</ol>` : ''}
+        ${a.reading ? `<div class="ar-section-h">Reading</div><div class="ar-reading">${escapeHTML(a.reading).replace(/\n\n+/g, '</p><p>').replace(/^/, '<p>').concat('</p>')}</div>` : ''}
+        ${relatives.length ? `<div class="ar-section-h">Cultural relatives</div><ul class="ar-rels">${relsHTML}</ul>` : ''}
+        ${dreamerHTML}
+        <div class="ar-foot">Analyzed by GPT-4o-mini · ~$0.01 per dream</div>
+      `;
+      statsEl.hidden = false;
+      statsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // Save dream record to localStorage
       try {
         const records = JSON.parse(localStorage.getItem('dreams:records') || '[]');
         records.push({
           id: 'd' + Date.now(),
           text,
-          words,
-          morphs,
+          analysis: a,
           recordedAt: new Date().toISOString(),
         });
         localStorage.setItem('dreams:records', JSON.stringify(records));
       } catch (_) {}
-      showToast('Saved · ' + words + ' words · ' + morphs + ' morph' + (morphs === 1 ? '' : 's'));
+      showToast('Saved · ' + (a.pattern_name || words + ' words'));
     }
 
     capture.addEventListener('click', (e) => {
