@@ -167,6 +167,70 @@
     margin-top: 8px;
   }
 
+
+  /* ============ RECENT DREAMS FEED ============ */
+  .recent-feed {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .recent-dream {
+    border: 1px solid var(--ink);
+    padding: 18px 20px;
+    background: var(--paper);
+    transition: transform 0.12s, box-shadow 0.15s, border-color 0.15s;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+  }
+  .recent-dream:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(13, 10, 4, 0.12);
+    border-color: var(--rust);
+  }
+  .rd-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dotted var(--ink-2);
+  }
+  .rd-id { color: var(--rust); font-weight: 700; }
+  .rd-pattern { color: var(--muted); }
+  .rd-text {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-style: italic; font-size: 15.5px;
+    line-height: 1.5; color: var(--ink);
+    margin-bottom: 12px;
+    flex: 1;
+  }
+  .rd-foot {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px; letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .recent-foot {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+    margin-top: 12px; text-align: right;
+  }
+
+  /* ============ BOTTOM CAPTURE CTA ============ */
+  .capture-cta {
+    background: var(--ink); color: var(--paper);
+    padding: 28px 32px; margin: 56px 0 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: center;
+    border: 1px solid var(--rust);
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+  .capture-cta:hover { background: #18120a; }
+  .capture-cta:hover .capture-btn { background: var(--rust-soft); }
+
   /* ============ MASTHEAD ============ */
   .masthead {
     border-bottom: 2px solid var(--ink);
@@ -266,7 +330,7 @@
   .section-head .rule { flex: 1; height: 1px; background: var(--ink); }
 
   /* ============ SOURCE TEXT ============ */
-  .source-grid { display: grid; grid-template-columns: 1fr 280px; gap: 48px; }
+  .source-grid { display: block; max-width: 880px; margin: 0 auto; }
   .source-text {
     font-family: 'Iowan Old Style', Georgia, serif;
     font-size: 21px; line-height: 1.65; color: var(--ink);
@@ -324,7 +388,7 @@
   .relatives-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
+    gap: 22px;
     margin-bottom: 12px;
   }
   .relative-card {
@@ -341,7 +405,7 @@
   }
   .rel-img {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 4;
     overflow: hidden;
     background: var(--paper-2);
     position: relative;
@@ -1199,6 +1263,19 @@
     .rel-phrase { font-size: 14px; margin: 4px 0 8px; }
     .rel-attr { font-size: 9px; margin-bottom: 8px; padding-bottom: 8px; }
     .rel-why { font-size: 12.5px; line-height: 1.5; }
+
+    /* recent dreams feed on mobile */
+    .recent-feed { grid-template-columns: 1fr; gap: 12px; }
+    .recent-dream { padding: 16px 18px; }
+    .rd-text { font-size: 14.5px; line-height: 1.5; margin-bottom: 10px; }
+    .rd-meta { font-size: 9px; }
+
+    /* bottom capture CTA on mobile */
+    .capture-cta { padding: 20px 18px; margin: 40px 0 0; gap: 14px; }
+    .capture-cta .capture-title { font-size: 18px; }
+    .capture-cta .capture-sub { font-size: 9px; }
+    .capture-cta .capture-btn { width: 52px; height: 52px; }
+    .capture-cta .capture-btn svg { width: 22px; height: 22px; }
   }
 
   @media (max-width: 380px) {
@@ -1349,28 +1426,6 @@
         and I felt I was
         <mark data-n="8">late for something important but couldn't remember what</mark>.
       </div>
-      <aside class="source-stats">
-        <div class="stat">
-          <span class="stat-num alert">8</span>
-          <span class="stat-label">Metamorphoses</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">1</span>
-          <span class="stat-label">Stable identity (you)</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">0</span>
-          <span class="stat-label">Successful actions</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">0</span>
-          <span class="stat-label">Other speakers</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">3.8×</span>
-          <span class="stat-label">Norm rate of morphs</span>
-        </div>
-      </aside>
     </div>
 
     <!-- =================== CULTURAL RELATIVES =================== -->
@@ -1469,188 +1524,9 @@
           <div class="rel-why">The canonical engraving of consequential dread with no defined object. The instruments scattered around the angel are all the things she could be doing; she is doing none of them. Your dream's emotional core.</div>
         </figcaption>
       </figure>
-    </div>
-
-    <!-- =================== MORPH CHAIN =================== -->
-    <div class="section-head">
-      <div class="num">ii.</div>
-      <div class="title">Metamorphosis chain — 8 transformations, in order</div>
-      <div class="rule"></div>
-    </div>
-
-    <!-- What is a morph -->
-    <div class="morph-def">
-      <div class="morph-def-label">
-        morph
-        <small>noun · /mɔːf/</small>
-      </div>
-      <div class="morph-def-body">
-        A <b>morph</b> is any moment in a dream when one thing <em>becomes</em> another — a parent who changes age, a phone whose alphabet no longer works, a ceiling that turns to water, a floor that turns to sand. The transformation may be sudden ("then the floor became sand") or quietly retroactive ("the rooms were all wrong"). Most dreams contain <b>one or two</b> morphs. This one contains <b>eight</b>. Counting and classifying them is how a dream reveals whether it's <em>about</em> something happening or <em>about</em> a single quality of transformation itself.
-      </div>
-    </div>
-
-    <div class="morph-grid">
-      <div class="morph">
-        <div class="m-num">01</div>
-        <div class="m-kind">Spatial distortion</div>
-        <div class="m-ba">
-          <span class="before">childhood house</span>
-          <span class="arrow">— became —</span>
-          <span class="after">rooms wrong</span>
-        </div>
-        <div class="m-gloss">The familiar setting keeps its name but loses its geometry. Hall/Van de Castle: "altered familiar."</div>
-      </div>
-
-      <div class="morph">
-        <div class="m-num">02</div>
-        <div class="m-kind">Age inversion</div>
-        <div class="m-ba">
-          <span class="before">mother (elder)</span>
-          <span class="arrow">— became —</span>
-          <span class="after">mother (younger than you)</span>
-        </div>
-        <div class="m-gloss">Parent age-inversion occurs in <b>0.4%</b> of coded dreams. Rare enough to be diagnostic.</div>
-      </div>
-
-      <div class="morph">
-        <div class="m-num">03</div>
-        <div class="m-kind">Material substitution</div>
-        <div class="m-ba">
-          <span class="before">ceiling (plaster)</span>
-          <span class="arrow">— became —</span>
-          <span class="after">ceiling (water)</span>
-        </div>
-        <div class="m-gloss">Architecture replaced by liquid. The structural becomes the fluid.</div>
-      </div>
-
-      <div class="morph">
-        <div class="m-num">04</div>
-        <div class="m-kind">Biosphere inversion</div>
-        <div class="m-ba">
-          <span class="before">fish (below)</span>
-          <span class="arrow">— became —</span>
-          <span class="after">fish (above)</span>
-        </div>
-        <div class="m-gloss">Up/down swap. Fish swim where birds fly. The dream's physics has rotated 180°.</div>
-      </div>
-
-      <div class="morph">
-        <div class="m-num">05</div>
-        <div class="m-kind">Symbol failure</div>
-        <div class="m-ba">
-          <span class="before">phone (numbers)</span>
-          <span class="arrow">— became —</span>
-          <span class="after">phone (foreign letters)</span>
-        </div>
-        <div class="m-gloss">The instrument still works; the alphabet doesn't. Communication is locally intact and globally lost.</div>
-      </div>
-
-      <div class="morph">
-        <div class="m-num">06</div>
-        <div class="m-kind">Material substitution</div>
-        <div class="m-ba">
-          <span class="before">floor (wood)</span>
-          <span class="arrow">— became —</span>
-          <span class="after">floor (sand)</span>
-        </div>
-        <div class="m-gloss">Second material swap. The ground itself stops being ground.</div>
-      </div>
-
-      <div class="morph">
-        <div class="m-num">07</div>
-        <div class="m-kind">Setting substitution</div>
-        <div class="m-ba">
-          <span class="before">house (peopled)</span>
-          <span class="arrow">— became —</span>
-          <span class="after">beach (empty)</span>
-        </div>
-        <div class="m-gloss">The household evaporates. Only after the house dissolves does the dream notice it's alone.</div>
-      </div>
-
-      <div class="morph">
-        <div class="m-num">08</div>
-        <div class="m-kind">Object loss</div>
-        <div class="m-ba">
-          <span class="before">late (for X)</span>
-          <span class="arrow">— became —</span>
-          <span class="after">late (for ?)</span>
-        </div>
-        <div class="m-gloss">Urgency keeps its weight but loses its referent. The dream's emotional spine: <em>urgency without object</em>.</div>
-      </div>
-    </div>
-
-    <!-- =================== STABILITY =================== -->
-    <div class="section-head">
-      <div class="num">iii.</div>
-      <div class="title">Stability ledger — who survives the dream</div>
-      <div class="rule"></div>
-    </div>
-
-    <div class="stability-wrap">
-      <div class="stability-diagram">
-        <svg class="stab-svg" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-              <path d="M0,0 L10,5 L0,10 z" fill="#b8421a"/>
-            </marker>
-          </defs>
-          <g>
-            <circle cx="300" cy="180" r="44" fill="#0d0a04"/>
-            <text x="300" y="178" text-anchor="middle" fill="#f1ead7" font-family="Didot, serif" font-style="italic" font-size="22">You</text>
-            <text x="300" y="196" text-anchor="middle" fill="#d97a3e" font-family="ui-monospace, monospace" font-size="8" letter-spacing="2">STABLE</text>
-          </g>
-
-          <line x1="300" y1="180" x2="120" y2="60" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
-          <text x="60" y="44" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">mother</text>
-          <text x="60" y="60" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">AGE-INVERTED</text>
-
-          <line x1="300" y1="180" x2="500" y2="60" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
-          <text x="500" y="44" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">brother</text>
-          <text x="500" y="60" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">UNREACHABLE</text>
-
-          <line x1="300" y1="180" x2="80" y2="180" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
-          <text x="20" y="178" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">house</text>
-          <text x="20" y="194" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">DISSOLVED</text>
-
-          <line x1="300" y1="180" x2="180" y2="300" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
-          <text x="100" y="320" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">ceiling</text>
-          <text x="100" y="336" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">WATER</text>
-
-          <line x1="300" y1="180" x2="420" y2="300" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
-          <text x="440" y="320" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">floor</text>
-          <text x="440" y="336" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">SAND</text>
-
-          <line x1="300" y1="180" x2="520" y2="180" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
-          <text x="540" y="178" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">phone</text>
-          <text x="540" y="194" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">FOREIGN</text>
-
-          <line x1="300" y1="180" x2="300" y2="320" stroke="#b8421a" stroke-width="1.4" stroke-dasharray="2,4"/>
-          <text x="300" y="350" text-anchor="middle" font-family="'Iowan Old Style', serif" font-size="14" fill="#0d0a04">purpose</text>
-          <text x="300" y="364" text-anchor="middle" font-family="ui-monospace, monospace" font-size="8" fill="#b8421a" letter-spacing="1.5">FORGOTTEN</text>
-        </svg>
-        <div class="stab-caption">One solid node. Seven broken spokes.</div>
-      </div>
-
-      <div class="stability-table">
-        <h4>Roster</h4>
-        <div class="stab-row stable"><span class="entity">You</span><span class="state">STABLE</span></div>
-        <div class="stab-row unstable"><span class="entity">Mother</span><span class="state">AGE-INVERTED</span></div>
-        <div class="stab-row unstable"><span class="entity">Brother</span><span class="state">UNREACHABLE</span></div>
-        <div class="stab-row unstable"><span class="entity">House</span><span class="state">DISSOLVED</span></div>
-        <div class="stab-row unstable"><span class="entity">Ceiling</span><span class="state">→ WATER</span></div>
-        <div class="stab-row unstable"><span class="entity">Floor</span><span class="state">→ SAND</span></div>
-        <div class="stab-row unstable"><span class="entity">Phone</span><span class="state">FOREIGN</span></div>
-        <div class="stab-row unstable"><span class="entity">Language</span><span class="state">UNREADABLE</span></div>
-        <div class="stab-row unstable"><span class="entity">Purpose</span><span class="state">FORGOTTEN</span></div>
-        <div class="stab-summary">
-          Of nine named entities, <b>one</b> survives the dream unaltered. The other eight transform, fail, or vanish.
-        </div>
-      </div>
-    </div>
-
-    <!-- =================== READING =================== -->
+    </div><!-- =================== READING =================== -->
     <div class="reading-block">
-      <div class="kicker">Reading — three lenses</div>
+      <div class="kicker">Reading</div>
 
       <div class="lens-player">
         <button class="player-btn" data-action="speak" aria-label="Read aloud">
@@ -1663,15 +1539,7 @@
           <option value="researcher">Researcher voice</option>
         </select>
         <div class="player-state" id="player-state">browser voice · quality varies by device</div>
-      </div>
-
-      <div class="lens-tabs">
-        <button class="lens-tab active" data-lens="reading"><span class="lens-num">i.</span>Reading</button>
-        <button class="lens-tab" data-lens="feeling"><span class="lens-num">ii.</span>Feeling</button>
-        <button class="lens-tab" data-lens="structure"><span class="lens-num">iii.</span>Structure</button>
-      </div>
-
-      <!-- LENS 1: READING (interpretive, explicit) -->
+      </div><!-- LENS 1: READING (interpretive, explicit) -->
       <div class="lens-content active" data-lens="reading">
         <div class="read-q">"What is this dream most likely about in your life?"</div>
         <div class="read-a">
@@ -1695,72 +1563,17 @@
           </p>
         </div>
       </div>
-
-      <!-- LENS 2: FEELING -->
-      <div class="lens-content" data-lens="feeling">
-        <div class="read-q">"What does this dream <em>feel</em> like, underneath?"</div>
-        <div class="read-a">
-          <p>
-            Not danger. <em>Recognition slipping.</em>
-          </p>
-          <p>
-            Nothing in this dream threatens you. No one is chasing you, no one is hostile, nothing breaks you. What slips, instead, is the dream's <b>grammar</b>: every familiar surface has shifted by exactly one category. The mother is the wrong age. The ceiling is the wrong material. The alphabet is the wrong system. The floor is the wrong substance. The beach is missing one thing — its people.
-          </p>
-          <p>
-            The dominant feeling is <em>urgency without object</em>: the body knows it's late while the mind has forgotten what for. This is not the anxiety of threat. It's the anxiety of a deadline you can no longer name. Dream lexicons sometimes call it <b>"evaporated purpose"</b> — the sense that something used to mean a great deal, and the meaning has come loose from the thing.
-          </p>
-          <p>
-            The orange sky is doing emotional work here. Orange skies in dreams correlate with the late stages of inhabiting a place — sunset, last light, the hour before something ends. The dream is telling you the day is closing.
-          </p>
-        </div>
-      </div>
-
-      <!-- LENS 3: STRUCTURE -->
-      <div class="lens-content" data-lens="structure">
-        <div class="read-q">"How is this dream architected?"</div>
-        <div class="read-a">
-          <p>
-            Eight morphs in 87 words. One stable identity (you). Every named entity except the dreamer transforms, fails, or vanishes.
-          </p>
-          <p>
-            The dream is built around a contrast: a <b>single fixed point</b> surrounded by a <b>field of failing substitutions</b>. Materials change (plaster → water, wood → sand). Physics inverts (fish swim above, not below). The communication channel remains intact (you have a phone, you have hands) but the alphabet has changed — locally functional, globally broken.
-          </p>
-          <p>
-            The morphs aren't randomly distributed. They cluster into three pairs: <em>two material substitutions</em> (ceiling, floor — the architecture itself becomes unstable), <em>two communication failures</em> (the foreign alphabet, the forgotten purpose — meaning detaches from its sign), and <em>two emptyings</em> (the house dissolves into a beach, the beach has no one on it — peopled space becomes unpeopled space). The eighth morph — your mother's age — is the only one that touches another person directly.
-          </p>
-          <p>
-            Structurally, this is a <b>metamorphosis dream</b> — 3.8× more morphs than the database norm. Its cluster signature is <b>SYMBOL_FAILURE + URGENCY_NO_OBJECT</b>.
-          </p>
-        </div>
       </div>
     </div>
 
     <!-- =================== DATABASE =================== -->
     <div class="section-head">
-      <div class="num">iv.</div>
-      <div class="title">Against the database — Sleep &amp; Dream DB, n = 24,378</div>
+      <div class="num">ii.</div>
+      <div class="title">People who dreamed like you</div>
       <div class="rule"></div>
-    </div>
-
-    <table class="compare-table">
-      <thead>
-        <tr><th>Feature</th><th>This dream</th><th>Database norm</th><th></th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Metamorphoses per dream</td><td class="this">8</td><td>2.1</td><td class="delta">3.8× norm</td></tr>
-        <tr><td>Parent age-inversion</td><td class="this">present</td><td>0.4% of dreams</td><td class="delta">rare</td></tr>
-        <tr><td>Communication attempted &amp; failed</td><td class="this">present</td><td>11% of anxiety dreams</td><td class="delta">elevated</td></tr>
-        <tr><td>Setting substitution mid-dream</td><td class="this">2 (house→beach)</td><td>1.1</td><td class="delta">2× norm</td></tr>
-        <tr><td>Successful actions by dreamer</td><td class="this">0</td><td>3.4</td><td class="delta cool">−100%</td></tr>
-        <tr><td>Other characters who speak</td><td class="this">0</td><td>1.8</td><td class="delta cool">−100%</td></tr>
-        <tr><td>Joy / positive emotion</td><td class="this">0</td><td>0.9 events</td><td class="delta cool">absent</td></tr>
-        <tr><td>Time / lateness anxiety</td><td class="this">present</td><td>7%</td><td class="delta">elevated</td></tr>
-      </tbody>
-    </table>
-
-    <div class="neighbor-card" id="neighbor-anchor" role="button" tabindex="0" data-neighbor="4012" aria-label="Open neighbor dream 4012">
+    </div><div class="neighbor-card" id="neighbor-anchor" role="button" tabindex="0" data-neighbor="4012" aria-label="Open neighbor dream 4012">
       <div>
-        <div class="nc-tag">Nearest neighbor · #1</div>
+        <div class="nc-tag">Similar dream · #1</div>
         <div class="nc-id">#4012</div>
       </div>
       <div>
@@ -1770,7 +1583,7 @@
     </div>
     <div class="neighbor-card extra" role="button" tabindex="0" data-neighbor="7194" aria-label="Open neighbor dream 7194">
       <div>
-        <div class="nc-tag">Nearest neighbor · #2</div>
+        <div class="nc-tag">Similar dream · #2</div>
         <div class="nc-id">#7194</div>
       </div>
       <div>
@@ -1780,7 +1593,7 @@
     </div>
     <div class="neighbor-card extra" role="button" tabindex="0" data-neighbor="2856" aria-label="Open neighbor dream 2856">
       <div>
-        <div class="nc-tag">Nearest neighbor · #3</div>
+        <div class="nc-tag">Similar dream · #3</div>
         <div class="nc-id">#2856</div>
       </div>
       <div>
@@ -1789,9 +1602,52 @@
       </div>
     </div>
 
+
+    <!-- =================== RECENT DREAMS =================== -->
+    <div class="section-head">
+      <div class="num">iii.</div>
+      <div class="title">Recent dreams from the repository</div>
+      <div class="rule"></div>
+    </div>
+    <div class="recent-feed">
+      <article class="recent-dream">
+        <div class="rd-meta">
+          <span class="rd-id">#4012</span>
+          <span class="rd-pattern">SYMBOL FAILURE</span>
+        </div>
+        <div class="rd-text">"I was in an airport that wasn't an airport. The keys had no teeth and the door had no lock, and I knew I had to be somewhere but the somewhere kept moving."</div>
+        <div class="rd-foot">F · 32 · 3h ago · 7 morphs</div>
+      </article>
+      <article class="recent-dream">
+        <div class="rd-meta">
+          <span class="rd-id">#7194</span>
+          <span class="rd-pattern">AGE INVERSION</span>
+        </div>
+        <div class="rd-text">"My father was a child and I had to read him his own letters but the handwriting had changed and the words wouldn't stay still on the page."</div>
+        <div class="rd-foot">M · 41 · 7h ago · 5 morphs</div>
+      </article>
+      <article class="recent-dream">
+        <div class="rd-meta">
+          <span class="rd-id">#5821</span>
+          <span class="rd-pattern">UNNAMED PURPOSE</span>
+        </div>
+        <div class="rd-text">"I was flying just above the rooftops, but I couldn't tell anyone because no one I called knew my name anymore."</div>
+        <div class="rd-foot">F · 28 · today · 4 morphs</div>
+      </article>
+      <article class="recent-dream">
+        <div class="rd-meta">
+          <span class="rd-id">#9933</span>
+          <span class="rd-pattern">CIRCULAR PURSUIT</span>
+        </div>
+        <div class="rd-text">"I kept running through the same school I went to as a kid, but every classroom led back to the same hallway and the bell wouldn't stop."</div>
+        <div class="rd-foot">M · 35 · yesterday · 6 morphs</div>
+      </article>
+    </div>
+    <div class="recent-foot">→ all dreams (coming soon)</div>
+
     <!-- =================== HISTORICAL DREAMER =================== -->
     <div class="section-head">
-      <div class="num">v.</div>
+      <div class="num">iv.</div>
       <div class="title">Closest historical dreamer</div>
       <div class="rule"></div>
     </div>
@@ -1826,6 +1682,20 @@
         </div>
       </div>
     </div>
+
+
+    <!-- =================== BOTTOM CAPTURE CTA =================== -->
+    <section class="capture-cta" data-action="scroll-to-capture" role="button" tabindex="0">
+      <div>
+        <div class="capture-title">Record <em>your</em> dream.</div>
+        <div class="capture-sub">Add it to the repository · find people who dreamed like you</div>
+      </div>
+      <button class="capture-btn" aria-label="Go to record">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" fill="currentColor"/>
+        </svg>
+      </button>
+    </section>
 
     <!-- =================== ACTIONS =================== -->
     <div class="actions">
@@ -2511,6 +2381,18 @@
       else if (action === 'reset-capture') setState('idle');
     });
   }
+
+  // ============ Bottom CTA → scroll to top capture ============
+  document.querySelectorAll('[data-action="scroll-to-capture"]').forEach((el) => {
+    const go = () => {
+      const target = document.getElementById('capture');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+    });
+  });
 })();
 </script>
 </body>
