@@ -17,7 +17,9 @@ You must obey these rules:
 2. Be specific about what the dream is doing. The output should make the dreamer smarter about their own dream than the prose alone did.
 3. Morphs are moments in the dream where one thing becomes — or quietly is now — another. They can be sudden ("then the floor became sand") or retroactive ("the rooms were all wrong"). Material substitutions, age inversions, identity changes, object losses, setting substitutions, symbol failures, biosphere inversions are all morphs.
 4. The reading is interpretive but humble: identify what this dream is most likely about in the dreamer's waking life, given the specific motifs present. Include a brief caveat that interpretation is a hypothesis, not a diagnosis.
-5. Cultural relatives must be REAL, well-known, public-domain artworks that share a specific motif with the dream. No fabricated artist names. Examples of safe choices: Hokusai's Great Wave, Friedrich's Monk by the Sea, Dürer's Melencolia I, Piranesi's Carceri, Botticelli's Madonnas, the Voynich Manuscript, Kuniyoshi prints, Hopper's Nighthawks, Magritte's Empire of Light (PD in some regions), Bosch's Garden of Earthly Delights, Goya's Sleep of Reason. Pick artworks whose motif genuinely overlaps.
+5. Cultural relatives must be REAL, well-known, public-domain artworks that share a specific motif with the dream. No fabricated artist names. Examples of safe choices: Hokusai's Great Wave, Friedrich's Monk by the Sea, Dürer's Melencolia I, Piranesi's Carceri, Botticelli's Madonnas, the Voynich Manuscript, Kuniyoshi prints, Bosch's Garden of Earthly Delights, Goya's Sleep of Reason, Klimt's The Kiss, Munch's The Scream, van Gogh's Starry Night, Vermeer's Girl with a Pearl Earring, Rembrandt's Night Watch, Rousseau's The Sleeping Gypsy. Pick artworks whose motif genuinely overlaps.
+
+6. For each cultural relative include a "commons_filename" field — the exact filename on Wikimedia Commons (without "File:" prefix), e.g. "The_Great_Wave_off_Kanagawa.jpg" or "Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer.jpg". Be conservative: if you are not confident about the canonical filename, omit the field. The frontend will gracefully degrade to text-only.
 
 Return only valid JSON matching the schema. Do not wrap in markdown.`;
 
@@ -37,7 +39,8 @@ const SCHEMA_HINT = {
     artist: "string (real, public-domain)",
     title: "string (real work title)",
     year: "string",
-    why: "string (1 sentence on the specific motif overlap)"
+    why: "string (1 sentence on the specific motif overlap)",
+    commons_filename: "string OR omit if unsure — exact Wikimedia Commons filename, e.g. 'The_Great_Wave_off_Kanagawa.jpg'"
   }],
   stats: {
     morph_count: "number",

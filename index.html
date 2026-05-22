@@ -54,29 +54,54 @@
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 16px;
-    background: linear-gradient(180deg, #1a0e1f 0%, #0a0a14 100%);
+    gap: 18px;
     color: var(--paper);
-    padding: 24px;
+    padding: 32px;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(216, 122, 62, 0.35), transparent 60%),
+      radial-gradient(ellipse at 70% 80%, rgba(110, 76, 184, 0.45), transparent 65%),
+      linear-gradient(135deg, #1a0e1f 0%, #0a0a14 50%, #1a0814 100%);
+    background-size: 200% 200%, 200% 200%, 100% 100%;
+    animation: hero-bg-drift 8s ease-in-out infinite alternate;
+    overflow: hidden;
   }
+  @keyframes hero-bg-drift {
+    0%   { background-position: 30% 20%, 70% 80%, 0 0; }
+    100% { background-position: 70% 50%, 20% 30%, 0 0; }
+  }
+  .hero-loading::before {
+    content: ""; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg,
+      transparent 0deg, rgba(216, 122, 62, 0.08) 60deg,
+      transparent 120deg, rgba(110, 76, 184, 0.1) 180deg,
+      transparent 240deg, rgba(126, 193, 255, 0.06) 300deg, transparent 360deg);
+    animation: hero-rotate 18s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes hero-rotate { to { transform: rotate(360deg); } }
+  .hero-loading > * { position: relative; z-index: 1; }
   .hero-spinner {
-    width: 38px; height: 38px;
+    width: 52px; height: 52px;
     border: 3px solid rgba(241, 234, 215, 0.18);
     border-top-color: var(--rust-soft);
+    border-right-color: rgba(126, 193, 255, 0.5);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 1.4s linear infinite;
   }
   .hero-loading-text {
     font-family: 'Didot', 'Bodoni 72', serif;
-    font-size: 20px; font-style: italic;
+    font-size: 26px; font-style: italic;
     color: var(--paper);
     text-align: center;
+    line-height: 1.2;
+    min-height: 32px;
+    transition: opacity 0.4s ease;
   }
   .hero-loading-sub {
     font-family: ui-monospace, Menlo, monospace;
-    font-size: 10px; letter-spacing: 0.18em;
+    font-size: 10px; letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(241, 234, 215, 0.4);
+    color: rgba(241, 234, 215, 0.55);
   }
   .hero-reroll {
     position: absolute; bottom: 14px; right: 14px;
@@ -206,6 +231,21 @@
   .capture-actions .btn:hover { background: rgba(241, 234, 215, 0.08); }
   .capture-actions .btn.primary { background: var(--rust); border-color: var(--rust); }
   .capture-actions .btn.primary:hover { background: var(--rust-soft); border-color: var(--rust-soft); }
+  .capture-actions .btn.analyzing {
+    background: linear-gradient(90deg,
+      #ff5e57 0%, #ff9c4a 16%, #ffd23e 32%, #57e08a 48%,
+      #4abff5 64%, #8a7bff 80%, #ff5e57 100%);
+    background-size: 250% 100%;
+    animation: dreams-rainbow 2.4s linear infinite;
+    color: var(--ink) !important;
+    border-color: transparent !important;
+    text-shadow: 0 0 4px rgba(255,255,255,0.4);
+    cursor: progress;
+  }
+  @keyframes dreams-rainbow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 250% 50%; }
+  }
   .capture-result-stats {
     display: flex; gap: 24px; margin-top: 14px;
     padding-top: 14px;
@@ -313,9 +353,23 @@
   .ar-reading p:last-child { margin-bottom: 0; }
   .ar-rels { list-style: none; padding: 0; margin: 0; }
   .ar-rel {
-    padding: 10px 0; border-bottom: 1px dotted rgba(241, 234, 215, 0.18);
+    padding: 14px 0; border-bottom: 1px dotted rgba(241, 234, 215, 0.18);
+    display: block;
+  }
+  .ar-rel.has-img {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 16px;
+    align-items: start;
   }
   .ar-rel:last-child { border-bottom: none; }
+  .ar-rel-img {
+    width: 96px; height: 128px;
+    object-fit: cover;
+    border: 1px solid rgba(241, 234, 215, 0.18);
+    background: rgba(241, 234, 215, 0.04);
+    display: block;
+  }
   .ar-rel-attr {
     font-family: ui-monospace, Menlo, monospace; font-size: 10px;
     letter-spacing: 0.04em; color: rgba(241, 234, 215, 0.7);
@@ -2266,6 +2320,7 @@
       const original = analyzeBtn.textContent;
       analyzeBtn.textContent = 'Analyzing…';
       analyzeBtn.disabled = true;
+      analyzeBtn.classList.add('analyzing');
       statsEl.hidden = true;
 
       try {
@@ -2291,6 +2346,7 @@
       } finally {
         analyzeBtn.textContent = original;
         analyzeBtn.disabled = false;
+        analyzeBtn.classList.remove('analyzing');
       }
     }
 
@@ -2325,11 +2381,20 @@
           </div>
         </li>`).join('');
 
-      const relsHTML = relatives.map((r) => `
-        <li class="ar-rel">
-          <div class="ar-rel-attr"><b>${escapeHTML(r.artist || '')}</b> · <i>${escapeHTML(r.title || '')}</i>${r.year ? ' · ' + escapeHTML(r.year) : ''}</div>
-          ${r.why ? `<div class="ar-rel-why">${escapeHTML(r.why)}</div>` : ''}
-        </li>`).join('');
+      const relsHTML = relatives.map((r) => {
+        const fname = (r.commons_filename || '').trim();
+        const imgUrl = fname
+          ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fname)}?width=480`
+          : '';
+        return `
+        <li class="ar-rel${imgUrl ? ' has-img' : ''}">
+          ${imgUrl ? `<img class="ar-rel-img" src="${imgUrl}" alt="${escapeHTML((r.artist || '') + ' — ' + (r.title || ''))}" loading="lazy" onerror="this.closest('.ar-rel').classList.remove('has-img'); this.remove();">` : ''}
+          <div class="ar-rel-body">
+            <div class="ar-rel-attr"><b>${escapeHTML(r.artist || '')}</b> · <i>${escapeHTML(r.title || '')}</i>${r.year ? ' · ' + escapeHTML(r.year) : ''}</div>
+            ${r.why ? `<div class="ar-rel-why">${escapeHTML(r.why)}</div>` : ''}
+          </div>
+        </li>`;
+      }).join('');
 
       const dreamer = a.closest_historical_dreamer || {};
       const dreamerHTML = dreamer.name ? `
@@ -2516,8 +2581,30 @@
       img.hidden = true;
       loading.hidden = false;
       reroll.hidden = true;
-      if (loadingText) loadingText.textContent = opts.force ? 'Re-generating…' : 'Generating dream image…';
-      if (loadingSub) loadingSub.textContent = 'gpt-image-1 · usually 20–30 seconds';
+      if (loadingText) loadingText.textContent = opts.force ? 'Re-mixing the pigments…' : 'Stretching the canvas…';
+      if (loadingSub) loadingSub.textContent = 'gpt-image-1 · 20–30 seconds';
+      // Cycle painterly phrases so the wait feels intentional
+      const phrases = [
+        'Stretching the canvas…',
+        'Sketching the figures…',
+        'Mixing the pigments…',
+        'Painting the background…',
+        'Adding lamp light…',
+        'Glazing the iridescence…',
+        'Catching the brushstroke…',
+        'Letting it dry…',
+      ];
+      let phraseIdx = 0;
+      const phraseTimer = setInterval(() => {
+        phraseIdx = (phraseIdx + 1) % phrases.length;
+        if (loadingText) {
+          loadingText.style.opacity = '0';
+          setTimeout(() => {
+            loadingText.textContent = phrases[phraseIdx];
+            loadingText.style.opacity = '1';
+          }, 280);
+        }
+      }, 2400);
 
       try {
         const r = await fetch('/api/image', {
@@ -2526,6 +2613,7 @@
           body: JSON.stringify({ id: dream.id, force: !!opts.force }),
         });
         if (!r.ok) {
+          clearInterval(phraseTimer);
           const data = await r.json().catch(() => ({}));
           if (loadingText) loadingText.textContent = data.error === 'blob_not_configured'
             ? 'Image storage not yet enabled'
@@ -2536,6 +2624,7 @@
         const { image_url, prompt } = await r.json();
         img.src = image_url;
         img.onload = () => {
+          clearInterval(phraseTimer);
           img.hidden = false;
           loading.hidden = true;
           reroll.hidden = false;
@@ -2549,6 +2638,7 @@
         dream.image_prompt = prompt;
         wireReroll(dream);
       } catch (err) {
+        clearInterval(phraseTimer);
         if (loadingText) loadingText.textContent = 'Could not generate image';
         if (loadingSub) loadingSub.textContent = err.message || String(err);
       }
