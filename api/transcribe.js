@@ -1,11 +1,13 @@
 // Vercel serverless function: POST audio → OpenAI Whisper → text
+// Also uploads the raw audio to Vercel Blob so the dream page can replay it.
 //
 // Setup (one-time, on Vercel):
-//   vercel env add OPENAI_API_KEY production
-//   <paste OpenAI key>
-//   vercel deploy --prod
+//   vercel env add OPENAI_API_KEY production  →  paste OpenAI key
+//   (BLOB_READ_WRITE_TOKEN comes from connecting Vercel Blob in the dashboard)
 //
-// Cost: $0.006 / minute of audio.
+// Cost: Whisper $0.006/min · Blob storage tiny per recording.
+
+import { put } from '@vercel/blob';
 
 export const config = {
   api: {
@@ -81,9 +83,31 @@ export default async function handler(req, res) {
     }
 
     const data = await openaiRes.json();
+
+    // Also save the audio to Vercel Blob so the dream page can replay it.
+    // Best-effort: if Blob isn't configured or upload fails, we still return
+    // the transcript — the user just loses replay capability for this one.
+    let audio_url = null;
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (blobToken) {
+      try {
+        const ext = filename.split('.').pop();
+        const rnd = Math.random().toString(36).slice(2, 8);
+        const blob = await put(
+          `audio/${Date.now()}-${rnd}.${ext}`,
+          audioBuffer,
+          { access: 'public', contentType, token: blobToken }
+        );
+        audio_url = blob.url;
+      } catch (blobErr) {
+        console.warn('Audio blob upload failed (transcript still returned):', blobErr.message);
+      }
+    }
+
     return res.status(200).json({
       text: data.text || '',
-      duration_seconds: null, // Whisper json response doesn't include duration; verbose_json does
+      audio_url,
+      duration_seconds: null,
       audio_bytes: audioBuffer.length,
     });
   } catch (err) {

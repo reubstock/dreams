@@ -512,6 +512,15 @@
     letter-spacing: 0.18em; text-transform: uppercase;
   }
   .ar-pl-copy:hover { background: var(--paper); }
+  .ar-pl-share {
+    background: transparent; color: var(--rust-soft);
+    border: 1px solid var(--rust-soft); padding: 6px 12px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    text-decoration: none; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .ar-pl-share:hover { background: var(--rust-soft); color: var(--ink); }
 
 
   /* ============ RECENT DREAMS FEED ============ */
@@ -2436,6 +2445,10 @@
           return;
         }
         const data = await res.json();
+        if (data.audio_url) {
+          // Save in case the dream isn't yet saved to the server — used by Play Recording
+          window.__pendingAudioUrl = data.audio_url;
+        }
         showTranscript(data.text || '');
       } catch (err) {
         const ok = await tryBrowserFallback();
@@ -2468,11 +2481,23 @@
     }
 
     function playRecording() {
-      if (!audioBlob) return;
+      // Prefer in-memory blob (fresh recording session). Fall back to a
+      // remote audio URL stored on the dream record (replays on /d/:id).
       if (audioPlayer) { audioPlayer.pause(); audioPlayer = null; }
-      const url = URL.createObjectURL(audioBlob);
-      audioPlayer = new Audio(url);
-      audioPlayer.onended = () => URL.revokeObjectURL(url);
+      let src = null;
+      let revoke = null;
+      if (audioBlob) {
+        src = URL.createObjectURL(audioBlob);
+        revoke = src;
+      } else if (window.__loadedAudioUrl) {
+        src = window.__loadedAudioUrl;
+      }
+      if (!src) {
+        showToast('No audio for this dream');
+        return;
+      }
+      audioPlayer = new Audio(src);
+      if (revoke) audioPlayer.onended = () => URL.revokeObjectURL(revoke);
       audioPlayer.play().catch((err) => showToast('Playback blocked: ' + err.message));
     }
 
@@ -2657,7 +2682,12 @@
         const res = await fetch('/api/dream/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, analysis, device_id: getDeviceId(), dreamer: getDreamer() }),
+          body: JSON.stringify({
+            text, analysis,
+            device_id: getDeviceId(),
+            dreamer: getDreamer(),
+            audio_url: window.__pendingAudioUrl || null,
+          }),
         });
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -2674,21 +2704,27 @@
     function appendPermalinkPill(id, permalink) {
       const existing = statsEl.querySelector('.ar-permalink');
       if (existing) existing.remove();
+      const fullUrl = window.location.origin + permalink;
+      const titleEl = document.getElementById('dream-title');
+      const title = (titleEl && titleEl.textContent && titleEl.textContent.trim()) || 'A dream';
+      const subject = encodeURIComponent(title);
+      const body = encodeURIComponent(title + '\n\n' + fullUrl);
       const pill = document.createElement('div');
       pill.className = 'ar-permalink';
       pill.innerHTML = `
-        <span class="ar-pl-label">Saved to repository</span>
+        <span class="ar-pl-label">Share this dream</span>
         <code class="ar-pl-url">${permalink}</code>
         <button class="ar-pl-copy" type="button">Copy link</button>
+        <a class="ar-pl-share" href="sms:?body=${body}" target="_blank" rel="noopener">Text</a>
+        <a class="ar-pl-share" href="mailto:?subject=${subject}&body=${body}" target="_blank" rel="noopener">Email</a>
       `;
       statsEl.insertBefore(pill, statsEl.firstChild);
       pill.querySelector('.ar-pl-copy').addEventListener('click', async () => {
-        const url = window.location.origin + permalink;
         try {
-          await navigator.clipboard.writeText(url);
+          await navigator.clipboard.writeText(fullUrl);
           showToast('Link copied');
         } catch (_) {
-          showToast(url);
+          showToast(fullUrl);
         }
       });
     }
@@ -2782,6 +2818,10 @@
         }
         textareaEl.value = dream.text;
         textareaEl.readOnly = true; // no re-edit after the dream is saved
+        // Make audio replay available if the dream record has an audio URL
+        window.__loadedAudioUrl = dream.audio_url || null;
+        const playBtn = document.querySelector('[data-action="play-recording"]');
+        if (playBtn) playBtn.style.display = dream.audio_url ? '' : 'none';
         showDreamTitle(dream);
         if (dream.analysis) {
           renderAnalysis(dream.text, dream.analysis);

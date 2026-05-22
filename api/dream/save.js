@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const { text, analysis, device_id, dreamer } = req.body || {};
+  const { text, analysis, device_id, dreamer, audio_url } = req.body || {};
   if (!text || typeof text !== 'string' || text.trim().length < 20) {
     return res.status(400).json({ error: 'dream_too_short' });
   }
@@ -65,12 +65,22 @@ export default async function handler(req, res) {
     if (g || a) dreamerClean = { ...(g && { gender: g }), ...(a && { age: a }) };
   }
 
+  // Validate audio_url — must be a Vercel Blob URL (defensive: don't accept
+  // arbitrary user-supplied URLs that could be used for XSS or referer leaks).
+  let audioUrlClean = null;
+  if (typeof audio_url === 'string' &&
+      /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/audio\//i.test(audio_url) &&
+      audio_url.length < 500) {
+    audioUrlClean = audio_url;
+  }
+
   const record = {
     id,
     text: text.trim(),
     title: (analysis && typeof analysis.title === 'string' && analysis.title.trim()) || null,
     analysis: analysis || null,
     dreamer: dreamerClean,
+    audio_url: audioUrlClean,
     device_id: typeof device_id === 'string' ? device_id.slice(0, 64) : null,
     created_at: new Date().toISOString(),
     word_count: text.trim().split(/\s+/).length,
