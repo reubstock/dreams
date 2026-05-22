@@ -21,6 +21,9 @@
     --morpho-deep: #0a1f5c;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  /* ↑ HTML5 [hidden] attribute must beat any display rule in our cascade
+     (we set hidden=true via JS to swap loading / image / saved states) */
   html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
   body {
     font-family: 'Iowan Old Style', 'Charter', Georgia, serif;
@@ -1441,37 +1444,32 @@
   /* ============ DREAM PAGE — one dream, one page ============ */
   body.dream-page .example-only { display: none !important; }
   .dream-frame { display: block; }
-  /* Hero image at the TOP of the dream page, centered, full-width (cap 560px).
-     Capture banner sits below it. Image is the headline; user cannot miss it. */
+  /* Side-by-side: dream text on left, hero box on right.
+     The image replaces the loading state in-place inside that right box. */
   body.dream-page .dream-frame {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    align-items: start;
     margin-bottom: 32px;
   }
-  body.dream-page .hero-image {
-    order: -1; /* hero comes first regardless of DOM order */
-    margin: 0 auto 28px;
-    max-width: 560px;
-    width: 100%;
-  }
+  body.dream-page .capture { grid-column: 1; margin: 0; }
+  body.dream-page .hero-image { grid-column: 2; margin: 0; position: sticky; top: 16px; }
   body.dream-page .hero-image-frame {
-    max-width: 560px;
     width: 100%;
     aspect-ratio: 1 / 1;
     height: auto;
     border: 1px solid var(--ink);
-    margin: 0 auto;
   }
   body.dream-page .hero-caption {
-    max-width: 560px;
-    margin: 10px auto 0;
-    text-align: center;
+    margin: 10px 0 0;
+    text-align: left;
   }
-  body.dream-page .capture { margin: 0; }
-  @media (max-width: 720px) {
-    body.dream-page .hero-image,
-    body.dream-page .hero-image-frame,
-    body.dream-page .hero-caption { max-width: 100%; }
+  @media (max-width: 900px) {
+    body.dream-page .dream-frame {
+      grid-template-columns: 1fr;
+    }
+    body.dream-page .hero-image { grid-column: 1; position: static; }
   }
   body.dream-page .recent-feed-header-on-dream {
     margin-top: 48px; padding-top: 28px;
