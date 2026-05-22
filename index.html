@@ -141,12 +141,11 @@
     text-align: center;
     max-width: 280px;
   }
-  .hero-elapsed {
-    font-family: 'Didot', 'Bodoni 72', serif;
-    font-size: 26px; font-style: italic;
+  .hero-elapsed-inline {
     color: var(--rust-soft);
-    margin-top: 8px;
-    line-height: 1;
+    font-style: italic;
+    font-variant-numeric: tabular-nums;
+    margin-left: 6px;
   }
   .hero-reroll {
     position: absolute; bottom: 14px; right: 14px;
@@ -161,6 +160,15 @@
   }
   .hero-reroll:hover { background: var(--rust); border-color: var(--rust); }
   .hero-reroll:disabled { opacity: 0.5; cursor: not-allowed; }
+  .hero-saved-badge {
+    position: absolute; top: 14px; left: 14px;
+    background: rgba(13, 10, 4, 0.78); color: var(--paper);
+    border: 1px solid rgba(241, 234, 215, 0.3);
+    padding: 6px 12px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    backdrop-filter: blur(4px);
+  }
   .hero-caption {
     max-width: 720px; margin: 10px auto 0;
     font-family: ui-monospace, Menlo, monospace; font-size: 10px;
@@ -1823,11 +1831,11 @@
         <img id="hero-img" alt="Generated dream image" hidden>
         <div class="hero-loading" id="hero-loading" hidden>
           <div class="hero-spinner"></div>
-          <div class="hero-loading-text">Painting your dream…</div>
+          <div class="hero-loading-text" id="hero-loading-text">Painting your dream… <span class="hero-elapsed-inline" id="hero-elapsed">0:00</span></div>
           <div class="hero-loading-sub">gpt-image-1 · usually 20–30 seconds</div>
-          <div class="hero-elapsed" id="hero-elapsed">0:00</div>
         </div>
         <button class="hero-reroll" id="hero-reroll" type="button" hidden>↻ Re-roll</button>
+        <div class="hero-saved-badge" id="hero-saved-badge" hidden>Saved</div>
       </figure>
       <figcaption class="hero-caption" id="hero-caption" hidden></figcaption>
     </section>
@@ -2760,6 +2768,8 @@
         };
         img.src = dream.image_url;
         reroll.hidden = false;
+        const savedBadge = document.getElementById('hero-saved-badge');
+        if (savedBadge) savedBadge.hidden = false;
         if (caption && dream.image_prompt) {
           caption.textContent = dream.image_prompt;
           caption.hidden = false;
@@ -2772,20 +2782,28 @@
       img.hidden = true;
       loading.hidden = false;
       reroll.hidden = true;
-      if (loadingText) loadingText.textContent = opts.force ? 'Painting again…' : 'Painting your dream…';
-      if (loadingSub) loadingSub.textContent = 'gpt-image-1 · 20–30 seconds';
-      // Elapsed time counter — ticks every second so the wait feels measurable
-      const elapsedEl = document.getElementById('hero-elapsed');
+      const savedBadgeG = document.getElementById('hero-saved-badge');
+      if (savedBadgeG) savedBadgeG.hidden = true;
+      // Replace the whole loading-text with a rebuilt string that includes the elapsed counter.
+      // This way the timer can't be hidden or skipped — it lives inside the same line the user is looking at.
+      const verb = opts.force ? 'Painting again' : 'Painting your dream';
       const loadStart = Date.now();
-      if (elapsedEl) elapsedEl.textContent = '0:00';
-      const tickTimer = setInterval(() => {
-        const e = Math.floor((Date.now() - loadStart) / 1000);
+      function fmt(e) {
         const m = Math.floor(e / 60);
         const s = String(e % 60).padStart(2, '0');
-        if (elapsedEl) elapsedEl.textContent = `${m}:${s}`;
-        if (e === 45 && loadingSub) loadingSub.textContent = 'Taking a little longer — the model sometimes queues';
-        else if (e === 75 && loadingSub) loadingSub.textContent = 'Rate-limit retry in progress — hang on';
-      }, 1000);
+        return m + ':' + s;
+      }
+      function paintTick() {
+        const e = Math.floor((Date.now() - loadStart) / 1000);
+        if (loadingText) loadingText.innerHTML = verb + '… <span class=\"hero-elapsed-inline\">' + fmt(e) + '</span>';
+        if (loadingSub) {
+          if (e >= 75) loadingSub.textContent = 'Rate-limit retry in progress — hang on';
+          else if (e >= 45) loadingSub.textContent = 'Taking a little longer — the model sometimes queues';
+          else loadingSub.textContent = 'gpt-image-1 · 20–30 seconds';
+        }
+      }
+      paintTick();
+      const tickTimer = setInterval(paintTick, 1000);
       // (No phrase cycling — spinner + one phrase is the visual cue.)
 
       try {
