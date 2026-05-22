@@ -31,6 +31,27 @@ async function kv(path, body) {
   return res.json();
 }
 
+function getCookie(req, name) {
+  const cookies = req.headers.cookie || '';
+  const match = cookies.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]+)'));
+  return match ? match[1] : null;
+}
+
+async function getSignedInEmail(req) {
+  const token = getCookie(req, 'dreams_session');
+  if (!token || token.length > 200) return null;
+  try {
+    const r = await fetch(`${KV_URL}/get/session:${encodeURIComponent(token)}`, {
+      headers: { Authorization: `Bearer ${KV_TOKEN}` },
+    });
+    if (!r.ok) return null;
+    const { result } = await r.json();
+    if (!result) return null;
+    const session = typeof result === 'string' ? JSON.parse(result) : result;
+    return session.email || null;
+  } catch (_) { return null; }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -74,6 +95,9 @@ export default async function handler(req, res) {
     audioUrlClean = audio_url;
   }
 
+  // If the user is signed in, capture ownership
+  const ownerEmail = await getSignedInEmail(req);
+
   const record = {
     id,
     text: text.trim(),
@@ -81,6 +105,7 @@ export default async function handler(req, res) {
     analysis: analysis || null,
     dreamer: dreamerClean,
     audio_url: audioUrlClean,
+    owner_email: ownerEmail,
     device_id: typeof device_id === 'string' ? device_id.slice(0, 64) : null,
     created_at: new Date().toISOString(),
     word_count: text.trim().split(/\s+/).length,
@@ -96,10 +121,15 @@ export default async function handler(req, res) {
     if (record.device_id) {
       await kv(`lpush/device:${record.device_id}/${id}`);
     }
+    // If signed in, add to the user's personal library
+    if (ownerEmail) {
+      await kv(`lpush/user_dreams:${encodeURIComponent(ownerEmail)}/${id}`);
+    }
     return res.status(200).json({
       id,
       permalink: `/d/${id}`,
       created_at: record.created_at,
+      owner_email: ownerEmail,
     });
   } catch (err) {
     console.error('save failed:', err);

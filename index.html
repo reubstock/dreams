@@ -592,6 +592,127 @@
   .capture-cta:hover { background: #18120a; }
   .capture-cta:hover .capture-btn { background: var(--rust-soft); }
 
+  /* ============ AUTH UI (sign in, library, recipient prompt) ============ */
+  .auth-slot {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 4px;
+    text-align: right;
+  }
+  .auth-slot a, .auth-slot button { color: var(--rust); cursor: pointer; }
+  .auth-link {
+    background: transparent; border: none; padding: 0;
+    color: var(--rust);
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    border-bottom: 1px solid var(--rust);
+    padding-bottom: 1px;
+  }
+  .auth-link:hover { color: var(--rust-deep); border-color: var(--rust-deep); }
+  .auth-email {
+    color: var(--ink); border-bottom: 1px dotted var(--ink-2); padding-bottom: 1px;
+  }
+  .auth-sep { color: var(--muted); margin: 0 6px; }
+
+  /* Sign-in modal */
+  #signin-modal .modal-help { margin-bottom: 22px; }
+  #signin-modal input[type="email"] {
+    width: 100%; padding: 12px 14px; font-size: 16px;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    border: 1px solid var(--ink); background: var(--paper);
+    color: var(--ink); outline: none;
+  }
+  #signin-modal input[type="email"]:focus { border-color: var(--rust); }
+  .signin-success {
+    background: var(--paper-2); border: 1px solid var(--rust-soft);
+    padding: 18px 20px; margin-top: 18px;
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 15px;
+    color: var(--ink); line-height: 1.5;
+    display: none;
+  }
+  .signin-success.shown { display: block; }
+  .signin-success b { color: var(--rust); }
+
+  /* Library view */
+  .library-section { display: none; padding: 32px 0; }
+  body.library-page .library-section { display: block; }
+  body.library-page .example-only,
+  body.library-page .dream-frame,
+  body.library-page .recent-feed,
+  body.library-page .recent-foot,
+  body.library-page .capture-cta,
+  body.library-page .relatives-header,
+  body.library-page .relatives-grid,
+  body.library-page .reading-block,
+  body.library-page .dream-title-section { display: none !important; }
+  .library-kicker {
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--rust);
+    margin-bottom: 10px;
+  }
+  .library-title {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 56px; font-style: italic; font-weight: 400;
+    line-height: 1.05; margin: 0 0 24px;
+    color: var(--ink);
+  }
+  .library-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px;
+    margin-bottom: 32px;
+  }
+  .library-empty {
+    border: 1px dashed var(--ink-2); padding: 32px 24px;
+    text-align: center; color: var(--muted);
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 15.5px;
+  }
+  .library-card {
+    border: 1px solid var(--ink); background: var(--paper);
+    cursor: pointer; transition: transform 0.12s, box-shadow 0.15s;
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+  }
+  .library-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(13, 10, 4, 0.12); }
+  .library-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; background: var(--paper-2); }
+  .library-card .lc-body { padding: 14px 16px; }
+  .library-card .lc-title {
+    font-family: 'Didot', serif; font-size: 20px; font-style: italic;
+    line-height: 1.15; color: var(--ink); margin-bottom: 8px;
+  }
+  .library-card .lc-meta {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* Recipient prompt on shared dream pages */
+  .recipient-prompt {
+    display: none;
+    background: var(--ink); color: var(--paper);
+    padding: 18px 22px; margin-bottom: 24px;
+    border: 1px solid var(--rust);
+    align-items: center; justify-content: space-between;
+    gap: 18px; flex-wrap: wrap;
+  }
+  body.dream-page .recipient-prompt.shown { display: flex; }
+  .recipient-prompt-text {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 17px; font-style: italic; line-height: 1.4;
+  }
+  .recipient-prompt-text em { color: var(--rust-soft); }
+  .recipient-prompt button {
+    background: var(--rust); color: var(--paper); border: none;
+    padding: 12px 22px; cursor: pointer;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .recipient-prompt button:hover { background: var(--rust-soft); }
+
+  @media (max-width: 720px) {
+    .library-grid { grid-template-columns: 1fr; }
+    .library-title { font-size: 36px; }
+  }
+
   /* ============ MASTHEAD ============ */
   .masthead {
     border-bottom: 2px solid var(--ink);
@@ -1731,8 +1852,10 @@
         <div class="brand">Discover people who <i>share your dreams.</i></div>
       </a>
       <div class="masthead-meta">
-        <div><b>DREAM 0001</b> · SUBJECT 0341</div>
-        <div>2026 · 05 · 20 · 87 WORDS</div>
+        <div class="auth-slot" id="auth-slot">
+          <button class="auth-link" data-action="open-signin">Sign in</button>
+        </div>
+        <div class="masthead-id"><b>DREAM 0001</b> · SUBJECT 0341</div>
       </div>
     </header>
     <div class="sub-bar">
@@ -1862,6 +1985,21 @@
         </div>
       </div>
     </section>
+
+    <!-- =================== LIBRARY (signed-in user's dreams, only on /library) =================== -->
+    <section class="library-section" id="library-section">
+      <div class="library-kicker" id="library-kicker">Your library</div>
+      <h1 class="library-title">Your dreams.</h1>
+      <div id="library-grid"></div>
+    </section>
+
+    <!-- =================== RECIPIENT PROMPT (on /d/:id when not signed in) =================== -->
+    <div class="recipient-prompt" id="recipient-prompt">
+      <div class="recipient-prompt-text">
+        Someone shared their dream with you. <em>Record yours</em> and the system finds dreams that share patterns with it.
+      </div>
+      <button data-action="open-signin">Sign in to start</button>
+    </div>
 
     <!-- =================== HERO IMAGE (dream pages only) =================== -->
     <section class="hero-image" id="hero-image" hidden>
@@ -2103,6 +2241,32 @@
       </button>
     </section></div>
 
+  <!-- =================== SIGN-IN MODAL =================== -->
+  <div class="modal-backdrop" id="signin-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="signin-title">
+      <button class="modal-close" aria-label="Close" data-action="close-signin">×</button>
+      <h2 id="signin-title">Sign in.</h2>
+      <div class="modal-sub">No password · we'll email you a link</div>
+      <div class="modal-help">
+        Enter your email and we'll send you a one-click sign-in link.
+        Your dreams will be tied to your email so you can find them on any
+        device. New here? Same flow — entering your email creates your account.
+      </div>
+      <form id="signin-form" novalidate>
+        <input type="email" id="signin-email" placeholder="you@example.com" autocomplete="email" required>
+        <div class="modal-actions">
+          <button class="btn" type="button" data-action="close-signin">Cancel</button>
+          <button class="btn primary" type="submit" id="signin-submit">Send link</button>
+        </div>
+      </form>
+      <div class="signin-success" id="signin-success">
+        Check your inbox at <b id="signin-success-email"></b>. The link expires in 30 minutes.
+        <br><br>
+        <small style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.04em; color: var(--muted);">If you don't see it, check spam. We send from onboarding@resend.dev.</small>
+      </div>
+    </div>
+  </div>
+
   <!-- =================== NEIGHBOR MODAL =================== -->
   <div class="modal-backdrop" id="neighbor-modal" aria-hidden="true">
     <div class="modal" role="dialog" aria-labelledby="nm-id">
@@ -2311,6 +2475,180 @@
   window.addEventListener('beforeunload', () => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   });
+
+  // ============ Auth state, sign-in modal, library, recipient prompt ============
+  const authState = { signedIn: false, email: null };
+
+  function escapeHtmlAuth(s) {
+    return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function refreshAuth() {
+    try {
+      const r = await fetch('/api/auth/me');
+      if (!r.ok) return;
+      const data = await r.json();
+      authState.signedIn = !!data.signed_in;
+      authState.email = data.email || null;
+      renderAuthSlot();
+      maybeShowRecipientPrompt();
+    } catch (_) {}
+  }
+
+  function renderAuthSlot() {
+    const slot = document.getElementById('auth-slot');
+    if (!slot) return;
+    if (authState.signedIn) {
+      slot.innerHTML = `
+        <a class="auth-email" href="/library">${escapeHtmlAuth(authState.email)}</a>
+        <span class="auth-sep">·</span>
+        <button class="auth-link" data-action="signout">Sign out</button>
+      `;
+    } else {
+      slot.innerHTML = `<button class="auth-link" data-action="open-signin">Sign in</button>`;
+    }
+  }
+
+  const signinModal = document.getElementById('signin-modal');
+  const signinForm = document.getElementById('signin-form');
+  const signinEmail = document.getElementById('signin-email');
+  const signinSubmit = document.getElementById('signin-submit');
+  const signinSuccess = document.getElementById('signin-success');
+  const signinSuccessEmail = document.getElementById('signin-success-email');
+
+  function openSignin() {
+    if (!signinModal) return;
+    signinSuccess.classList.remove('shown');
+    if (signinForm) signinForm.style.display = '';
+    signinModal.classList.add('open');
+    signinModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => signinEmail?.focus(), 80);
+  }
+  function closeSignin() {
+    if (!signinModal) return;
+    signinModal.classList.remove('open');
+    signinModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (signinForm) {
+    signinForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = (signinEmail.value || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast('Enter a valid email');
+        return;
+      }
+      const orig = signinSubmit.textContent;
+      signinSubmit.disabled = true;
+      signinSubmit.textContent = 'Sending…';
+      try {
+        const r = await fetch('/api/auth/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          showToast(data.message || 'Could not send sign-in email');
+          return;
+        }
+        signinSuccessEmail.textContent = data.email || email;
+        signinSuccess.classList.add('shown');
+        signinForm.style.display = 'none';
+      } finally {
+        signinSubmit.disabled = false;
+        signinSubmit.textContent = orig;
+      }
+    });
+  }
+
+  if (signinModal) {
+    signinModal.addEventListener('click', (e) => { if (e.target === signinModal) closeSignin(); });
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    if (action === 'open-signin') openSignin();
+    else if (action === 'close-signin') closeSignin();
+    else if (action === 'signout') signOut();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && signinModal && signinModal.classList.contains('open')) closeSignin();
+  });
+
+  async function signOut() {
+    try { await fetch('/api/auth/signout', { method: 'POST' }); } catch (_) {}
+    authState.signedIn = false;
+    authState.email = null;
+    renderAuthSlot();
+    showToast('Signed out');
+    if (window.location.pathname === '/library') window.location.href = '/';
+  }
+
+  function maybeShowRecipientPrompt() {
+    const isDreamPage = /^\/d\//.test(window.location.pathname);
+    const prompt = document.getElementById('recipient-prompt');
+    if (!prompt || !isDreamPage) return;
+    if (!authState.signedIn) prompt.classList.add('shown');
+    else prompt.classList.remove('shown');
+  }
+
+  async function maybeLoadLibrary() {
+    if (window.location.pathname !== '/library') return;
+    document.body.classList.add('library-page');
+    const grid = document.getElementById('library-grid');
+    const kicker = document.getElementById('library-kicker');
+    if (!grid) return;
+    if (!authState.signedIn) {
+      grid.innerHTML = `<div class="library-empty">Sign in to see your dreams. <button class="auth-link" data-action="open-signin" style="margin-left: 12px;">Sign in</button></div>`;
+      return;
+    }
+    if (kicker) kicker.textContent = authState.email;
+    try {
+      const r = await fetch('/api/user/dreams');
+      if (!r.ok) {
+        grid.innerHTML = `<div class="library-empty">Couldn't load your dreams.</div>`;
+        return;
+      }
+      const { dreams } = await r.json();
+      if (!dreams || dreams.length === 0) {
+        grid.innerHTML = `<div class="library-empty">No dreams yet. <a class="auth-link" href="/" style="margin-left: 12px;">Record your first</a></div>`;
+        return;
+      }
+      grid.className = 'library-grid';
+      grid.innerHTML = dreams.map((d) => {
+        const fb = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
+        const title = (d.title && d.title.trim()) || (fb ? fb + '…' : 'Untitled');
+        const img = d.image_url ? `<img src="${escapeHtmlAuth(d.image_url)}" alt="" loading="lazy">` : '';
+        const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : '';
+        return `<a class="library-card" href="/d/${escapeHtmlAuth(d.id)}">
+          ${img}
+          <div class="lc-body">
+            <div class="lc-title">${escapeHtmlAuth(title)}</div>
+            <div class="lc-meta">${escapeHtmlAuth(created)} · ${d.morph_count || 0} morphs</div>
+          </div>
+        </a>`;
+      }).join('');
+    } catch (err) {
+      grid.innerHTML = `<div class="library-empty">${escapeHtmlAuth(err.message || 'Error')}</div>`;
+    }
+  }
+
+  (function consumeAuthQuery() {
+    const m = window.location.search.match(/[?&]auth=(\w+)/);
+    if (!m) return;
+    const s = m[1];
+    if (s === 'ok') showToast('Signed in');
+    else if (s === 'expired') showToast('Sign-in link expired');
+    else if (s === 'invalid') showToast('Sign-in link invalid');
+    history.replaceState(null, '', window.location.pathname + window.location.hash);
+  })();
+
+  refreshAuth().then(maybeLoadLibrary);
 
   // ============ Voice capture (record → Whisper → dream record) ============
   // Pipeline:
