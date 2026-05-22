@@ -564,11 +564,14 @@
     padding: 64px 0 48px;
     border-bottom: 1px solid var(--ink);
     display: grid;
-    grid-template-columns: 1fr 200px;
+    grid-template-columns: 200px 1fr;
     gap: 48px;
-    align-items: start;
   }
-  .headline-text { min-width: 0; }
+  .headline-text {
+    min-width: 0;
+    grid-column: 2;
+    align-self: start;
+  }
   .kicker {
     font-family: ui-monospace, Menlo, monospace; font-size: 11px;
     letter-spacing: 0.24em; text-transform: uppercase; color: var(--rust);
@@ -592,8 +595,10 @@
 
   /* hero icon */
   .dream-icon-wrap {
-    display: flex; flex-direction: column; align-items: flex-end;
-    padding-top: 6px;
+    display: flex; flex-direction: column; align-items: flex-start;
+    grid-column: 1;
+    align-self: end;
+    padding-top: 0;
   }
   .dream-icon {
     width: 200px; height: auto; display: block;
@@ -607,7 +612,7 @@
   .dream-icon-caption {
     font-family: ui-monospace, Menlo, monospace; font-size: 10px;
     letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
-    text-align: right; line-height: 1.6; margin-top: 14px;
+    text-align: left; line-height: 1.6; margin-top: 14px;
     max-width: 200px;
   }
   .dream-icon-caption b { color: var(--ink); font-weight: 600; }
@@ -1466,7 +1471,7 @@
     .morph:nth-last-child(-n+4) { border-bottom: 1px solid var(--ink); }
     .morph:nth-last-child(-n+2) { border-bottom: none; }
     .reading-block { margin: 64px -32px 0; padding: 48px 32px; }
-    .headline-block { grid-template-columns: 1fr 160px; gap: 32px; }
+    .headline-block { grid-template-columns: 160px 1fr; gap: 32px; }
     .relatives-grid { grid-template-columns: repeat(2, 1fr); }
     .dream-icon { width: 160px; }
     .dream-icon-caption { max-width: 160px; }
