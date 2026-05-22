@@ -1,0 +1,87 @@
+// POST /api/dream/save
+// Body: { text, analysis, device_id }
+// Saves a dream record to Upstash Redis (Vercel KV) and returns { id, permalink }.
+//
+// Schema:
+//   dream:{id}           → JSON of the full record
+//   dreams:recent        → Redis LIST of recent IDs (newest first, capped at 200)
+//   device:{deviceId}    → Redis LIST of that device's dream IDs (no cap)
+
+import crypto from 'node:crypto';
+
+export const config = { api: { bodyParser: true }, maxDuration: 10 };
+
+const KV_URL = process.env.KV_REST_API_URL;
+const KV_TOKEN = process.env.KV_REST_API_TOKEN;
+
+async function kv(path, body) {
+  const opts = {
+    method: body !== undefined ? 'POST' : 'GET',
+    headers: { Authorization: `Bearer ${KV_TOKEN}` },
+  };
+  if (body !== undefined) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = typeof body === 'string' ? body : JSON.stringify(body);
+  }
+  const res = await fetch(`${KV_URL}/${path}`, opts);
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`KV ${path} → ${res.status}: ${t.slice(0, 200)}`);
+  }
+  return res.json();
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
+
+  if (!KV_URL || !KV_TOKEN) {
+    return res.status(503).json({
+      error: 'storage_not_configured',
+      message: 'Connect a Redis store on Vercel and redeploy.',
+    });
+  }
+
+  const { text, analysis, device_id } = req.body || {};
+  if (!text || typeof text !== 'string' || text.trim().length < 20) {
+    return res.status(400).json({ error: 'dream_too_short' });
+  }
+  if (text.length > 8000) {
+    return res.status(413).json({ error: 'dream_too_long' });
+  }
+
+  // Generate URL-safe 11-char ID (~2^48 entropy)
+  const id = crypto.randomBytes(8).toString('base64url');
+
+  const record = {
+    id,
+    text: text.trim(),
+    analysis: analysis || null,
+    device_id: typeof device_id === 'string' ? device_id.slice(0, 64) : null,
+    created_at: new Date().toISOString(),
+    word_count: text.trim().split(/\s+/).length,
+  };
+
+  try {
+    // Set the dream record (Upstash REST: send value as JSON string in body)
+    await kv(`set/dream:${id}`, JSON.stringify(record));
+    // Add to global recent list (newest first, cap at 200)
+    await kv(`lpush/dreams:recent/${id}`);
+    await kv(`ltrim/dreams:recent/0/199`);
+    // Add to per-device list (no cap)
+    if (record.device_id) {
+      await kv(`lpush/device:${record.device_id}/${id}`);
+    }
+    return res.status(200).json({
+      id,
+      permalink: `/d/${id}`,
+      created_at: record.created_at,
+    });
+  } catch (err) {
+    console.error('save failed:', err);
+    return res.status(500).json({ error: 'save_failed', message: err.message });
+  }
+}

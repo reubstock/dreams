@@ -277,6 +277,32 @@
     letter-spacing: 0.16em; text-transform: uppercase;
     color: rgba(241, 234, 215, 0.4);
   }
+  .ar-permalink {
+    background: rgba(216, 122, 62, 0.12);
+    border: 1px solid var(--rust-soft);
+    padding: 12px 14px;
+    margin: 14px 0 18px;
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .ar-pl-label {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--rust-soft);
+  }
+  .ar-pl-url {
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+    color: var(--paper); background: transparent;
+    padding: 0;
+    flex: 1; word-break: break-all;
+  }
+  .ar-pl-copy {
+    background: var(--rust-soft); color: var(--ink);
+    border: none; padding: 6px 12px; cursor: pointer;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .ar-pl-copy:hover { background: var(--paper); }
 
 
   /* ============ RECENT DREAMS FEED ============ */
@@ -1675,7 +1701,7 @@
       <div class="title">Recent dreams from the repository</div>
       <div class="rule"></div>
     </div>
-    <div class="recent-feed">
+    <div class="recent-feed" id="recent-feed">
       <article class="recent-dream">
         <div class="rd-meta">
           <span class="rd-id">#4012</span>
@@ -2259,6 +2285,74 @@
         localStorage.setItem('dreams:records', JSON.stringify(records));
       } catch (_) {}
       showToast('Saved · ' + (a.pattern_name || words + ' words'));
+
+      // Persist to server (Redis via Upstash) so the dream gets a permalink
+      // and joins the public "recent dreams" feed.
+      saveToServer(text, a).then((saved) => {
+        if (saved && saved.id) {
+          appendPermalinkPill(saved.id, saved.permalink);
+          // Track our own dream IDs locally so /library (step 4) can list them
+          try {
+            const mine = JSON.parse(localStorage.getItem('dreams:my_ids') || '[]');
+            mine.push(saved.id);
+            localStorage.setItem('dreams:my_ids', JSON.stringify(mine));
+          } catch (_) {}
+          // Refresh the public feed so this dream shows up immediately
+          loadRecentDreams();
+        }
+      });
+    }
+
+    function getDeviceId() {
+      let id = localStorage.getItem('dreams:device_id');
+      if (!id) {
+        id = (window.crypto && window.crypto.randomUUID)
+          ? window.crypto.randomUUID()
+          : 'dev-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('dreams:device_id', id);
+      }
+      return id;
+    }
+
+    async function saveToServer(text, analysis) {
+      try {
+        const res = await fetch('/api/dream/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, analysis, device_id: getDeviceId() }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          console.warn('Save to server failed:', data);
+          return null;
+        }
+        return await res.json();
+      } catch (err) {
+        console.warn('Save to server error:', err);
+        return null;
+      }
+    }
+
+    function appendPermalinkPill(id, permalink) {
+      const existing = statsEl.querySelector('.ar-permalink');
+      if (existing) existing.remove();
+      const pill = document.createElement('div');
+      pill.className = 'ar-permalink';
+      pill.innerHTML = `
+        <span class="ar-pl-label">Saved to repository</span>
+        <code class="ar-pl-url">${permalink}</code>
+        <button class="ar-pl-copy" type="button">Copy link</button>
+      `;
+      statsEl.insertBefore(pill, statsEl.firstChild);
+      pill.querySelector('.ar-pl-copy').addEventListener('click', async () => {
+        const url = window.location.origin + permalink;
+        try {
+          await navigator.clipboard.writeText(url);
+          showToast('Link copied');
+        } catch (_) {
+          showToast(url);
+        }
+      });
     }
 
     capture.addEventListener('click', (e) => {
@@ -2272,7 +2366,87 @@
       else if (action === 'discard-recording') discardRecording();
       else if (action === 'reset-capture') setState('idle');
     });
+
+    // ============ Permalink loader — when URL is /d/:id ============
+    (async function loadDreamFromUrl() {
+      const m = window.location.pathname.match(/^\/d\/([A-Za-z0-9_-]{8,20})/);
+      if (!m) return;
+      const id = m[1];
+      setState('transcribing');
+      try {
+        const res = await fetch('/api/dream/' + id);
+        if (!res.ok) {
+          showError('Dream not found', 'No dream is saved at this URL. It may have been removed, or the link is wrong.');
+          return;
+        }
+        const { dream } = await res.json();
+        if (!dream || !dream.text) {
+          showError('Empty dream', 'This URL resolves but the dream record has no text.');
+          return;
+        }
+        textareaEl.value = dream.text;
+        if (dream.analysis) {
+          renderAnalysis(dream.text, dream.analysis);
+          // Show the permalink pill on a loaded dream too
+          appendPermalinkPill(dream.id, '/d/' + dream.id);
+        }
+        setState('done');
+      } catch (err) {
+        showError('Could not load this dream', err.message || String(err));
+      }
+    })();
   }
+
+  // ============ Recent dreams feed — populate from /api/dreams/recent ============
+  async function loadRecentDreams() {
+    const feed = document.getElementById('recent-feed');
+    if (!feed) return;
+    try {
+      const r = await fetch('/api/dreams/recent?limit=8');
+      if (!r.ok) return; // silently keep static placeholders
+      const { dreams } = await r.json();
+      if (!Array.isArray(dreams) || dreams.length === 0) return;
+
+      const fmtAgo = (iso) => {
+        const ms = Date.now() - new Date(iso).getTime();
+        const m = Math.round(ms / 60000);
+        if (m < 1) return 'just now';
+        if (m < 60) return m + 'm ago';
+        const h = Math.round(m / 60);
+        if (h < 24) return h + 'h ago';
+        const d = Math.round(h / 24);
+        return d + 'd ago';
+      };
+      const escapeHTML = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+      feed.innerHTML = dreams.map((d) => {
+        const pattern = d.pattern_name ? d.pattern_name.toUpperCase() : 'UNCATEGORIZED';
+        const preview = d.text_preview.length >= 200 ? d.text_preview + '…' : d.text_preview;
+        const morphs = d.morph_count || 0;
+        const words = d.word_count || 0;
+        return `
+          <article class="recent-dream" data-href="/d/${escapeHTML(d.id)}">
+            <div class="rd-meta">
+              <span class="rd-id">#${escapeHTML(d.id).slice(0, 6)}</span>
+              <span class="rd-pattern">${escapeHTML(pattern)}</span>
+            </div>
+            <div class="rd-text">"${escapeHTML(preview)}"</div>
+            <div class="rd-foot">${fmtAgo(d.created_at)} · ${words} words · ${morphs} morph${morphs === 1 ? '' : 's'}</div>
+          </article>`;
+      }).join('');
+
+      // Cards navigate to the saved dream's permalink
+      feed.querySelectorAll('.recent-dream[data-href]').forEach((card) => {
+        card.addEventListener('click', () => {
+          window.location.href = card.dataset.href;
+        });
+      });
+    } catch (err) {
+      // Network or parse error — leave placeholders
+      console.warn('Could not load recent dreams:', err);
+    }
+  }
+  loadRecentDreams();
 
   // ============ Bottom CTA → scroll to top capture ============
   document.querySelectorAll('[data-action="scroll-to-capture"]').forEach((el) => {
