@@ -1238,6 +1238,14 @@
   }
   .toast.shown { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ============ DREAM PAGE — one dream, one page ============ */
+  body.dream-page .example-only { display: none !important; }
+  body.dream-page .capture { margin-bottom: 32px; }
+  body.dream-page .recent-feed-header-on-dream {
+    margin-top: 48px; padding-top: 28px;
+    border-top: 1px solid var(--ink);
+  }
+
   /* ============ RESPONSIVE ============ */
   @media (max-width: 1024px) {
     .container { padding: 0 32px; }
@@ -1524,7 +1532,7 @@
     </section>
 
     <!-- =================== HEADLINE =================== -->
-    <section class="headline-block">
+    <section class="headline-block example-only">
       <div class="headline-text">
         <div class="kicker">Example diagnosis · Dream 0001</div>
         <h1 class="pattern">A dream of <em>metamorphoses.</em></h1>
@@ -1550,12 +1558,12 @@
     </section>
 
     <!-- =================== SOURCE =================== -->
-    <div class="section-head">
+    <div class="section-head example-only">
       <div class="num">i.</div>
       <div class="title">Example dream — Subject 0341, annotated</div>
       <div class="rule"></div>
     </div>
-    <div class="source-grid">
+    <div class="source-grid example-only">
       <div class="source-text">
         I was in my childhood house but
         <mark data-n="1">the rooms were all wrong</mark>.
@@ -1572,11 +1580,11 @@
     </div>
 
     <!-- =================== CULTURAL RELATIVES =================== -->
-    <div class="relatives-header">
+    <div class="relatives-header example-only">
       <div class="relatives-label">Cultural relatives</div>
       <div class="relatives-sub">each unusual element in your dream has a documented predecessor</div>
     </div>
-    <div class="relatives-grid">
+    <div class="relatives-grid example-only">
 
       <figure class="relative-card" data-mark="3">
         <div class="rel-img">
@@ -1617,7 +1625,7 @@
         </figcaption>
       </figure>
     </div><!-- =================== READING =================== -->
-    <div class="reading-block">
+    <div class="reading-block example-only">
       <div class="kicker">Reading</div>
 
       <div class="lens-player">
@@ -1659,11 +1667,11 @@
     </div>
 
     <!-- =================== DATABASE =================== -->
-    <div class="section-head">
+    <div class="section-head example-only">
       <div class="num">ii.</div>
       <div class="title">People who dreamed like you</div>
       <div class="rule"></div>
-    </div><div class="neighbor-card" id="neighbor-anchor" role="button" tabindex="0" data-neighbor="4012" aria-label="Open neighbor dream 4012">
+    </div><div class="neighbor-card example-only" id="neighbor-anchor" role="button" tabindex="0" data-neighbor="4012" aria-label="Open neighbor dream 4012">
       <div>
         <div class="nc-tag">Similar dream · #1</div>
         <div class="nc-id">#4012</div>
@@ -1673,7 +1681,7 @@
         <div class="nc-meta">F · 32 · cosine sim 0.81 · cluster: SYMBOL_FAILURE + URGENCY_NO_OBJECT</div>
       </div>
     </div>
-    <div class="neighbor-card extra" role="button" tabindex="0" data-neighbor="7194" aria-label="Open neighbor dream 7194">
+    <div class="neighbor-card extra example-only" role="button" tabindex="0" data-neighbor="7194" aria-label="Open neighbor dream 7194">
       <div>
         <div class="nc-tag">Similar dream · #2</div>
         <div class="nc-id">#7194</div>
@@ -1683,7 +1691,7 @@
         <div class="nc-meta">M · 41 · cosine sim 0.77 · cluster: PARENT_AGE_INVERSION + SYMBOL_FAILURE</div>
       </div>
     </div>
-    <div class="neighbor-card extra" role="button" tabindex="0" data-neighbor="2856" aria-label="Open neighbor dream 2856">
+    <div class="neighbor-card extra example-only" role="button" tabindex="0" data-neighbor="2856" aria-label="Open neighbor dream 2856">
       <div>
         <div class="nc-tag">Similar dream · #3</div>
         <div class="nc-id">#2856</div>
@@ -1738,13 +1746,13 @@
     <div class="recent-foot">→ all dreams (coming soon)</div>
 
     <!-- =================== HISTORICAL DREAMER =================== -->
-    <div class="section-head">
+    <div class="section-head example-only">
       <div class="num">iv.</div>
       <div class="title">Closest historical dreamer</div>
       <div class="rule"></div>
     </div>
 
-    <div class="dreamer-card">
+    <div class="dreamer-card example-only">
       <div class="dreamer-portrait has-photo">
         <img class="dreamer-photo" id="kafka-photo" alt="Franz Kafka" loading="lazy">
         <div class="dreamer-monogram"><i>FK</i></div>
@@ -2290,15 +2298,14 @@
       // and joins the public "recent dreams" feed.
       saveToServer(text, a).then((saved) => {
         if (saved && saved.id) {
-          appendPermalinkPill(saved.id, saved.permalink);
           // Track our own dream IDs locally so /library (step 4) can list them
           try {
             const mine = JSON.parse(localStorage.getItem('dreams:my_ids') || '[]');
             mine.push(saved.id);
             localStorage.setItem('dreams:my_ids', JSON.stringify(mine));
           } catch (_) {}
-          // Refresh the public feed so this dream shows up immediately
-          loadRecentDreams();
+          // Redirect to the dream's own page — one dream, one page
+          window.location.href = saved.permalink;
         }
       });
     }
@@ -2371,6 +2378,7 @@
     (async function loadDreamFromUrl() {
       const m = window.location.pathname.match(/^\/d\/([A-Za-z0-9_-]{8,20})/);
       if (!m) return;
+      document.body.classList.add('dream-page'); // hide example sections
       const id = m[1];
       setState('transcribing');
       try {
