@@ -24,6 +24,29 @@ async function kvGet(key) {
   return typeof result === 'string' ? JSON.parse(result) : result;
 }
 
+const RESERVED_HANDLES = new Set([
+  'admin', 'api', 'auth', 'd', 'dreams', 'inbox', 'library', 'login', 'logout',
+  'me', 'new', 'profile', 'settings', 'signin', 'signout', 'signup', 'u', 'user',
+  'about', 'help', 'home', 'public', 'static', 'images', 'assets', 'support',
+  'mail', 'message', 'messages', 'team', 'root',
+]);
+
+async function pickHandle(email) {
+  const base = (email.split('@')[0] || 'dreamer')
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '')
+    .replace(/^[-_]+/, '')
+    .slice(0, 20) || 'dreamer';
+  const candidates = [base, ...Array.from({ length: 30 }, (_, i) => `${base}${i + 1}`)];
+  for (const cand of candidates) {
+    if (cand.length < 3) continue;
+    if (RESERVED_HANDLES.has(cand)) continue;
+    const taken = await kvGet(`handle:${cand}`);
+    if (!taken) return cand;
+  }
+  return `${base}-${Math.random().toString(36).slice(2, 6)}`.slice(0, 24);
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   const token = getCookie(req, 'dreams_session');
@@ -37,7 +60,30 @@ export default async function handler(req, res) {
   }
 
   // Also fetch user record for selfie + handle + display name
-  const user = (await kvGet(`user:${session.email}`)) || {};
+  let user = (await kvGet(`user:${session.email}`)) || {};
+
+  // Lazy handle-backfill: any existing user without a handle gets one assigned
+  // on their next /api/auth/me call. The verify.js path only fires on sign-in,
+  // which excludes users who were created before the handle system existed.
+  if (!user.handle) {
+    const handle = await pickHandle(session.email);
+    if (handle) {
+      user.email = user.email || session.email;
+      user.handle = handle;
+      if (!user.display_name) user.display_name = session.email.split('@')[0];
+      user.created_at = user.created_at || new Date().toISOString();
+      await fetch(`${KV_URL}/set/user:${encodeURIComponent(session.email)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
+      });
+      await fetch(`${KV_URL}/set/handle:${encodeURIComponent(handle)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(session.email),
+      });
+    }
+  }
 
   // Pull unread inbox count (best-effort; never block the auth response on it)
   let unread_count = 0;
