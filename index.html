@@ -1740,13 +1740,17 @@
     }
     body.dream-page .masthead { order: 0; }
     body.dream-page .dream-frame { order: 1; margin-top: 8px; }
+    /* Prev/next nav sits right under the picture on mobile so you can
+       swipe through the global feed without scrolling past the entire
+       analysis first. */
+    body.dream-page #prev-next-nav { order: 2; margin-top: 16px; }
     body.dream-page .dream-title-section {
-      order: 2;
+      order: 3;
       padding-top: 20px;
       margin-bottom: 20px;
     }
     /* Everything else after the title (analysis stats, source, recent feed,
-       historical dreamer, footer) — push to order: 3+ so they all stay below.
+       historical dreamer, footer) — push to order: 4+ so they all stay below.
        Using a high number ensures unknown siblings still render after the
        priority blocks above. */
     body.dream-page .stats,
@@ -1754,7 +1758,7 @@
     body.dream-page .recent-feed-header-on-dream,
     body.dream-page section.example-only,
     body.dream-page footer,
-    body.dream-page .historical-dreamer { order: 3; }
+    body.dream-page .historical-dreamer { order: 4; }
 
     /* Inside .dream-frame: hero image first, then transcript */
     body.dream-page .dream-frame {
