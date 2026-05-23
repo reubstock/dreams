@@ -282,27 +282,34 @@ export default async function handler(req, res) {
     ? requestDreamer
     : dream.dreamer || null;
 
-  // Selfie lookup for face-swap. Priority order:
-  //   1. dream.owner_email (the dream's saved owner)
-  //   2. The current requester's session email — handles dreams created before
-  //      the user signed in (owner_email is null) and ensures the re-rolling
-  //      user's face is used.
-  // If the dream is unclaimed and the requester is signed in, we also stamp
-  // ownership on the record so the next view shows their handle.
-  let selfieUrl = null;
+  // Owner-only gate: only the dreamer can generate or re-roll their image.
+  // Costs real money (gpt-image-1 + Replicate) and only the dreamer should
+  // have control over how their dream is depicted.
   const requesterEmail = await getRequesterEmail(req);
-  const lookupEmail = dream.owner_email || requesterEmail;
-  if (lookupEmail) {
-    try {
-      const user = await kvGetRaw(`user:${lookupEmail}`);
-      if (user?.selfie_url) selfieUrl = user.selfie_url;
-    } catch (err) {
-      console.warn('Selfie lookup failed:', err.message);
+  if (dream.owner_email) {
+    if (!requesterEmail) {
+      return res.status(401).json({ error: 'sign_in_required', message: 'Sign in to generate or re-roll this image.' });
     }
-  }
-  // Claim orphan dreams (owner_email null) as the requester's
-  if (!dream.owner_email && requesterEmail) {
+    if (requesterEmail.toLowerCase() !== dream.owner_email.toLowerCase()) {
+      return res.status(403).json({ error: 'not_owner', message: 'Only the dreamer can re-roll this image.' });
+    }
+  } else {
+    // Orphan dream (no owner stamped). Require sign-in and claim it for the
+    // requester so future re-rolls are gated to the same person.
+    if (!requesterEmail) {
+      return res.status(401).json({ error: 'sign_in_required', message: 'Sign in to generate the image for this dream.' });
+    }
     dream.owner_email = requesterEmail;
+  }
+
+  // Selfie lookup for face-swap. We already verified ownership above, so
+  // we look up the owner's selfie.
+  let selfieUrl = null;
+  try {
+    const user = await kvGetRaw(`user:${dream.owner_email}`);
+    if (user?.selfie_url) selfieUrl = user.selfie_url;
+  } catch (err) {
+    console.warn('Selfie lookup failed:', err.message);
   }
   const willFaceSwap = !!(selfieUrl && REPLICATE_TOKEN);
 

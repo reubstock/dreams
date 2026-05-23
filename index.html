@@ -4112,8 +4112,14 @@
         ? `<span>Dreamed by <a href="/u/${escapeHtmlAuth(handle)}">${escapeHtmlAuth(display)}</a></span>`
         : `<span>Dreamed anonymously</span>`;
 
-      // Owner = signed-in user whose email matches dream.owner_email
+      // Owner = signed-in user whose email matches dream.owner_email.
+      // Expose on window so other render paths (re-roll button, etc.) can
+      // gate UI on ownership too. The server-side /api/image also enforces
+      // this — UI gating is just to keep the button from teasing non-owners.
       const isOwner = !!(authState.signedIn && dream.owner_email && authState.email && dream.owner_email.toLowerCase() === authState.email.toLowerCase());
+      window.__currentDreamIsOwner = isOwner;
+      // Re-run reroll-button gating any time isOwner changes
+      try { if (typeof refreshRerollButton === 'function') refreshRerollButton(); } catch (_) {}
       const visibility = dream.visibility === 'private' ? 'private' : 'public';
       const visBtn = isOwner
         ? `<button class="vis-toggle" data-current="${visibility}" data-action="toggle-vis">${visibility === 'private' ? 'Private — make public' : 'Public — make private'}</button>`
@@ -4255,7 +4261,7 @@
           loadHeroImage(dream);
         };
         img.src = dream.image_url;
-        reroll.hidden = false;
+        reroll.hidden = !window.__currentDreamIsOwner;
         const savedBadge = document.getElementById('hero-saved-badge');
         if (savedBadge) savedBadge.hidden = false;
         if (caption && dream.image_prompt) {
@@ -4319,7 +4325,7 @@
           if (detail.length > 360) detail = detail.slice(0, 357) + '…';
           if (loadingText) loadingText.textContent = title;
           if (loadingSub) loadingSub.textContent = detail;
-          if (reroll) { reroll.hidden = false; }
+          if (reroll) { reroll.hidden = !window.__currentDreamIsOwner; }
           return;
         }
         const { image_url, prompt } = await r.json();
@@ -4328,7 +4334,7 @@
           clearInterval(tickTimer);
           img.hidden = false;
           loading.hidden = true;
-          reroll.hidden = false;
+          reroll.hidden = !window.__currentDreamIsOwner;
         };
         if (caption && prompt) {
           caption.textContent = prompt;
@@ -4342,14 +4348,30 @@
         clearInterval(tickTimer);
         if (loadingText) loadingText.textContent = 'Could not generate image';
         if (loadingSub) loadingSub.textContent = (err.message || String(err)).slice(0, 220);
-        if (reroll) reroll.hidden = false;
+        if (reroll) reroll.hidden = !window.__currentDreamIsOwner;
       }
+    }
+
+    // Owner gates the reroll button. Called from renderDreamOwnerControls
+    // any time isOwner changes (sign-in/out, dream load, etc.).
+    function refreshRerollButton() {
+      const reroll = document.getElementById('hero-reroll');
+      if (!reroll) return;
+      // Only flip visibility if a hero image is currently showing — don't
+      // un-hide the button while the image is still loading.
+      const img = document.getElementById('hero-img');
+      if (!img || img.hidden) return;
+      reroll.hidden = !window.__currentDreamIsOwner;
     }
 
     function wireReroll(dream) {
       const reroll = document.getElementById('hero-reroll');
       if (!reroll) return;
       reroll.onclick = () => {
+        if (!window.__currentDreamIsOwner) {
+          showToast('Only the dreamer can re-roll this image');
+          return;
+        }
         if (!confirm('Re-roll this image? Costs ~$0.04. The current image will be replaced.')) return;
         reroll.disabled = true;
         loadHeroImage(dream, { force: true }).finally(() => { reroll.disabled = false; });
