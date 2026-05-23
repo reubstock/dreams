@@ -4210,12 +4210,17 @@
         if (h < 24) return h + 'h';
         return Math.round(h / 24) + 'd';
       };
-      track.innerHTML = dreams.map((d) => {
-        const fb = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
-        const title = (d.title && d.title.trim()) || (fb ? fb + '…' : 'Untitled');
-        const by = d.owner_handle ? `<span class="frc-by">@${escapeHtmlAuth(d.owner_handle)}</span>` : '';
-        return `<a class="feed-rail-chip" href="/d/${escapeHtmlAuth(d.id)}" title="${escapeHtmlAuth(title)} · ${fmtAgo(d.created_at)}">${escapeHtmlAuth(title)}${by}</a>`;
-      }).join('');
+      // On a dream page, skip the current dream so users don't see a link to
+      // the page they're already on.
+      const currentId = (window.location.pathname.match(/^\/d\/([A-Za-z0-9_-]+)/) || [])[1];
+      track.innerHTML = dreams
+        .filter((d) => d.id !== currentId)
+        .map((d) => {
+          const fb = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
+          const title = (d.title && d.title.trim()) || (fb ? fb + '…' : 'Untitled');
+          const by = d.owner_handle ? `<span class="frc-by">@${escapeHtmlAuth(d.owner_handle)}</span>` : '';
+          return `<a class="feed-rail-chip" href="/d/${escapeHtmlAuth(d.id)}" title="${escapeHtmlAuth(title)} · ${fmtAgo(d.created_at)}">${escapeHtmlAuth(title)}${by}</a>`;
+        }).join('');
     } catch (_) {}
   }
   loadFeedRail();
