@@ -3814,19 +3814,33 @@
       const fullUrl = window.location.origin + permalink;
       const titleEl = document.getElementById('dream-title');
       const title = (titleEl && titleEl.textContent && titleEl.textContent.trim()) || 'A dream';
+      // Image URL pulled from the rendered hero <img>; null if not yet generated.
+      const heroImgEl = document.getElementById('hero-image');
+      const heroSrc = (heroImgEl && heroImgEl.src && !heroImgEl.src.includes('morpho.png')) ? heroImgEl.src : null;
+      // Body for plain mailto:/sms: + Gmail compose. We include the image URL on
+      // its own line so Gmail and iMessage render it as an inline preview when
+      // the recipient opens the message.
+      const plainBody = title + '\n\n' + fullUrl + (heroSrc ? '\n\n' + heroSrc : '');
       const subject = encodeURIComponent(title);
-      const body = encodeURIComponent(title + '\n\n' + fullUrl);
+      const body = encodeURIComponent(plainBody);
       // Email opens Gmail's web compose directly. mailto: was unreliable because
       // it routes through the OS default mail handler (Mail.app on macOS) even
       // when the user has Gmail open in a browser tab. Gmail web compose works
       // in any browser; users with other mail clients can copy the link.
       const gmailHref = `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
+      // "Share photo" button uses the Web Share API with the actual image file
+      // attached. Mobile Safari + Chrome support this; on supported browsers the
+      // OS share sheet opens with the image already attached, so Mail / Messages
+      // attach it natively. We hide the button if no hero image exists or the
+      // browser doesn't support file-share.
+      const canFileShare = !!(heroSrc && navigator.canShare && navigator.share);
       const pill = document.createElement('div');
       pill.className = 'ar-permalink';
       pill.innerHTML = `
         <span class="ar-pl-label">Share this dream</span>
         <code class="ar-pl-url">${permalink}</code>
         <button class="ar-pl-copy" type="button">Copy link</button>
+        ${canFileShare ? `<button class="ar-pl-share ar-pl-fileshare" type="button">Share photo</button>` : ''}
         <a class="ar-pl-share" href="sms:?body=${body}">Text</a>
         <a class="ar-pl-share" href="${gmailHref}" target="_blank" rel="noopener">Email</a>
       `;
@@ -3839,6 +3853,35 @@
           showToast(fullUrl);
         }
       });
+      const fileShareBtn = pill.querySelector('.ar-pl-fileshare');
+      if (fileShareBtn && heroSrc) {
+        fileShareBtn.addEventListener('click', async () => {
+          fileShareBtn.disabled = true;
+          fileShareBtn.textContent = 'Preparing…';
+          try {
+            const r = await fetch(heroSrc, { mode: 'cors' });
+            if (!r.ok) throw new Error('fetch_failed');
+            const blob = await r.blob();
+            const ext = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+            const file = new File([blob], `dream-${id}.${ext}`, { type: blob.type });
+            if (!navigator.canShare({ files: [file] })) throw new Error('cannot_share_file');
+            await navigator.share({
+              files: [file],
+              title,
+              text: title + '\n\n' + fullUrl,
+              url: fullUrl,
+            });
+            showToast('Shared');
+          } catch (err) {
+            if (err && err.name === 'AbortError') return; // user cancelled
+            console.warn('file share failed', err);
+            showToast('Could not share image');
+          } finally {
+            fileShareBtn.disabled = false;
+            fileShareBtn.textContent = 'Share photo';
+          }
+        });
+      }
     }
 
     capture.addEventListener('click', (e) => {
