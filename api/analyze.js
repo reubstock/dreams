@@ -277,15 +277,18 @@ async function searchCommons(query, opts = {}) {
 
 async function resolveCulturalRelative(r) {
   if (!r) return;
-  if (await fileExists(r.commons_filename)) return;
-  // Pull the artist's last name as a required token so we don't accept
-  // random Wikimedia hits that happen to match the title alone (e.g.
-  // searching "A Cat in a Flower Pot" without "Ronner-Knip" returns
-  // user-uploaded cat photos, not the painting).
   const surname = (r.artist || '')
     .split(/\s+/)
     .filter(Boolean)
     .pop() || '';
+  // Accept the LLM's filename only if (a) it 200s AND (b) the filename actually
+  // mentions the artist. "The_Dream.jpg" 200s but is a tourist snapshot, not
+  // Rousseau's painting — that's the failure mode we're guarding against.
+  const llmFile = r.commons_filename || '';
+  const llmAttributed = surname && llmFile.toLowerCase().includes(surname.toLowerCase());
+  if (llmAttributed && (await fileExists(llmFile))) return;
+  // Otherwise search Wikimedia for the artist's name + title and require the
+  // surname in the result filename.
   const queries = [];
   if (r.artist && r.title) queries.push(`${r.artist} ${r.title}`);
   if (r.title && surname) queries.push(`${surname} ${r.title}`);
@@ -294,8 +297,8 @@ async function resolveCulturalRelative(r) {
     const found = await searchCommons(q, { kind: 'artwork', requireToken: surname || null });
     if (found) { r.commons_filename = found; return; }
   }
-  // If nothing surnamed comes back, clear the bad filename so the frontend
-  // hides the broken card instead of rendering a misleading stock photo.
+  // Nothing attributed to the artist came back — clear the field so the
+  // frontend hides the card rather than rendering a misleading stock photo.
   r.commons_filename = null;
 }
 
