@@ -35,13 +35,61 @@ export default async function handler(req, res) {
   if (!session || !session.email) return res.status(401).json({ error: 'session_expired' });
   const email = session.email;
 
-  // Get user's dream IDs (newest first)
-  const idsRes = await fetch(`${KV_URL}/lrange/user_dreams:${encodeURIComponent(email)}/0/99`, {
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-  });
-  if (!idsRes.ok) return res.status(500).json({ error: 'lrange_failed' });
-  const { result: ids } = await idsRes.json();
-  if (!Array.isArray(ids) || ids.length === 0) {
+  // Get user's dream IDs (newest first).
+  // We try several key encodings to handle any historical inconsistency between
+  // what save.js wrote and what we're reading here. Upstash may or may not
+  // URL-decode the key from the path — we try both forms and union the results.
+  const keyVariants = [
+    `user_dreams:${email}`,                       // literal @
+    `user_dreams:${encodeURIComponent(email)}`,   // %40 form
+  ];
+  let ids = [];
+  for (const key of keyVariants) {
+    try {
+      const r = await fetch(`${KV_URL}/lrange/${key}/0/99`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` },
+      });
+      if (!r.ok) continue;
+      const { result } = await r.json();
+      if (Array.isArray(result) && result.length > 0) {
+        // De-dup if both keys had overlap
+        for (const id of result) if (!ids.includes(id)) ids.push(id);
+      }
+    } catch (_) {}
+  }
+
+  // Final fallback: scan recent dreams and pluck those whose owner_email matches.
+  // Covers any dream saved before user_dreams lists existed.
+  if (ids.length === 0) {
+    try {
+      const recentRes = await fetch(`${KV_URL}/lrange/dreams:recent/0/199`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` },
+      });
+      if (recentRes.ok) {
+        const { result: recentIds } = await recentRes.json();
+        if (Array.isArray(recentIds) && recentIds.length) {
+          const keys = recentIds.map((id) => `dream:${id}`);
+          const mget = await fetch(`${KV_URL}/mget/${keys.join('/')}`, {
+            headers: { Authorization: `Bearer ${KV_TOKEN}` },
+          });
+          if (mget.ok) {
+            const { result: vals } = await mget.json();
+            (vals || []).forEach((v, i) => {
+              if (!v) return;
+              try {
+                const d = typeof v === 'string' ? JSON.parse(v) : v;
+                if (d.owner_email && d.owner_email.toLowerCase() === email.toLowerCase()) {
+                  ids.push(recentIds[i]);
+                }
+              } catch (_) {}
+            });
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  if (ids.length === 0) {
     return res.status(200).json({ email, dreams: [] });
   }
 

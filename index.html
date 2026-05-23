@@ -800,7 +800,23 @@
     color: var(--ink-2);
   }
   .one-liner b { color: var(--ink); font-weight: 600; }
-  .one-liner .pop { background: var(--ink); color: var(--paper); padding: 0 4px; }
+  .one-liner .pop {
+    /* Marker-style highlight: a warm peach/amber band behind the text,
+       like a Stabilo Boss swiped across paper. Eye-catching but soothing.
+       The bottom 75% of the line is the inked band — mimics how a real
+       highlight marker leaves the very top of letters clear. */
+    background: linear-gradient(
+      180deg,
+      transparent 22%,
+      rgba(244, 201, 138, 0.55) 22%,
+      rgba(217, 122, 62, 0.45) 88%,
+      transparent 88%
+    );
+    color: var(--ink);
+    padding: 0 4px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
 
   /* hero icon — back to top-right, nudged down 72px / left 48px (≈3/4″ × 1/2″) */
   .dream-icon-wrap {

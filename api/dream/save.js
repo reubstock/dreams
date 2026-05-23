@@ -121,8 +121,12 @@ export default async function handler(req, res) {
     if (record.device_id) {
       await kv(`lpush/device:${record.device_id}/${id}`);
     }
-    // If signed in, add to the user's personal library
+    // If signed in, add to the user's personal library. We push to BOTH the
+    // literal-@ and the percent-encoded key variants so the reader (which
+    // also tries both) is guaranteed to find the dream regardless of how
+    // Upstash normalizes URL path encoding.
     if (ownerEmail) {
+      await kv(`lpush/user_dreams:${ownerEmail}/${id}`);
       await kv(`lpush/user_dreams:${encodeURIComponent(ownerEmail)}/${id}`);
     }
     return res.status(200).json({
