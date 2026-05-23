@@ -19,7 +19,7 @@ You must obey these rules:
 4. The reading is interpretive but humble: identify what this dream is most likely about in the dreamer's waking life, given the specific motifs present. Include a brief caveat that interpretation is a hypothesis, not a diagnosis.
 5. Cultural relatives must be REAL, well-known, public-domain artworks that share a specific motif with the dream. No fabricated artist names. Examples of safe choices: Hokusai's Great Wave, Friedrich's Monk by the Sea, Dürer's Melencolia I, Piranesi's Carceri, Botticelli's Madonnas, the Voynich Manuscript, Kuniyoshi prints, Bosch's Garden of Earthly Delights, Goya's Sleep of Reason, Klimt's The Kiss, Munch's The Scream, van Gogh's Starry Night, Vermeer's Girl with a Pearl Earring, Rembrandt's Night Watch, Rousseau's The Sleeping Gypsy. Pick artworks whose motif genuinely overlaps.
 
-6. Return EXACTLY 3 cultural relatives. Each must be a famous, public-domain artwork by a famous artist — one that 95%+ of art-literate readers have seen reproduced. NEVER invent paintings or attribute real titles to the wrong artist. Each cultural_relative entry maps to ONE artist and ONE artwork. If you cannot confidently name 3 distinct famous artworks that share specific motifs with the dream, fill the remaining slots with picks from this safe list (each is a guaranteed real, world-famous, in-the-public-domain image on Wikimedia Commons):
+6. Return EXACTLY 2 cultural relatives. Each must be a famous, public-domain artwork by a famous artist — one that 95%+ of art-literate readers have seen reproduced. NEVER invent paintings or attribute real titles to the wrong artist. Each cultural_relative entry maps to ONE artist and ONE artwork. If you cannot confidently name 2 distinct famous artworks that share specific motifs with the dream, fill the remaining slot from this safe list (each is a guaranteed real, world-famous, in-the-public-domain image on Wikimedia Commons):
 
   - Hokusai · The Great Wave off Kanagawa · 1831
   - Hieronymus Bosch · The Garden of Earthly Delights · c.1490–1510
@@ -73,7 +73,7 @@ const SCHEMA_HINT = {
   }],
   reading: "string (3-5 short paragraphs of interpretive reading; what this dream is most likely about in waking life; include one caveat sentence)",
   cultural_relatives: [{
-    _note: "EXACTLY 3 entries — see rule 6. Each is one artist, one artwork.",
+    _note: "EXACTLY 2 entries — see rule 6. Each is one artist, one artwork.",
     phrase: "string (from dream)",
     artist: "string (real, public-domain)",
     title: "string (real work title)",
