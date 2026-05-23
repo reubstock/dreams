@@ -1716,6 +1716,64 @@
     }
     body.dream-page .hero-image { grid-column: 1; position: static; }
   }
+
+  /* ============ MOBILE DREAM-PAGE: IMAGE-FIRST LAYOUT ============
+     On phones, a recipient arriving via a shared link should see the AI
+     illustration immediately — not buried below the chrome (sub-bar,
+     browse rail, title, transcript).
+
+     We do this two ways:
+     1. Hide the sub-bar + browse rail entirely on dream pages on mobile.
+     2. Switch .container to flex so we can reorder its children — the
+        dream-frame (which contains the hero image) comes BEFORE the
+        title section.
+     3. Inside .dream-frame, also flex-reorder so the recipient prompt
+        (if shown) and hero image come BEFORE the transcript. */
+  @media (max-width: 768px) {
+    body.dream-page .sub-bar,
+    body.dream-page .feed-rail {
+      display: none !important;
+    }
+    body.dream-page .container {
+      display: flex;
+      flex-direction: column;
+    }
+    body.dream-page .masthead { order: 0; }
+    body.dream-page .dream-frame { order: 1; margin-top: 8px; }
+    body.dream-page .dream-title-section {
+      order: 2;
+      padding-top: 20px;
+      margin-bottom: 20px;
+    }
+    /* Everything else after the title (analysis stats, source, recent feed,
+       historical dreamer, footer) — push to order: 3+ so they all stay below.
+       Using a high number ensures unknown siblings still render after the
+       priority blocks above. */
+    body.dream-page .stats,
+    body.dream-page .source,
+    body.dream-page .recent-feed-header-on-dream,
+    body.dream-page section.example-only,
+    body.dream-page footer,
+    body.dream-page .historical-dreamer { order: 3; }
+
+    /* Inside .dream-frame: hero image first, then transcript */
+    body.dream-page .dream-frame {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    body.dream-page .dream-frame .recipient-prompt { order: 0; }
+    body.dream-page .dream-frame .hero-image { order: 1; }
+    body.dream-page .dream-frame .capture { order: 2; }
+
+    /* Compact the title above the image — kicker hint less prominent */
+    body.dream-page .dream-title {
+      font-size: 36px;
+      line-height: 1.05;
+    }
+    body.dream-page .dream-title-hint { display: none; }
+  }
+
   body.dream-page .recent-feed-header-on-dream {
     margin-top: 48px; padding-top: 28px;
     border-top: 1px solid var(--ink);
