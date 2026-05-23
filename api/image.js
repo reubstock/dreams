@@ -161,6 +161,11 @@ async function generateImage(promptText, attempt = 0) {
 }
 
 // ============ Replicate face-swap ============
+// Pinned version hash of cdingram/face-swap. Update with:
+//   curl -s https://api.replicate.com/v1/models/cdingram/face-swap \
+//        -H "Authorization: Bearer $TOKEN" | jq -r .latest_version.id
+const FACE_SWAP_VERSION = 'd1d6ea8c8be89d664a07a457526f7128109dee7030fdac424788d762c71ed111';
+
 // Takes the generated dream image (as Buffer) and the user's selfie URL,
 // returns a Buffer of the swapped result. Falls back to the original
 // generated image (returns null) if anything goes wrong — face-swap is a
@@ -170,10 +175,13 @@ async function faceSwap(generatedBuffer, selfieUrl) {
   const generatedDataUrl = `data:image/png;base64,${generatedBuffer.toString('base64')}`;
 
   try {
-    // Prefer: wait lets the request block up to 60s and return the completed
-    // prediction synchronously — saves us a polling loop in the common case.
+    // POST /v1/predictions with the model version hash. The
+    // /v1/models/owner/name/predictions path 404s for this endpoint.
+    // Prefer: wait lets the request block up to ~55s and return the
+    // completed prediction synchronously — saves us a polling loop in
+    // the common case.
     const createRes = await fetch(
-      'https://api.replicate.com/v1/models/cdingram/face-swap/predictions',
+      'https://api.replicate.com/v1/predictions',
       {
         method: 'POST',
         headers: {
@@ -182,6 +190,7 @@ async function faceSwap(generatedBuffer, selfieUrl) {
           Prefer: 'wait=55',
         },
         body: JSON.stringify({
+          version: FACE_SWAP_VERSION,
           input: {
             input_image: generatedDataUrl,   // target with face to be replaced
             swap_image: selfieUrl,           // face source
