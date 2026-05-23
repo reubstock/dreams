@@ -31,6 +31,29 @@ async function kvGet(id) {
   return typeof result === 'string' ? JSON.parse(result) : result;
 }
 
+async function kvGetRaw(key) {
+  const r = await fetch(`${KV_URL}/get/${encodeURIComponent(key)}`, {
+    headers: { Authorization: `Bearer ${KV_TOKEN}` },
+  });
+  if (!r.ok) return null;
+  const { result } = await r.json();
+  if (!result) return null;
+  return typeof result === 'string' ? JSON.parse(result) : result;
+}
+
+function getCookie(req, name) {
+  const cookies = req.headers.cookie || '';
+  const match = cookies.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]+)'));
+  return match ? match[1] : null;
+}
+
+async function getRequesterEmail(req) {
+  const token = getCookie(req, 'dreams_session');
+  if (!token || token.length > 200) return null;
+  const session = await kvGetRaw(`session:${token}`);
+  return session?.email || null;
+}
+
 async function kvSet(id, value) {
   const r = await fetch(`${KV_URL}/set/dream:${id}`, {
     method: 'POST',
@@ -234,17 +257,27 @@ export default async function handler(req, res) {
     ? requestDreamer
     : dream.dreamer || null;
 
-  // Look up the owner's selfie URL — we use it for Replicate face-swap after
-  // gpt-image-1 generates the scene. Best-effort; missing selfie just means
-  // the scene renders with its generic face and we skip the swap step.
+  // Selfie lookup for face-swap. Priority order:
+  //   1. dream.owner_email (the dream's saved owner)
+  //   2. The current requester's session email — handles dreams created before
+  //      the user signed in (owner_email is null) and ensures the re-rolling
+  //      user's face is used.
+  // If the dream is unclaimed and the requester is signed in, we also stamp
+  // ownership on the record so the next view shows their handle.
   let selfieUrl = null;
-  if (dream.owner_email) {
+  const requesterEmail = await getRequesterEmail(req);
+  const lookupEmail = dream.owner_email || requesterEmail;
+  if (lookupEmail) {
     try {
-      const user = await kvGet(`user:${dream.owner_email}`);
+      const user = await kvGetRaw(`user:${lookupEmail}`);
       if (user?.selfie_url) selfieUrl = user.selfie_url;
     } catch (err) {
       console.warn('Selfie lookup failed:', err.message);
     }
+  }
+  // Claim orphan dreams (owner_email null) as the requester's
+  if (!dream.owner_email && requesterEmail) {
+    dream.owner_email = requesterEmail;
   }
   const willFaceSwap = !!(selfieUrl && REPLICATE_TOKEN);
 
@@ -256,11 +289,16 @@ export default async function handler(req, res) {
 
     // If we have a selfie + Replicate token, swap the face onto the generated scene
     if (willFaceSwap) {
+      console.log(`[face-swap] starting for dream ${id} with selfie ${selfieUrl}`);
+      const t0 = Date.now();
       const swapped = await faceSwap(buffer, selfieUrl);
+      console.log(`[face-swap] dream ${id} completed in ${Date.now() - t0}ms — ${swapped ? 'success' : 'fell back to original'}`);
       if (swapped) {
         buffer = swapped;
         faceSwapped = true;
       }
+    } else {
+      console.log(`[face-swap] skipped for dream ${id} — selfieUrl=${!!selfieUrl}, REPLICATE_TOKEN=${!!REPLICATE_TOKEN}, requesterEmail=${requesterEmail || 'none'}, dreamOwner=${dream.owner_email || 'none'}`);
     }
 
     const filename = `dreams/${id}-${Date.now()}.${faceSwapped ? 'jpg' : 'png'}`;
