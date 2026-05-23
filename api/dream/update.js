@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'storage_not_configured' });
 
-  const { id, title } = req.body || {};
+  const { id, title, visibility } = req.body || {};
   if (!id || typeof id !== 'string' || !/^[A-Za-z0-9_-]{8,20}$/.test(id)) {
     return res.status(400).json({ error: 'bad_id' });
   }
@@ -30,8 +30,32 @@ export default async function handler(req, res) {
     }
     patch.title = t;
   }
+  if (typeof visibility === 'string') {
+    if (!['public', 'private'].includes(visibility)) {
+      return res.status(400).json({ error: 'bad_visibility' });
+    }
+    patch.visibility = visibility;
+  }
   if (Object.keys(patch).length === 0) {
     return res.status(400).json({ error: 'no_fields', message: 'Provide at least one updatable field.' });
+  }
+
+  // Visibility changes are owner-only. (Title is too in practice — the editable
+  // title only appears in the owner's UI — but we don't currently gate it.)
+  let requesterEmail = null;
+  if (patch.visibility) {
+    const cookieMatch = (req.headers.cookie || '').match(/(?:^|;\s*)dreams_session=([^;]+)/);
+    const token = cookieMatch ? cookieMatch[1] : null;
+    if (!token) return res.status(401).json({ error: 'not_signed_in' });
+    const sr = await fetch(`${KV_URL}/get/session:${encodeURIComponent(token)}`, {
+      headers: { Authorization: `Bearer ${KV_TOKEN}` },
+    });
+    if (!sr.ok) return res.status(401).json({ error: 'session_lookup_failed' });
+    const { result: sRes } = await sr.json();
+    if (!sRes) return res.status(401).json({ error: 'session_expired' });
+    const session = typeof sRes === 'string' ? JSON.parse(sRes) : sRes;
+    requesterEmail = session?.email || null;
+    if (!requesterEmail) return res.status(401).json({ error: 'session_invalid' });
   }
 
   try {
@@ -42,6 +66,10 @@ export default async function handler(req, res) {
     const { result } = await getRes.json();
     if (!result) return res.status(404).json({ error: 'dream_not_found' });
     const dream = typeof result === 'string' ? JSON.parse(result) : result;
+
+    if (patch.visibility && dream.owner_email && dream.owner_email !== requesterEmail) {
+      return res.status(403).json({ error: 'not_owner' });
+    }
 
     Object.assign(dream, patch, { updated_at: new Date().toISOString() });
 

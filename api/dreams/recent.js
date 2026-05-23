@@ -1,5 +1,6 @@
 // GET /api/dreams/recent?limit=10
-// Returns the N most recent dreams (newest first), slimmed for feed display.
+// Returns the N most recent PUBLIC dreams (newest first), slimmed for feed display.
+// Existing records without a `visibility` field are treated as public.
 
 export const config = { api: { bodyParser: false }, maxDuration: 10 };
 
@@ -15,10 +16,11 @@ export default async function handler(req, res) {
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'storage_not_configured' });
 
   const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+  // Fetch a wider slice so we can filter out private dreams and still hit `limit`.
+  const fetchN = Math.min(limit * 3, 200);
 
   try {
-    // Get the most recent IDs
-    const idsRes = await fetch(`${KV_URL}/lrange/dreams:recent/0/${limit - 1}`, {
+    const idsRes = await fetch(`${KV_URL}/lrange/dreams:recent/0/${fetchN - 1}`, {
       headers: { Authorization: `Bearer ${KV_TOKEN}` },
     });
     if (!idsRes.ok) throw new Error(`lrange → ${idsRes.status}`);
@@ -27,10 +29,8 @@ export default async function handler(req, res) {
       return res.status(200).json({ dreams: [] });
     }
 
-    // Use MGET to fetch all dreams in one round-trip
     const keys = ids.map((id) => `dream:${id}`);
-    const mgetUrl = `${KV_URL}/mget/${keys.join('/')}`;
-    const mgetRes = await fetch(mgetUrl, {
+    const mgetRes = await fetch(`${KV_URL}/mget/${keys.join('/')}`, {
       headers: { Authorization: `Bearer ${KV_TOKEN}` },
     });
     if (!mgetRes.ok) throw new Error(`mget → ${mgetRes.status}`);
@@ -43,6 +43,8 @@ export default async function handler(req, res) {
         catch (_) { return null; }
       })
       .filter(Boolean)
+      .filter((d) => d.visibility !== 'private')
+      .slice(0, limit)
       .map((d) => ({
         id: d.id,
         title: d.title || d.analysis?.title || null,
@@ -50,6 +52,9 @@ export default async function handler(req, res) {
         pattern_name: d.analysis?.pattern_name || null,
         morph_count: Array.isArray(d.analysis?.morphs) ? d.analysis.morphs.length : 0,
         word_count: d.word_count || (d.text || '').split(/\s+/).filter(Boolean).length,
+        image_url: d.image_url || null,
+        owner_handle: d.owner_handle || null,
+        owner_display_name: d.owner_display_name || null,
         created_at: d.created_at,
       }));
 

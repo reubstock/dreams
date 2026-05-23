@@ -1707,6 +1707,383 @@
     border-top: 1px solid var(--ink);
   }
 
+  /* ============ CULTURAL RELATIVES: FEATURED CARD (first one is large) ============ */
+  .ar-rel.featured {
+    grid-template-columns: 1fr !important;
+    border-bottom: 1px solid rgba(241, 234, 215, 0.22) !important;
+    padding: 18px 0 26px;
+    margin-bottom: 8px;
+  }
+  .ar-rel.featured .ar-rel-img {
+    width: 100%; height: auto;
+    max-height: 540px;
+    max-width: 720px;
+    object-fit: contain;
+    background: rgba(0,0,0,0.18);
+  }
+  .ar-rel.featured .ar-rel-body { margin-top: 14px; }
+  .ar-rel.featured .ar-rel-attr { font-size: 11px; }
+  .ar-rel.featured .ar-rel-why { font-size: 14.5px; line-height: 1.6; }
+
+  /* ============ MASTHEAD: RECENT-DREAMS RAIL ============ */
+  .feed-rail {
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 6px 0;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px;
+    overflow: hidden;
+  }
+  .feed-rail-label {
+    flex-shrink: 0;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .feed-rail-track {
+    display: flex; gap: 14px;
+    overflow-x: auto; overflow-y: hidden;
+    flex: 1;
+    scrollbar-width: thin;
+  }
+  .feed-rail-track::-webkit-scrollbar { height: 4px; }
+  .feed-rail-track::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); }
+  .feed-rail-chip {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border: 1px solid rgba(0,0,0,0.18);
+    background: rgba(0,0,0,0.02);
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 12px;
+    color: var(--ink);
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 280px;
+    overflow: hidden; text-overflow: ellipsis;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .feed-rail-chip:hover { background: var(--rust-soft); border-color: var(--rust); color: var(--ink); }
+  .feed-rail-chip .frc-by {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    color: var(--rust); margin-left: 6px;
+  }
+  .feed-rail-more {
+    flex-shrink: 0;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--rust); text-decoration: none;
+    padding: 4px 8px;
+  }
+  .feed-rail-more:hover { color: var(--rust-deep); }
+  @media (max-width: 640px) {
+    .feed-rail-label { display: none; }
+  }
+
+  /* ============ ENVELOPE / INBOX BADGE (in auth slot) ============ */
+  .inbox-link {
+    position: relative;
+    display: inline-flex; align-items: center;
+    color: var(--rust); cursor: pointer;
+    padding: 2px 6px;
+    text-decoration: none;
+  }
+  .inbox-link svg { width: 16px; height: 16px; display: block; }
+  .inbox-link:hover { color: var(--rust-deep); }
+  .inbox-badge {
+    position: absolute; top: -4px; right: -2px;
+    background: var(--rust);
+    color: var(--paper);
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 8px;
+    min-width: 14px; text-align: center;
+  }
+
+  /* ============ DREAM PAGE: OWNER LINE / VISIBILITY TOGGLE / PREV-NEXT NAV / NOTE BTN ============ */
+  .dream-owner-line {
+    margin: 8px 0 18px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  }
+  .dream-owner-line a {
+    color: var(--rust);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--rust-soft);
+  }
+  .dream-owner-line a:hover { color: var(--rust-deep); border-bottom-color: var(--rust); }
+  .vis-toggle {
+    border: 1px solid var(--rust-soft); background: transparent;
+    color: var(--rust); cursor: pointer;
+    padding: 3px 9px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .vis-toggle:hover { background: var(--rust-soft); color: var(--ink); }
+  .vis-toggle[data-current="private"] {
+    border-color: #999; color: #999;
+  }
+  .vis-toggle[data-current="private"]:hover { background: #999; color: var(--paper); }
+  .note-btn {
+    border: 1px solid var(--rust); background: var(--rust);
+    color: var(--paper); cursor: pointer;
+    padding: 4px 12px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    text-decoration: none;
+  }
+  .note-btn:hover { background: var(--rust-deep); border-color: var(--rust-deep); }
+  .prev-next-nav {
+    margin-top: 56px; padding-top: 22px;
+    border-top: 1px solid var(--ink);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .pn-link {
+    display: block;
+    padding: 16px 18px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    text-decoration: none;
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+  .pn-link:hover { background: var(--rust-soft); }
+  .pn-link.disabled {
+    opacity: 0.35; cursor: not-allowed; pointer-events: none;
+  }
+  .pn-link .pn-kicker {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--rust); margin-bottom: 6px;
+  }
+  .pn-link .pn-title {
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 16px;
+    color: var(--ink);
+  }
+  .pn-link.pn-next { text-align: right; }
+  .pn-link.pn-next .pn-kicker::after { content: ' →'; }
+  .pn-link.pn-prev .pn-kicker::before { content: '← '; }
+  @media (max-width: 640px) {
+    .prev-next-nav { grid-template-columns: 1fr; }
+  }
+
+  /* ============ PROFILE PAGE ============ */
+  .profile-section { display: none; padding: 12px 0 48px; }
+  body.profile-page .profile-section { display: block; }
+  body.profile-page .example-only,
+  body.profile-page .dream-frame,
+  body.profile-page .recent-feed,
+  body.profile-page .recent-foot,
+  body.profile-page .capture-cta,
+  body.profile-page .relatives-header,
+  body.profile-page .relatives-grid,
+  body.profile-page .reading-block,
+  body.profile-page .library-section,
+  body.profile-page .inbox-section,
+  body.profile-page .settings-section,
+  body.profile-page .dream-title-section { display: none !important; }
+  .profile-head {
+    display: flex; align-items: center; gap: 24px;
+    border-bottom: 1px solid var(--ink); padding-bottom: 22px; margin-bottom: 26px;
+  }
+  .profile-avatar {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--ink);
+    background: var(--rust-soft);
+  }
+  .profile-avatar.empty {
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, Menlo, monospace; font-size: 28px;
+    color: var(--rust);
+    text-transform: uppercase;
+  }
+  .profile-name { font-family: 'Iowan Old Style', Georgia, serif; font-size: 32px; line-height: 1.15; }
+  .profile-handle {
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+    color: var(--rust); letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+  .profile-bio {
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 14px;
+    color: var(--muted); margin-top: 8px; max-width: 540px;
+  }
+  .profile-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .profile-contact-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .profile-contact-links a {
+    color: var(--rust); text-decoration: none;
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+    border-bottom: 1px dotted var(--rust-soft);
+  }
+  .profile-contact-links a:hover { color: var(--rust-deep); }
+  .profile-dreams-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+  .pd-card {
+    border: 1px solid var(--ink);
+    background: transparent;
+    display: block; text-decoration: none; color: var(--ink);
+    transition: background 0.15s;
+    overflow: hidden;
+  }
+  .pd-card:hover { background: var(--rust-soft); }
+  .pd-card img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 1px solid var(--ink); }
+  .pd-body { padding: 12px; }
+  .pd-title { font-family: 'Iowan Old Style', Georgia, serif; font-size: 15px; line-height: 1.3; }
+  .pd-meta { font-family: ui-monospace, Menlo, monospace; font-size: 9px; letter-spacing: 0.08em; color: var(--muted); margin-top: 6px; text-transform: uppercase; }
+  .profile-empty {
+    grid-column: 1 / -1;
+    padding: 28px; border: 1px dashed var(--ink);
+    text-align: center; color: var(--muted);
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 14px;
+  }
+  @media (max-width: 720px) {
+    .profile-dreams-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .profile-dreams-grid { grid-template-columns: 1fr; }
+    .profile-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+  }
+
+  /* ============ INBOX PAGE ============ */
+  .inbox-section { display: none; padding: 12px 0 48px; }
+  body.inbox-page .inbox-section { display: block; }
+  body.inbox-page .example-only,
+  body.inbox-page .dream-frame,
+  body.inbox-page .recent-feed,
+  body.inbox-page .recent-foot,
+  body.inbox-page .capture-cta,
+  body.inbox-page .relatives-header,
+  body.inbox-page .relatives-grid,
+  body.inbox-page .reading-block,
+  body.inbox-page .library-section,
+  body.inbox-page .profile-section,
+  body.inbox-page .settings-section,
+  body.inbox-page .dream-title-section { display: none !important; }
+  .inbox-head {
+    border-bottom: 1px solid var(--ink); padding-bottom: 14px; margin-bottom: 22px;
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .inbox-head h1 { font-family: 'Iowan Old Style', Georgia, serif; font-size: 28px; font-weight: 600; margin: 0; }
+  .inbox-head .ih-meta { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.08em; }
+  .inbox-list { display: flex; flex-direction: column; gap: 12px; }
+  .inbox-msg {
+    border: 1px solid var(--ink);
+    padding: 14px 18px;
+    background: transparent;
+  }
+  .inbox-msg.unread {
+    background: rgba(216, 122, 62, 0.08);
+    border-left-width: 4px;
+  }
+  .inbox-msg-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .inbox-msg-from {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    color: var(--rust); letter-spacing: 0.04em;
+  }
+  .inbox-msg-from a { color: var(--rust); text-decoration: none; border-bottom: 1px dotted var(--rust-soft); }
+  .inbox-msg-from a:hover { color: var(--rust-deep); }
+  .inbox-msg-time {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    color: var(--muted); letter-spacing: 0.08em;
+  }
+  .inbox-msg-body {
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 14.5px;
+    line-height: 1.55; color: var(--ink); white-space: pre-wrap;
+  }
+  .inbox-msg-dream {
+    margin-top: 10px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    color: var(--muted);
+  }
+  .inbox-msg-dream a { color: var(--rust); text-decoration: none; }
+  .inbox-msg-actions { display: flex; gap: 10px; margin-top: 8px; }
+  .inbox-empty {
+    padding: 28px; border: 1px dashed var(--ink); text-align: center;
+    color: var(--muted); font-family: 'Iowan Old Style', Georgia, serif;
+  }
+
+  /* ============ SETTINGS PAGE ============ */
+  .settings-section { display: none; padding: 12px 0 48px; max-width: 540px; }
+  body.settings-page .settings-section { display: block; }
+  body.settings-page .example-only,
+  body.settings-page .dream-frame,
+  body.settings-page .recent-feed,
+  body.settings-page .recent-foot,
+  body.settings-page .capture-cta,
+  body.settings-page .relatives-header,
+  body.settings-page .relatives-grid,
+  body.settings-page .reading-block,
+  body.settings-page .library-section,
+  body.settings-page .inbox-section,
+  body.settings-page .profile-section,
+  body.settings-page .dream-title-section { display: none !important; }
+  .settings-section h1 { font-family: 'Iowan Old Style', Georgia, serif; font-size: 28px; font-weight: 600; margin: 0 0 22px; }
+  .settings-section label.fld {
+    display: block; margin-bottom: 16px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  }
+  .settings-section label.fld input,
+  .settings-section label.fld textarea {
+    display: block; width: 100%; margin-top: 6px;
+    background: transparent; border: 1px solid var(--ink);
+    color: var(--ink); padding: 10px 12px;
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 14.5px;
+    letter-spacing: 0; text-transform: none;
+  }
+  .settings-section label.fld textarea { min-height: 80px; resize: vertical; }
+  .settings-section label.fld input:focus,
+  .settings-section label.fld textarea:focus { outline: none; border-color: var(--rust); }
+  .settings-section .fld-hint {
+    margin-top: 4px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    color: var(--muted); letter-spacing: 0.06em;
+    text-transform: none;
+  }
+  .settings-section .save-row { margin-top: 6px; }
+  .settings-section .save-msg {
+    display: inline-block; margin-left: 12px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.08em; color: var(--rust);
+  }
+  .contact-link-row {
+    display: grid; grid-template-columns: 100px 1fr auto; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .contact-link-row input {
+    background: transparent; border: 1px solid var(--ink); color: var(--ink);
+    padding: 7px 10px;
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 13px;
+  }
+  .contact-link-row button {
+    border: 1px solid var(--ink); background: transparent; color: var(--ink);
+    cursor: pointer; padding: 0 12px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+  }
+
+  /* ============ NOTE-COMPOSE MODAL ============ */
+  #note-modal .modal { max-width: 460px; }
+  #note-modal textarea {
+    width: 100%; box-sizing: border-box;
+    min-height: 130px; resize: vertical;
+    background: transparent; border: 1px solid var(--ink); color: var(--ink);
+    padding: 10px 12px;
+    font-family: 'Iowan Old Style', Georgia, serif; font-size: 14px;
+    margin: 10px 0;
+  }
+  #note-modal textarea:focus { outline: none; border-color: var(--rust); }
+  #note-modal .note-meta {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    color: var(--muted); letter-spacing: 0.06em;
+  }
+
   /* ============ RESPONSIVE ============ */
   @media (max-width: 1024px) {
     .container { padding: 0 32px; }
@@ -1935,6 +2312,13 @@
       <span>Confidence 0.78</span>
     </div>
 
+    <!-- =================== DREAM-BROWSING RAIL =================== -->
+    <nav class="feed-rail" id="feed-rail" aria-label="Recent dreams">
+      <span class="feed-rail-label">Browse</span>
+      <div class="feed-rail-track" id="feed-rail-track"></div>
+      <a class="feed-rail-more" href="/" id="feed-rail-more">All →</a>
+    </nav>
+
     <!-- =================== DREAM TITLE (only shown on /d/:id) =================== -->
     <section class="dream-title-section" id="dream-title-section" hidden>
       <div class="dream-title-meta">
@@ -2069,6 +2453,51 @@
       <div class="library-kicker" id="library-kicker">Your library</div>
       <h1 class="library-title">Your dreams.</h1>
       <div id="library-grid"></div>
+    </section>
+
+    <!-- =================== PROFILE (only on /u/:handle) =================== -->
+    <section class="profile-section" id="profile-section">
+      <div id="profile-content"></div>
+    </section>
+
+    <!-- =================== INBOX (only on /inbox) =================== -->
+    <section class="inbox-section" id="inbox-section">
+      <div class="inbox-head">
+        <h1>Inbox.</h1>
+        <div class="ih-meta" id="inbox-meta"></div>
+      </div>
+      <div class="inbox-list" id="inbox-list"></div>
+    </section>
+
+    <!-- =================== SETTINGS (only on /settings) =================== -->
+    <section class="settings-section" id="settings-section">
+      <h1>Settings.</h1>
+      <form id="settings-form" novalidate>
+        <label class="fld">
+          Display name
+          <input type="text" id="settings-display-name" maxlength="50" placeholder="How your name appears on dreams and notes">
+          <div class="fld-hint">Up to 50 characters.</div>
+        </label>
+        <label class="fld">
+          Handle
+          <input type="text" id="settings-handle" maxlength="24" placeholder="lowercase letters, numbers, _ -">
+          <div class="fld-hint">Your profile lives at <code>/u/your-handle</code>. 3–24 characters: a–z, 0–9, _ or -. Must be unique.</div>
+        </label>
+        <label class="fld">
+          Bio
+          <textarea id="settings-bio" maxlength="280" placeholder="A line or two about you (optional)."></textarea>
+        </label>
+        <label class="fld">
+          Public contact links
+          <div id="settings-links"></div>
+          <button type="button" id="settings-add-link" class="vis-toggle" style="margin-top: 6px;">+ Add link</button>
+          <div class="fld-hint">Up to 4. Anything starting with https://. Shown on your profile.</div>
+        </label>
+        <div class="save-row">
+          <button type="submit" class="btn primary" id="settings-save">Save</button>
+          <span class="save-msg" id="settings-save-msg"></span>
+        </div>
+      </form>
     </section>
 
     <!-- =================== RECIPIENT PROMPT (on /d/:id when not signed in) =================== -->
@@ -2360,6 +2789,23 @@
     </div>
   </div>
 
+  <!-- =================== NOTE-COMPOSE MODAL =================== -->
+  <div class="modal-backdrop" id="note-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="note-title">
+      <button class="modal-close" aria-label="Close" data-action="close-note">×</button>
+      <h2 id="note-title">Send a note.</h2>
+      <div class="note-meta" id="note-recipient"></div>
+      <form id="note-form" novalidate>
+        <textarea id="note-body" maxlength="1500" placeholder="Say hello. Tell them what their dream made you think of."></textarea>
+        <div class="note-meta">They'll get this in their inbox and an email notification.</div>
+        <div class="modal-actions">
+          <button class="btn" type="button" data-action="close-note">Cancel</button>
+          <button class="btn primary" type="submit" id="note-send">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- =================== TOAST =================== -->
   <div class="toast" id="toast">Saved</div>
 
@@ -2552,7 +2998,7 @@
   });
 
   // ============ Auth state, sign-in modal, library, recipient prompt ============
-  const authState = { signedIn: false, email: null };
+  const authState = { signedIn: false, email: null, handle: null, displayName: null, unreadCount: 0 };
 
   function escapeHtmlAuth(s) {
     return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2565,10 +3011,18 @@
       const data = await r.json();
       authState.signedIn = !!data.signed_in;
       authState.email = data.email || null;
+      authState.handle = data.handle || null;
+      authState.displayName = data.display_name || null;
+      authState.unreadCount = Number(data.unread_count || 0);
       authState.selfieUrl = data.selfie_url || null;
       renderAuthSlot();
       renderSelfieState();
       maybeShowRecipientPrompt();
+      // Pages that depend on auth state
+      maybeLoadInbox();
+      maybeLoadSettings();
+      // Re-render dream-page owner controls if applicable
+      if (window.__currentDream) renderDreamOwnerControls(window.__currentDream);
     } catch (_) {}
   }
 
@@ -2677,8 +3131,19 @@
     const slot = document.getElementById('auth-slot');
     if (!slot) return;
     if (authState.signedIn) {
+      const unread = Number(authState.unreadCount || 0);
+      const badge = unread > 0 ? `<span class="inbox-badge">${unread > 99 ? '99+' : unread}</span>` : '';
+      const handle = authState.handle ? `<a class="auth-email" href="/u/${escapeHtmlAuth(authState.handle)}" title="Your profile">@${escapeHtmlAuth(authState.handle)}</a><span class="auth-sep">·</span>` : '';
       slot.innerHTML = `
+        ${handle}
         <a class="auth-email" href="/library" title="${escapeHtmlAuth(authState.email)}">My dreams</a>
+        <span class="auth-sep">·</span>
+        <a class="auth-email" href="/settings" title="Profile settings">Settings</a>
+        <span class="auth-sep">·</span>
+        <a class="inbox-link" href="/inbox" aria-label="Inbox" title="Inbox">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 4l6 4 6-4"/><rect x="2" y="3" width="12" height="10" rx="0.5"/></svg>
+          ${badge}
+        </a>
         <span class="auth-sep">·</span>
         <button class="auth-link" data-action="signout">Sign out</button>
       `;
@@ -2767,9 +3232,13 @@
     try { await fetch('/api/auth/signout', { method: 'POST' }); } catch (_) {}
     authState.signedIn = false;
     authState.email = null;
+    authState.handle = null;
+    authState.displayName = null;
+    authState.unreadCount = 0;
     renderAuthSlot();
     showToast('Signed out');
-    if (window.location.pathname === '/library') window.location.href = '/';
+    const restricted = ['/library', '/inbox', '/settings'];
+    if (restricted.includes(window.location.pathname)) window.location.href = '/';
   }
 
   function maybeShowRecipientPrompt() {
@@ -2831,7 +3300,10 @@
     history.replaceState(null, '', window.location.pathname + window.location.hash);
   })();
 
-  refreshAuth().then(maybeLoadLibrary);
+  refreshAuth().then(() => {
+    maybeLoadLibrary();
+    maybeLoadProfile(); // re-render with accurate auth state (no-op if not on /u/...)
+  });
 
   // ============ Voice capture (record → Whisper → dream record) ============
   // Pipeline:
@@ -3131,8 +3603,9 @@
         } else {
           learnUrl = `https://en.wikipedia.org/wiki/Special:Search?search=${searchQuery}`;
         }
+        const featured = idx === 0 ? ' featured' : '';
         return `
-        <li class="ar-rel has-img" data-rel-idx="${idx}" data-search-q="${searchQuery}">
+        <li class="ar-rel has-img${featured}" data-rel-idx="${idx}" data-search-q="${searchQuery}">
           <img class="ar-rel-img" src="${imgUrl}" alt="${escapeHTML((r.artist || '') + ' — ' + (r.title || ''))}" loading="lazy" data-tried="0">
           <div class="ar-rel-body">
             <div class="ar-rel-attr"><b>${escapeHTML(r.artist || '')}</b> · <i>${escapeHTML(r.title || '')}</i>${r.year ? ' · ' + escapeHTML(r.year) : ''}</div>
@@ -3393,11 +3866,15 @@
           showError('Dream not found', 'No dream is saved at this URL. It may have been removed, or the link is wrong.');
           return;
         }
-        const { dream } = await res.json();
+        const payload = await res.json();
+        const dream = payload.dream;
         if (!dream || !dream.text) {
           showError('Empty dream', 'This URL resolves but the dream record has no text.');
           return;
         }
+        window.__currentDream = dream;
+        window.__currentPrevId = payload.prev_id || null;
+        window.__currentNextId = payload.next_id || null;
         textareaEl.value = dream.text;
         textareaEl.readOnly = true; // no re-edit after the dream is saved
         // Make audio replay available if the dream record has an audio URL
@@ -3405,10 +3882,12 @@
         const playBtn = document.querySelector('[data-action="play-recording"]');
         if (playBtn) playBtn.style.display = dream.audio_url ? '' : 'none';
         showDreamTitle(dream);
+        renderDreamOwnerControls(dream);
         if (dream.analysis) {
           renderAnalysis(dream.text, dream.analysis);
           appendPermalinkPill(dream.id, '/d/' + dream.id);
         }
+        renderPrevNextNav();
         setState('done');
         // Hero image: show + load (cached if already generated, generates on demand otherwise)
         loadHeroImage(dream);
@@ -3416,6 +3895,96 @@
         showError('Could not load this dream', err.message || String(err));
       }
     })();
+
+    // ============ Owner line: "Dreamed by @handle" + visibility toggle + Send-note ============
+    function renderDreamOwnerControls(dream) {
+      const section = document.getElementById('dream-title-section');
+      if (!section || !dream) return;
+      let line = document.getElementById('dream-owner-line');
+      if (!line) {
+        line = document.createElement('div');
+        line.id = 'dream-owner-line';
+        line.className = 'dream-owner-line';
+        section.appendChild(line);
+      }
+      const handle = dream.owner_handle || null;
+      const display = dream.owner_display_name || (handle ? '@' + handle : 'Anonymous');
+      const dreamerLink = handle
+        ? `<span>Dreamed by <a href="/u/${escapeHtmlAuth(handle)}">${escapeHtmlAuth(display)}</a></span>`
+        : `<span>Dreamed anonymously</span>`;
+
+      // Owner = signed-in user whose email matches dream.owner_email
+      const isOwner = !!(authState.signedIn && dream.owner_email && authState.email && dream.owner_email.toLowerCase() === authState.email.toLowerCase());
+      const visibility = dream.visibility === 'private' ? 'private' : 'public';
+      const visBtn = isOwner
+        ? `<button class="vis-toggle" data-current="${visibility}" data-action="toggle-vis">${visibility === 'private' ? 'Private — make public' : 'Public — make private'}</button>`
+        : '';
+      const noteBtn = (handle && !isOwner)
+        ? `<button class="note-btn" data-action="open-note" data-to-handle="${escapeHtmlAuth(handle)}" data-dream-id="${escapeHtmlAuth(dream.id)}">Send a note</button>`
+        : '';
+
+      line.innerHTML = `${dreamerLink}${visBtn ? ' · ' + visBtn : ''}${noteBtn ? ' · ' + noteBtn : ''}`;
+    }
+
+    // Visibility toggle handler (delegated globally below)
+    async function toggleVisibility(btn) {
+      if (!btn) return;
+      const current = btn.dataset.current === 'private' ? 'private' : 'public';
+      const next = current === 'private' ? 'public' : 'private';
+      const dream = window.__currentDream;
+      if (!dream || !dream.id) return;
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/dream/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: dream.id, visibility: next }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          showToast(data.message || data.error || 'Could not update visibility');
+          return;
+        }
+        dream.visibility = next;
+        showToast(next === 'private' ? 'Made private' : 'Made public');
+        renderDreamOwnerControls(dream);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ============ Prev/Next navigation at bottom of dream page ============
+    function renderPrevNextNav() {
+      const existing = document.getElementById('prev-next-nav');
+      if (existing) existing.remove();
+      const isDreamPage = /^\/d\//.test(window.location.pathname);
+      if (!isDreamPage) return;
+      const container = document.querySelector('.container');
+      if (!container) return;
+      const prevId = window.__currentPrevId;
+      const nextId = window.__currentNextId;
+      if (!prevId && !nextId) return;
+      const nav = document.createElement('nav');
+      nav.id = 'prev-next-nav';
+      nav.className = 'prev-next-nav';
+      const prevHtml = prevId
+        ? `<a class="pn-link pn-prev" href="/d/${escapeHtmlAuth(prevId)}">
+             <div class="pn-kicker">Previous dream</div>
+             <div class="pn-title">Older in the global feed</div>
+           </a>`
+        : `<span class="pn-link pn-prev disabled"><div class="pn-kicker">Previous dream</div><div class="pn-title">No older dream</div></span>`;
+      const nextHtml = nextId
+        ? `<a class="pn-link pn-next" href="/d/${escapeHtmlAuth(nextId)}">
+             <div class="pn-kicker">Next dream</div>
+             <div class="pn-title">Newer in the global feed</div>
+           </a>`
+        : `<span class="pn-link pn-next disabled"><div class="pn-kicker">Next dream</div><div class="pn-title">No newer dream</div></span>`;
+      nav.innerHTML = prevHtml + nextHtml;
+      // Append just before the bottom capture-cta if present, else end of container
+      const cta = container.querySelector('.capture-cta');
+      if (cta) cta.parentNode.insertBefore(nav, cta);
+      else container.appendChild(nav);
+    }
 
     // ============ Hero dream image ============
     async function loadHeroImage(dream, opts = {}) {
@@ -3610,6 +4179,342 @@
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
     });
+  });
+
+  // ============ Browse-rail: persistent top-of-page recent-dreams strip ============
+  async function loadFeedRail() {
+    const track = document.getElementById('feed-rail-track');
+    if (!track) return;
+    try {
+      const r = await fetch('/api/dreams/recent?limit=12');
+      if (!r.ok) { track.innerHTML = ''; return; }
+      const { dreams } = await r.json();
+      if (!Array.isArray(dreams) || dreams.length === 0) {
+        track.innerHTML = '<span class="feed-rail-label" style="color:var(--muted)">No dreams yet — record yours</span>';
+        return;
+      }
+      const fmtAgo = (iso) => {
+        const ms = Date.now() - new Date(iso).getTime();
+        const m = Math.round(ms / 60000);
+        if (m < 1) return 'now';
+        if (m < 60) return m + 'm';
+        const h = Math.round(m / 60);
+        if (h < 24) return h + 'h';
+        return Math.round(h / 24) + 'd';
+      };
+      track.innerHTML = dreams.map((d) => {
+        const fb = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
+        const title = (d.title && d.title.trim()) || (fb ? fb + '…' : 'Untitled');
+        const by = d.owner_handle ? `<span class="frc-by">@${escapeHtmlAuth(d.owner_handle)}</span>` : '';
+        return `<a class="feed-rail-chip" href="/d/${escapeHtmlAuth(d.id)}" title="${escapeHtmlAuth(title)} · ${fmtAgo(d.created_at)}">${escapeHtmlAuth(title)}${by}</a>`;
+      }).join('');
+    } catch (_) {}
+  }
+  loadFeedRail();
+
+  // ============ Profile page (/u/:handle) ============
+  async function maybeLoadProfile() {
+    const m = window.location.pathname.match(/^\/u\/([a-z0-9][a-z0-9_-]{2,23})\/?$/i);
+    if (!m) return;
+    document.body.classList.add('profile-page');
+    const handle = m[1].toLowerCase();
+    const container = document.getElementById('profile-content');
+    if (!container) return;
+    container.innerHTML = '<div class="profile-empty">Loading…</div>';
+    try {
+      const r = await fetch('/api/user/profile?handle=' + encodeURIComponent(handle));
+      if (!r.ok) {
+        container.innerHTML = `<div class="profile-empty">No dreamer with the handle <b>@${escapeHtmlAuth(handle)}</b>.</div>`;
+        return;
+      }
+      const { profile, dreams } = await r.json();
+      const initial = (profile.display_name || profile.handle || '?').slice(0, 1).toUpperCase();
+      const avatar = profile.selfie_url
+        ? `<img class="profile-avatar" src="${escapeHtmlAuth(profile.selfie_url)}" alt="">`
+        : `<div class="profile-avatar empty">${escapeHtmlAuth(initial)}</div>`;
+      const links = (profile.contact_links || []).map((l) =>
+        `<a href="${escapeHtmlAuth(l.url)}" target="_blank" rel="noopener">${escapeHtmlAuth(l.label)}</a>`
+      ).join('');
+      const isSelf = authState.signedIn && authState.handle && authState.handle === profile.handle;
+      const noteBtn = (!isSelf && profile.handle)
+        ? `<button class="note-btn" data-action="open-note" data-to-handle="${escapeHtmlAuth(profile.handle)}">Send a note</button>`
+        : '';
+      const settingsBtn = isSelf
+        ? `<a class="vis-toggle" href="/settings">Edit profile</a>`
+        : '';
+      const dreamsHtml = (dreams || []).length === 0
+        ? '<div class="profile-empty">No public dreams yet.</div>'
+        : dreams.map((d) => {
+            const fb = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
+            const title = (d.title && d.title.trim()) || (fb ? fb + '…' : 'Untitled');
+            const img = d.image_url
+              ? `<img src="${escapeHtmlAuth(d.image_url)}" alt="" loading="lazy">`
+              : '';
+            const date = d.created_at ? new Date(d.created_at).toLocaleDateString() : '';
+            return `<a class="pd-card" href="/d/${escapeHtmlAuth(d.id)}">
+              ${img}
+              <div class="pd-body">
+                <div class="pd-title">${escapeHtmlAuth(title)}</div>
+                <div class="pd-meta">${escapeHtmlAuth(date)} · ${d.morph_count || 0} morphs</div>
+              </div>
+            </a>`;
+          }).join('');
+
+      container.innerHTML = `
+        <div class="profile-head">
+          ${avatar}
+          <div>
+            <div class="profile-name">${escapeHtmlAuth(profile.display_name || ('@' + profile.handle))}</div>
+            <div class="profile-handle">@${escapeHtmlAuth(profile.handle)}</div>
+            ${profile.bio ? `<div class="profile-bio">${escapeHtmlAuth(profile.bio)}</div>` : ''}
+            ${links ? `<div class="profile-contact-links">${links}</div>` : ''}
+            <div class="profile-actions">${noteBtn}${settingsBtn}</div>
+          </div>
+        </div>
+        <div class="section-head"><div class="num">i.</div><div class="title">Public dreams</div><div class="rule"></div></div>
+        <div class="profile-dreams-grid">${dreamsHtml}</div>
+      `;
+      try { document.title = `@${profile.handle} · Dreams`; } catch (_) {}
+    } catch (err) {
+      container.innerHTML = `<div class="profile-empty">${escapeHtmlAuth(err.message || 'Error loading profile')}</div>`;
+    }
+  }
+  // (maybeLoadProfile is invoked from refreshAuth().then so the profile renders
+  // with the correct auth state on first paint — see refreshAuth chain above.)
+
+  // ============ Inbox page (/inbox) ============
+  async function maybeLoadInbox() {
+    if (window.location.pathname !== '/inbox') return;
+    document.body.classList.add('inbox-page');
+    const list = document.getElementById('inbox-list');
+    const meta = document.getElementById('inbox-meta');
+    if (!list) return;
+    if (!authState.signedIn) {
+      list.innerHTML = `<div class="inbox-empty">Sign in to read your notes. <button class="auth-link" data-action="open-signin" style="margin-left: 12px;">Sign in</button></div>`;
+      if (meta) meta.textContent = '';
+      return;
+    }
+    list.innerHTML = '<div class="inbox-empty">Loading…</div>';
+    try {
+      const r = await fetch('/api/message/inbox');
+      if (!r.ok) {
+        list.innerHTML = '<div class="inbox-empty">Could not load inbox.</div>';
+        return;
+      }
+      const { messages, unread_count } = await r.json();
+      if (meta) meta.textContent = (messages.length || 0) + ' total · ' + (unread_count || 0) + ' unread';
+      if (!messages || messages.length === 0) {
+        list.innerHTML = '<div class="inbox-empty">No notes yet. When someone reads one of your dreams and reaches out, it lands here.</div>';
+        return;
+      }
+      list.innerHTML = messages.map((m) => {
+        const when = m.created_at ? new Date(m.created_at).toLocaleString() : '';
+        const fromName = m.from_display_name || (m.from_handle ? '@' + m.from_handle : 'Someone');
+        const fromLink = m.from_handle
+          ? `<a href="/u/${escapeHtmlAuth(m.from_handle)}">${escapeHtmlAuth(fromName)}</a>`
+          : escapeHtmlAuth(fromName);
+        const dreamLink = m.dream_id
+          ? `<div class="inbox-msg-dream">About your dream: <a href="/d/${escapeHtmlAuth(m.dream_id)}">/d/${escapeHtmlAuth(m.dream_id)}</a></div>`
+          : '';
+        const replyBtn = m.from_handle
+          ? `<button class="vis-toggle" data-action="open-note" data-to-handle="${escapeHtmlAuth(m.from_handle)}">Reply</button>`
+          : '';
+        return `<article class="inbox-msg ${m.read ? '' : 'unread'}" data-msg-id="${escapeHtmlAuth(m.id)}">
+          <div class="inbox-msg-head">
+            <div class="inbox-msg-from">From ${fromLink}</div>
+            <div class="inbox-msg-time">${escapeHtmlAuth(when)}</div>
+          </div>
+          <div class="inbox-msg-body">${escapeHtmlAuth(m.body)}</div>
+          ${dreamLink}
+          <div class="inbox-msg-actions">${replyBtn}</div>
+        </article>`;
+      }).join('');
+      // Mark all read in the background (best-effort)
+      if (unread_count > 0) {
+        try {
+          await fetch('/api/message/read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ all: true }),
+          });
+          authState.unreadCount = 0;
+          renderAuthSlot();
+        } catch (_) {}
+      }
+      try { document.title = 'Inbox · Dreams'; } catch (_) {}
+    } catch (err) {
+      list.innerHTML = `<div class="inbox-empty">${escapeHtmlAuth(err.message || 'Error')}</div>`;
+    }
+  }
+
+  // ============ Settings page (/settings) ============
+  let settingsLoaded = false;
+  async function maybeLoadSettings() {
+    if (window.location.pathname !== '/settings') return;
+    document.body.classList.add('settings-page');
+    if (settingsLoaded) return;
+    settingsLoaded = true;
+    if (!authState.signedIn) {
+      const form = document.getElementById('settings-form');
+      if (form) form.innerHTML = '<div class="inbox-empty">Sign in to edit your profile. <button class="auth-link" data-action="open-signin" style="margin-left: 12px;">Sign in</button></div>';
+      return;
+    }
+    try {
+      const r = await fetch('/api/user/profile');
+      if (!r.ok) return;
+      const { profile } = await r.json();
+      document.getElementById('settings-display-name').value = profile.display_name || '';
+      document.getElementById('settings-handle').value = profile.handle || '';
+      document.getElementById('settings-bio').value = profile.bio || '';
+      renderContactLinks(profile.contact_links || []);
+      try { document.title = 'Settings · Dreams'; } catch (_) {}
+    } catch (_) {}
+  }
+  function renderContactLinks(links) {
+    const wrap = document.getElementById('settings-links');
+    if (!wrap) return;
+    const rows = (links.length ? links : [{ label: '', url: '' }]).map((l, i) => `
+      <div class="contact-link-row" data-row-idx="${i}">
+        <input type="text" data-link-field="label" placeholder="Label (e.g. Twitter)" value="${escapeHtmlAuth(l.label || '')}" maxlength="24">
+        <input type="url" data-link-field="url" placeholder="https://..." value="${escapeHtmlAuth(l.url || '')}" maxlength="200">
+        <button type="button" data-action="remove-link" title="Remove">×</button>
+      </div>`).join('');
+    wrap.innerHTML = rows;
+  }
+  document.addEventListener('click', (e) => {
+    const addBtn = e.target.closest('#settings-add-link');
+    if (addBtn) {
+      e.preventDefault();
+      const wrap = document.getElementById('settings-links');
+      const idx = wrap.children.length;
+      const row = document.createElement('div');
+      row.className = 'contact-link-row';
+      row.dataset.rowIdx = idx;
+      row.innerHTML = `
+        <input type="text" data-link-field="label" placeholder="Label" maxlength="24">
+        <input type="url" data-link-field="url" placeholder="https://..." maxlength="200">
+        <button type="button" data-action="remove-link" title="Remove">×</button>`;
+      wrap.appendChild(row);
+    }
+    const removeBtn = e.target.closest('[data-action="remove-link"]');
+    if (removeBtn) {
+      e.preventDefault();
+      const row = removeBtn.closest('.contact-link-row');
+      if (row) row.remove();
+    }
+  });
+  const settingsForm = document.getElementById('settings-form');
+  if (settingsForm) {
+    settingsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const display_name = document.getElementById('settings-display-name').value.trim();
+      const handle = document.getElementById('settings-handle').value.trim().toLowerCase();
+      const bio = document.getElementById('settings-bio').value.trim();
+      const contact_links = Array.from(document.querySelectorAll('#settings-links .contact-link-row')).map((row) => {
+        const label = row.querySelector('[data-link-field="label"]').value.trim();
+        const url = row.querySelector('[data-link-field="url"]').value.trim();
+        return { label, url };
+      }).filter((l) => l.label && /^https?:\/\//i.test(l.url));
+      const saveBtn = document.getElementById('settings-save');
+      const msg = document.getElementById('settings-save-msg');
+      saveBtn.disabled = true;
+      msg.textContent = 'Saving…';
+      try {
+        const r = await fetch('/api/user/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ display_name, handle, bio, contact_links }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          msg.textContent = data.message || data.error || 'Could not save';
+          msg.style.color = 'var(--rust-deep)';
+          return;
+        }
+        msg.textContent = 'Saved';
+        msg.style.color = 'var(--rust)';
+        authState.handle = data.profile.handle || authState.handle;
+        authState.displayName = data.profile.display_name || authState.displayName;
+        renderAuthSlot();
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+  }
+
+  // ============ Send-note modal ============
+  const noteModal = document.getElementById('note-modal');
+  const noteForm = document.getElementById('note-form');
+  const noteBody = document.getElementById('note-body');
+  const noteRecipient = document.getElementById('note-recipient');
+  const noteSend = document.getElementById('note-send');
+  let noteState = { toHandle: null, dreamId: null };
+
+  function openNote(toHandle, dreamId) {
+    if (!noteModal) return;
+    if (!authState.signedIn) {
+      showToast('Sign in to send notes');
+      openSignin();
+      return;
+    }
+    if (toHandle === authState.handle) {
+      showToast("You can't send a note to yourself");
+      return;
+    }
+    noteState.toHandle = toHandle;
+    noteState.dreamId = dreamId || null;
+    noteBody.value = '';
+    noteRecipient.innerHTML = `To <b>@${escapeHtmlAuth(toHandle)}</b>${dreamId ? ' · about <a href="/d/' + escapeHtmlAuth(dreamId) + '">/d/' + escapeHtmlAuth(dreamId) + '</a>' : ''}`;
+    noteModal.classList.add('open');
+    noteModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => noteBody.focus(), 80);
+  }
+  function closeNote() {
+    if (!noteModal) return;
+    noteModal.classList.remove('open');
+    noteModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  if (noteForm) {
+    noteForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = noteBody.value.trim();
+      if (!body) { showToast('Write something first'); return; }
+      noteSend.disabled = true;
+      noteSend.textContent = 'Sending…';
+      try {
+        const r = await fetch('/api/message/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to_handle: noteState.toHandle, body, dream_id: noteState.dreamId }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          showToast(data.message || data.error || 'Could not send');
+          return;
+        }
+        showToast(data.email_sent ? 'Sent · they got an email too' : 'Sent');
+        closeNote();
+      } finally {
+        noteSend.disabled = false;
+        noteSend.textContent = 'Send';
+      }
+    });
+  }
+  if (noteModal) noteModal.addEventListener('click', (e) => { if (e.target === noteModal) closeNote(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && noteModal && noteModal.classList.contains('open')) closeNote();
+  });
+
+  // ============ Delegated handlers for the new data-actions ============
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    if (action === 'open-note') openNote(btn.dataset.toHandle, btn.dataset.dreamId);
+    else if (action === 'close-note') closeNote();
+    else if (action === 'toggle-vis') toggleVisibility(btn);
   });
 
   // ============ Kafka portrait — Wikimedia URL fallback chain ============

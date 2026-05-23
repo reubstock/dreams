@@ -116,6 +116,7 @@ export default async function handler(req, res) {
       morph_count: Array.isArray(d.analysis?.morphs) ? d.analysis.morphs.length : 0,
       word_count: d.word_count || (d.text || '').split(/\s+/).filter(Boolean).length,
       image_url: d.image_url || null,
+      visibility: d.visibility || 'public',
       created_at: d.created_at,
     }));
 

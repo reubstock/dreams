@@ -95,8 +95,23 @@ export default async function handler(req, res) {
     audioUrlClean = audio_url;
   }
 
-  // If the user is signed in, capture ownership
+  // If the user is signed in, capture ownership + their handle for cheap rendering.
   const ownerEmail = await getSignedInEmail(req);
+  let ownerHandle = null;
+  let ownerDisplayName = null;
+  if (ownerEmail) {
+    try {
+      const ur = await fetch(`${KV_URL}/get/user:${encodeURIComponent(ownerEmail)}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` },
+      });
+      if (ur.ok) {
+        const { result } = await ur.json();
+        const user = result && (typeof result === 'string' ? JSON.parse(result) : result);
+        ownerHandle = user?.handle || null;
+        ownerDisplayName = user?.display_name || null;
+      }
+    } catch (_) {}
+  }
 
   const record = {
     id,
@@ -106,6 +121,9 @@ export default async function handler(req, res) {
     dreamer: dreamerClean,
     audio_url: audioUrlClean,
     owner_email: ownerEmail,
+    owner_handle: ownerHandle,
+    owner_display_name: ownerDisplayName,
+    visibility: 'public', // default per product choice; user can flip to private later
     device_id: typeof device_id === 'string' ? device_id.slice(0, 64) : null,
     created_at: new Date().toISOString(),
     word_count: text.trim().split(/\s+/).length,

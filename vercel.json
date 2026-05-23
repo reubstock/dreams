@@ -1,6 +1,9 @@
 {
   "rewrites": [
     { "source": "/d/:id", "destination": "/api/d/:id" },
-    { "source": "/library", "destination": "/index.html" }
+    { "source": "/u/:handle", "destination": "/api/u/:handle" },
+    { "source": "/library", "destination": "/index.html" },
+    { "source": "/inbox", "destination": "/index.html" },
+    { "source": "/settings", "destination": "/index.html" }
   ]
 }

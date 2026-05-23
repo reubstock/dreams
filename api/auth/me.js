@@ -36,12 +36,34 @@ export default async function handler(req, res) {
     return res.status(200).json({ signed_in: false });
   }
 
-  // Also fetch user record for selfie + any other profile data
+  // Also fetch user record for selfie + handle + display name
   const user = (await kvGet(`user:${session.email}`)) || {};
+
+  // Pull unread inbox count (best-effort; never block the auth response on it)
+  let unread_count = 0;
+  try {
+    const r = await fetch(`${KV_URL}/lrange/inbox:${encodeURIComponent(session.email)}/0/99`, {
+      headers: { Authorization: `Bearer ${KV_TOKEN}` },
+    });
+    if (r.ok) {
+      const { result } = await r.json();
+      if (Array.isArray(result)) {
+        for (const s of result) {
+          try {
+            const m = typeof s === 'string' ? JSON.parse(s) : s;
+            if (m && !m.read) unread_count++;
+          } catch (_) {}
+        }
+      }
+    }
+  } catch (_) {}
 
   return res.status(200).json({
     signed_in: true,
     email: session.email,
+    handle: user.handle || null,
+    display_name: user.display_name || session.email.split('@')[0],
     selfie_url: user.selfie_url || null,
+    unread_count,
   });
 }
