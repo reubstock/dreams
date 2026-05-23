@@ -3924,6 +3924,14 @@
         : '';
 
       line.innerHTML = `${dreamerLink}${visBtn ? ' · ' + visBtn : ''}${noteBtn ? ' · ' + noteBtn : ''}`;
+      // Direct-wire the buttons. We can't rely on a top-level delegated handler
+      // because these helpers live inside this nested IIFE scope.
+      const visEl = line.querySelector('[data-action="toggle-vis"]');
+      if (visEl) visEl.addEventListener('click', () => toggleVisibility(visEl));
+      const noteEl = line.querySelector('[data-action="open-note"]');
+      if (noteEl) noteEl.addEventListener('click', () => {
+        if (typeof window.__openNote === 'function') window.__openNote(noteEl.dataset.toHandle, noteEl.dataset.dreamId);
+      });
     }
 
     // Visibility toggle handler (delegated globally below)
@@ -4476,6 +4484,9 @@
     noteModal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
+  // Expose openNote on window so renderDreamOwnerControls (nested-IIFE scope)
+  // can reach it. closeNote is fine via the in-modal close button (top-level scope).
+  window.__openNote = openNote;
   if (noteForm) {
     noteForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -4514,7 +4525,8 @@
     const action = btn.dataset.action;
     if (action === 'open-note') openNote(btn.dataset.toHandle, btn.dataset.dreamId);
     else if (action === 'close-note') closeNote();
-    else if (action === 'toggle-vis') toggleVisibility(btn);
+    // toggle-vis is wired directly inside renderDreamOwnerControls because
+    // toggleVisibility lives in a nested-IIFE scope unreachable from here.
   });
 
   // ============ Kafka portrait — Wikimedia URL fallback chain ============

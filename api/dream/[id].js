@@ -30,6 +30,27 @@ export default async function handler(req, res) {
     if (!result) return res.status(404).json({ error: 'not_found', id });
     const dream = typeof result === 'string' ? JSON.parse(result) : result;
 
+    // Backfill owner_handle / owner_display_name for pre-migration dreams
+    // by looking up the owner's user record. We don't write it back here;
+    // the next dream-update will persist it. Cheap one-shot read.
+    if (dream.owner_email && (!dream.owner_handle || !dream.owner_display_name)) {
+      try {
+        const ur = await fetch(`${KV_URL}/get/user:${encodeURIComponent(dream.owner_email)}`, {
+          headers: { Authorization: `Bearer ${KV_TOKEN}` },
+        });
+        if (ur.ok) {
+          const { result: uRes } = await ur.json();
+          if (uRes) {
+            const user = typeof uRes === 'string' ? JSON.parse(uRes) : uRes;
+            if (user) {
+              if (!dream.owner_handle && user.handle) dream.owner_handle = user.handle;
+              if (!dream.owner_display_name && user.display_name) dream.owner_display_name = user.display_name;
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
     // Resolve prev/next neighbors from the global recent list. dreams:recent is
     // lpushed (newest at index 0). "Next" = newer than this dream (smaller idx);
     // "Prev" = older (larger idx). Skip private dreams; bail out if we'd walk too far.
