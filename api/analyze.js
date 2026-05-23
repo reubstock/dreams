@@ -224,12 +224,15 @@ async function searchCommons(query, opts = {}) {
     });
     if (!r.ok) return null;
     const data = await r.json();
-    let hits = (data?.query?.search || []).filter((h) => /\.(jpe?g|png|gif|tiff?)$/i.test(h.title));
+    let hits = (data?.query?.search || []).filter((h) => /\.(jpe?g|png|gif|tiff?|svg)$/i.test(h.title));
     if (kind === 'artwork') {
       const wantsSelfPortrait = /self[-_ ]?portrait/i.test(query);
       hits = hits.filter((h) => wantsSelfPortrait || !PHOTO_TELLS.test(h.title));
     }
-    const pick = hits[0];
+    // Prefer browser-renderable formats (jpg/png/gif) over tiff/svg.
+    // Chrome won't render <img src="...tif"> at all.
+    const renderable = hits.filter((h) => /\.(jpe?g|png|gif)$/i.test(h.title));
+    const pick = renderable[0] || hits[0];
     return pick ? pick.title.replace(/^File:/, '') : null;
   } catch (_) { return null; }
 }

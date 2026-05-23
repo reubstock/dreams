@@ -46,7 +46,9 @@ export default async function handler(req, res) {
       });
     }
 
-    const pick = pool[0] || hits.find((h) => /\.(jpe?g|png|gif|tiff?)$/i.test(h.title));
+    // Prefer browser-renderable formats; fall back to whatever is available.
+    const renderable = pool.filter((h) => /\.(jpe?g|png|gif)$/i.test(h.title));
+    const pick = renderable[0] || pool[0] || hits.find((h) => /\.(jpe?g|png|gif|tiff?)$/i.test(h.title));
     if (!pick) {
       return res.status(404).json({ error: 'no_image_found' });
     }
