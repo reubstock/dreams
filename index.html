@@ -3816,6 +3816,11 @@
       const title = (titleEl && titleEl.textContent && titleEl.textContent.trim()) || 'A dream';
       const subject = encodeURIComponent(title);
       const body = encodeURIComponent(title + '\n\n' + fullUrl);
+      // Email opens Gmail's web compose directly. mailto: was unreliable because
+      // it routes through the OS default mail handler (Mail.app on macOS) even
+      // when the user has Gmail open in a browser tab. Gmail web compose works
+      // in any browser; users with other mail clients can copy the link.
+      const gmailHref = `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
       const pill = document.createElement('div');
       pill.className = 'ar-permalink';
       pill.innerHTML = `
@@ -3823,7 +3828,7 @@
         <code class="ar-pl-url">${permalink}</code>
         <button class="ar-pl-copy" type="button">Copy link</button>
         <a class="ar-pl-share" href="sms:?body=${body}">Text</a>
-        <a class="ar-pl-share" href="mailto:?subject=${subject}&body=${body}">Email</a>
+        <a class="ar-pl-share" href="${gmailHref}" target="_blank" rel="noopener">Email</a>
       `;
       statsEl.insertBefore(pill, statsEl.firstChild);
       pill.querySelector('.ar-pl-copy').addEventListener('click', async () => {
