@@ -60,6 +60,34 @@ Safe list (each is a real, world-famous, public-domain image on Wikimedia Common
 
 8. Also include "wikipedia_url" — the full Wikipedia article URL for THE ARTWORK ITSELF (e.g. "https://en.wikipedia.org/wiki/The_Garden_of_Earthly_Delights"), NOT a biography of the artist. The "Learn More" link on each card uses it. If you're unsure whether a dedicated article exists, omit the field — the frontend will fall back to a Wikipedia search URL built from the title.
 
+9. For closest_historical_dreamer, **pick the figure whose documented dream-related work most specifically matches THIS dream's motifs.** Vary your picks across dreams — Freud and Jung are the lazy defaults; only choose them when no one else fits better. Anchor list of historical dreamers, each with the motifs their work is best known for:
+
+  - Franz Kafka (1883–1924) — bodily metamorphosis, voice loss, bureaucratic absurdity, family alienation
+  - Mary Shelley (1797–1851) — life animated from death, Frankenstein born from a waking dream
+  - Samuel Taylor Coleridge (1772–1834) — Kubla Khan, opium reverie, interrupted vision
+  - Lewis Carroll (1832–1898) — falling, talking animals, logic that bends, Alice
+  - Robert Louis Stevenson (1850–1894) — Jekyll & Hyde, split identity, the "Brownies" who wrote his dreams
+  - Jorge Luis Borges (1899–1986) — labyrinths, infinite libraries, doubles, mirrors
+  - Marcel Proust (1871–1922) — involuntary memory, the half-waking moment, the long unbroken interior
+  - William Blake (1757–1827) — angels, devils, prophetic visions, illuminated manuscripts
+  - Gérard de Nerval (1808–1855) — Aurélia, melancholic descent, the dream as second life
+  - August Strindberg (1849–1912) — A Dream Play, reality fragmenting on stage
+  - Edgar Allan Poe (1809–1849) — premature burial, the fevered nightmare, the haunted room
+  - August Kekulé (1829–1896) — the benzene-ring snake dream, scientific intuition
+  - Dmitri Mendeleev (1834–1907) — the periodic table arrived in a dream
+  - Elias Howe (1819–1867) — the sewing-machine eye in a dream, mechanical solution
+  - René Descartes (1596–1650) — three formative dreams of November 1619
+  - Hildegard von Bingen (1098–1179) — radiant visions of fire and light, illuminated by God
+  - Julian of Norwich (1342–c.1416) — Revelations of Divine Love, the hazelnut, the wound
+  - Emanuel Swedenborg (1688–1772) — spirit-world journeys, dream journals
+  - Hervey de Saint-Denys (1822–1892) — pioneering lucid-dreaming experiments, voluntary dream control
+  - Carl Jung (1875–1961) — archetypes, shadow, the Red Book, the collective unconscious
+  - Sigmund Freud (1856–1939) — wish-fulfillment, repression, latent vs. manifest content
+  - Zhuangzi (c.369–286 BCE) — the butterfly dream; "Am I a man dreaming I'm a butterfly, or a butterfly dreaming I'm a man?"
+  - Artemidorus (2nd century CE) — Oneirocritica, the first systematic dream interpretation manual
+
+You may use a figure outside the list if their work is even more specifically on-point. But cross-check: if the dream is about transformation, Kafka beats Freud; if it's about a fevered nightmare, Poe beats Jung; if it's about scientific insight, Kekulé or Mendeleev beats Freud. DO NOT default to Freud or Jung unless the dream is genuinely about wish-fulfillment, repression, archetypes, or the unconscious.
+
 Return only valid JSON matching the schema. Do not wrap in markdown.`;
 
 const SCHEMA_HINT = {
