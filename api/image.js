@@ -67,12 +67,28 @@ async function craftPrompt(text, analysis, dreamer, willFaceSwap) {
   const motifs = analysis?.morphs?.slice(0, 6).map((m) => `${m.before} → ${m.after}`).join('; ') || '';
 
   // Build the dreamer instruction — this is the key fix for "renders me as a woman".
-  // If we know gender/age, the prompt-crafter MUST describe the dreamer consistently.
+  // If we know gender/age/hair/glasses, the prompt-crafter MUST describe the
+  // dreamer consistently. Hair + glasses matter because face-swap (Replicate)
+  // transfers facial features only and inherits hair/accessories from the
+  // gpt-image-1 painting; so the painting needs to start with the right hair
+  // and glasses or face-swap can't recover them.
   let dreamerLine = '';
-  if (dreamer && (dreamer.gender || dreamer.age)) {
+  if (dreamer && (dreamer.gender || dreamer.age || dreamer.hair || dreamer.glasses)) {
     const ageDesc = dreamer.age ? `${dreamer.age}-year-old ` : '';
     const genderDesc = dreamer.gender || 'person';
-    dreamerLine = `\n\nDREAMER IDENTITY (CRITICAL): The person whose dream this is, is a ${ageDesc}${genderDesc}. Whenever the dreamer appears in the image, describe them as a ${ageDesc}${genderDesc}. Do NOT default to any other gender or age. If the dream text says "I" or "my", that refers to this ${genderDesc}.`;
+    const parts = [`a ${ageDesc}${genderDesc}`];
+    if (dreamer.hair) {
+      if (dreamer.hair === 'bald') parts.push('completely bald');
+      else if (dreamer.hair === 'shaved') parts.push('with a shaved head');
+      else parts.push(`with ${dreamer.hair} hair`);
+    }
+    if (dreamer.glasses && dreamer.glasses !== 'none') {
+      parts.push(`wearing ${dreamer.glasses} glasses`);
+    } else if (dreamer.glasses === 'none') {
+      parts.push('not wearing glasses');
+    }
+    const description = parts.join(', ');
+    dreamerLine = `\n\nDREAMER IDENTITY (CRITICAL — render exactly as described, do not invent different features): The person whose dream this is, is ${description}. Whenever the dreamer appears in the image, render them as ${description}. Do NOT default to any other appearance. If the dream text says "I" or "my", that refers to this person.`;
   }
 
   // When face-swap will run after generation, hint the prompt-crafter to make

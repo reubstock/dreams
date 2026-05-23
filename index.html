@@ -2400,6 +2400,35 @@
             <span class="dp-label">age</span>
             <input class="dp-input dp-age" id="dreamer-age" type="number" min="1" max="120" placeholder="—" aria-label="Dreamer age">
             <span class="dp-sep">·</span>
+            <span class="dp-label">hair</span>
+            <select class="dp-input" id="dreamer-hair" aria-label="Dreamer hair">
+              <option value="">—</option>
+              <option value="black">black</option>
+              <option value="dark brown">dark brown</option>
+              <option value="brown">brown</option>
+              <option value="auburn">auburn</option>
+              <option value="red">red</option>
+              <option value="blonde">blonde</option>
+              <option value="strawberry blonde">strawberry blonde</option>
+              <option value="grey">grey</option>
+              <option value="silver">silver</option>
+              <option value="white">white</option>
+              <option value="bald">bald</option>
+              <option value="shaved">shaved</option>
+            </select>
+            <span class="dp-sep">·</span>
+            <span class="dp-label">glasses</span>
+            <select class="dp-input" id="dreamer-glasses" aria-label="Dreamer glasses">
+              <option value="">—</option>
+              <option value="none">no</option>
+              <option value="black rectangular">black rectangular</option>
+              <option value="tortoiseshell">tortoiseshell</option>
+              <option value="round wire">round wire</option>
+              <option value="aviator">aviator</option>
+              <option value="rimless">rimless</option>
+              <option value="other">other</option>
+            </select>
+            <span class="dp-sep">·</span>
             <span class="dp-label">your face</span>
             <button class="dp-input dp-selfie-btn" id="selfie-upload-btn" type="button" data-action="upload-selfie">+ add reference photo</button>
             <img class="dp-selfie-thumb" id="selfie-thumb" alt="" hidden>
@@ -3750,9 +3779,13 @@
     function getDreamer() {
       const g = document.getElementById('dreamer-gender');
       const a = document.getElementById('dreamer-age');
+      const h = document.getElementById('dreamer-hair');
+      const gl = document.getElementById('dreamer-glasses');
       const out = {};
       if (g && g.value) out.gender = g.value;
       if (a && a.value) out.age = Number(a.value);
+      if (h && h.value) out.hair = h.value;
+      if (gl && gl.value) out.glasses = gl.value;
       return Object.keys(out).length ? out : null;
     }
     function persistDreamer() {
@@ -3764,10 +3797,14 @@
         const d = JSON.parse(localStorage.getItem('dreams:dreamer') || '{}');
         const g = document.getElementById('dreamer-gender');
         const a = document.getElementById('dreamer-age');
+        const h = document.getElementById('dreamer-hair');
+        const gl = document.getElementById('dreamer-glasses');
         if (g && d.gender) g.value = d.gender;
         if (a && d.age != null) a.value = d.age;
+        if (h && d.hair) h.value = d.hair;
+        if (gl && d.glasses) gl.value = d.glasses;
       } catch (_) {}
-      ['dreamer-gender', 'dreamer-age'].forEach((id) => {
+      ['dreamer-gender', 'dreamer-age', 'dreamer-hair', 'dreamer-glasses'].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('change', persistDreamer);
       });

@@ -81,9 +81,20 @@ export default async function handler(req, res) {
   let dreamerClean = null;
   if (dreamer && typeof dreamer === 'object') {
     const validGenders = ['man', 'woman', 'nonbinary', 'other'];
+    const validHair = ['black', 'dark brown', 'brown', 'auburn', 'red', 'blonde', 'strawberry blonde', 'grey', 'silver', 'white', 'bald', 'shaved'];
+    const validGlasses = ['none', 'black rectangular', 'tortoiseshell', 'round wire', 'aviator', 'rimless', 'other'];
     const g = typeof dreamer.gender === 'string' && validGenders.includes(dreamer.gender) ? dreamer.gender : null;
     const a = Number.isFinite(dreamer.age) && dreamer.age > 0 && dreamer.age < 130 ? dreamer.age : null;
-    if (g || a) dreamerClean = { ...(g && { gender: g }), ...(a && { age: a }) };
+    const h = typeof dreamer.hair === 'string' && validHair.includes(dreamer.hair) ? dreamer.hair : null;
+    const gl = typeof dreamer.glasses === 'string' && validGlasses.includes(dreamer.glasses) ? dreamer.glasses : null;
+    if (g || a || h || gl) {
+      dreamerClean = {
+        ...(g && { gender: g }),
+        ...(a && { age: a }),
+        ...(h && { hair: h }),
+        ...(gl && { glasses: gl }),
+      };
+    }
   }
 
   // Validate audio_url — must be a Vercel Blob URL (defensive: don't accept
