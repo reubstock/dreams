@@ -462,13 +462,13 @@
   }
   .ar-rel.has-img {
     display: grid;
-    grid-template-columns: 96px 1fr;
-    gap: 16px;
+    grid-template-columns: 120px 1fr;
+    gap: 18px;
     align-items: start;
   }
   .ar-rel:last-child { border-bottom: none; }
   .ar-rel-img {
-    width: 96px; height: 128px;
+    width: 120px; height: 160px;
     object-fit: cover;
     border: 1px solid rgba(241, 234, 215, 0.18);
     background: rgba(241, 234, 215, 0.04);
@@ -3058,14 +3058,15 @@
           </div>
         </li>`).join('');
 
-      const relsHTML = relatives.map((r) => {
+      const relsHTML = relatives.map((r, idx) => {
         const fname = (r.commons_filename || '').trim();
         const imgUrl = fname
           ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fname)}?width=480`
           : '';
+        const searchQuery = encodeURIComponent(`${r.artist || ''} ${r.title || ''}`.trim());
         return `
-        <li class="ar-rel${imgUrl ? ' has-img' : ''}">
-          ${imgUrl ? `<img class="ar-rel-img" src="${imgUrl}" alt="${escapeHTML((r.artist || '') + ' — ' + (r.title || ''))}" loading="lazy" onerror="this.closest('.ar-rel').classList.remove('has-img'); this.remove();">` : ''}
+        <li class="ar-rel has-img" data-rel-idx="${idx}" data-search-q="${searchQuery}">
+          <img class="ar-rel-img" src="${imgUrl}" alt="${escapeHTML((r.artist || '') + ' — ' + (r.title || ''))}" loading="lazy" data-tried="0">
           <div class="ar-rel-body">
             <div class="ar-rel-attr"><b>${escapeHTML(r.artist || '')}</b> · <i>${escapeHTML(r.title || '')}</i>${r.year ? ' · ' + escapeHTML(r.year) : ''}</div>
             ${r.why ? `<div class="ar-rel-why">${escapeHTML(r.why)}</div>` : ''}
@@ -3102,6 +3103,44 @@
       `;
       statsEl.hidden = false;
       statsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // For each cultural-relative image: if the LLM-guessed filename 404s,
+      // fall back to a Wikimedia search via /api/wikimedia/search.
+      statsEl.querySelectorAll('.ar-rel-img').forEach((img) => {
+        img.addEventListener('error', async function onErr() {
+          const tried = parseInt(img.dataset.tried || '0', 10);
+          if (tried >= 1) {
+            // Search already attempted — hide image
+            const li = img.closest('.ar-rel');
+            if (li) li.classList.remove('has-img');
+            img.remove();
+            return;
+          }
+          img.dataset.tried = '1';
+          const q = img.closest('.ar-rel')?.dataset.searchQ || '';
+          if (!q) { img.remove(); return; }
+          try {
+            const r = await fetch('/api/wikimedia/search?q=' + q);
+            if (!r.ok) {
+              const li = img.closest('.ar-rel');
+              if (li) li.classList.remove('has-img');
+              img.remove();
+              return;
+            }
+            const data = await r.json();
+            if (data.url) img.src = data.url;
+            else {
+              const li = img.closest('.ar-rel');
+              if (li) li.classList.remove('has-img');
+              img.remove();
+            }
+          } catch (_) {
+            const li = img.closest('.ar-rel');
+            if (li) li.classList.remove('has-img');
+            img.remove();
+          }
+        });
+      });
 
       // (Note: persistence + redirect happens in analyzeRecording AFTER this
       // function returns — NOT inside renderAnalysis, because renderAnalysis
