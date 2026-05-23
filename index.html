@@ -3682,6 +3682,10 @@
         const fullQ = li?.dataset.searchQ || '';
         const artist = li?.querySelector('.ar-rel-attr b')?.textContent?.trim() || '';
         const title = li?.querySelector('.ar-rel-attr i')?.textContent?.trim() || '';
+        // Last token of the artist name is what we require in the result filename
+        // so we never accept a random cat photo for "Ronner-Knip · A Cat in a Flower Pot".
+        const surname = artist ? artist.trim().split(/\s+/).filter(Boolean).pop() : '';
+        const requireParam = surname ? '&require=' + encodeURIComponent(surname) : '';
         if (fullQ) queries.push(decodeURIComponent(fullQ));
         if (title) queries.push(title);
         if (artist) queries.push(artist + ' painting');
@@ -3695,7 +3699,7 @@
           const q = queries[tried];
           img.dataset.tried = String(tried + 1);
           try {
-            const r = await fetch('/api/wikimedia/search?kind=artwork&q=' + encodeURIComponent(q));
+            const r = await fetch('/api/wikimedia/search?kind=artwork' + requireParam + '&q=' + encodeURIComponent(q));
             if (!r.ok) { img.dispatchEvent(new Event('error')); return; }
             const data = await r.json();
             if (data.url) { img.src = data.url; }

@@ -20,6 +20,11 @@ export default async function handler(req, res) {
   // person/portrait. Artwork searches skip obvious photo-of-a-person filenames
   // so we don't end up showing a snapshot of Picasso as if it were a painting.
   const kind = (req.query.kind || 'artwork').toString();
+  // `require` is a token (usually the artist's surname) that must appear in the
+  // result filename. Without this, a search for "A Cat in a Flower Pot" returns
+  // any random cat photo on Commons; with it, we only accept hits attributed to
+  // the artist we asked for.
+  const require = (req.query.require || '').toString().trim().toLowerCase();
   const PHOTO_TELLS = /(photograph|photo[_-]|portrait[_-]?(of|de)|self[_-]?portrait|snapshot|by[_-][A-Z][a-z]+_\d{4}|_\d{4}_(photo|snapshot)|wax_figure)/i;
 
   try {
@@ -44,6 +49,13 @@ export default async function handler(req, res) {
         if (userWantsSelfPortrait) return true;
         return !PHOTO_TELLS.test(h.title);
       });
+    }
+
+    // Require a token (usually the artist's surname) in the filename.
+    if (require) {
+      const filtered = pool.filter((h) => h.title.toLowerCase().includes(require));
+      if (filtered.length) pool = filtered;
+      else return res.status(404).json({ error: 'no_attributed_match' });
     }
 
     // Prefer browser-renderable formats; fall back to whatever is available.

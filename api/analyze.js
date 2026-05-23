@@ -246,6 +246,10 @@ async function fileExists(filename) {
 
 async function searchCommons(query, opts = {}) {
   const kind = opts.kind || 'artwork';
+  // For artwork searches we keep the artist's last name so we can require it
+  // in the result filename — otherwise "A Cat in a Flower Pot" matches any
+  // random cat photo someone uploaded.
+  const requireToken = opts.requireToken || null;
   try {
     const r = await fetch(COMMONS_SEARCH(query), {
       headers: { 'User-Agent': 'Dreams/1.0 (dreams-livid.vercel.app)' },
@@ -257,6 +261,12 @@ async function searchCommons(query, opts = {}) {
       const wantsSelfPortrait = /self[-_ ]?portrait/i.test(query);
       hits = hits.filter((h) => wantsSelfPortrait || !PHOTO_TELLS.test(h.title));
     }
+    if (requireToken) {
+      const tok = requireToken.toLowerCase();
+      const filtered = hits.filter((h) => h.title.toLowerCase().includes(tok));
+      if (filtered.length) hits = filtered;
+      else return null; // No hit attributed to the requested artist — bail
+    }
     // Prefer browser-renderable formats (jpg/png/gif) over tiff/svg.
     // Chrome won't render <img src="...tif"> at all.
     const renderable = hits.filter((h) => /\.(jpe?g|png|gif)$/i.test(h.title));
@@ -267,18 +277,26 @@ async function searchCommons(query, opts = {}) {
 
 async function resolveCulturalRelative(r) {
   if (!r) return;
-  // Build progressively looser queries
+  if (await fileExists(r.commons_filename)) return;
+  // Pull the artist's last name as a required token so we don't accept
+  // random Wikimedia hits that happen to match the title alone (e.g.
+  // searching "A Cat in a Flower Pot" without "Ronner-Knip" returns
+  // user-uploaded cat photos, not the painting).
+  const surname = (r.artist || '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .pop() || '';
   const queries = [];
   if (r.artist && r.title) queries.push(`${r.artist} ${r.title}`);
-  if (r.title) queries.push(r.title);
+  if (r.title && surname) queries.push(`${surname} ${r.title}`);
   if (r.artist) queries.push(`${r.artist} painting`);
-  // If LLM filename works, keep it
-  if (await fileExists(r.commons_filename)) return;
   for (const q of queries) {
-    const found = await searchCommons(q, { kind: 'artwork' });
+    const found = await searchCommons(q, { kind: 'artwork', requireToken: surname || null });
     if (found) { r.commons_filename = found; return; }
   }
-  // Final state: leave commons_filename as-is; frontend will hide if it fails
+  // If nothing surnamed comes back, clear the bad filename so the frontend
+  // hides the broken card instead of rendering a misleading stock photo.
+  r.commons_filename = null;
 }
 
 async function resolveHistoricalDreamer(d) {
