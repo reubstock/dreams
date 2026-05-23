@@ -177,6 +177,12 @@ ${JSON.stringify(SCHEMA_HINT, null, 2)}`;
       return res.status(502).json({ error: 'llm_invalid_json', message: 'Model returned non-JSON output.' });
     }
 
+    // Server-side image resolution: replace any LLM-supplied commons_filename
+    // that 404s with a Wikimedia-search result, so the browser always renders
+    // an image without having to chase fallbacks. Each lookup is ~200ms; we
+    // run them concurrently so the total analyze time barely moves.
+    await resolveAnalysisImages(analysis);
+
     return res.status(200).json({
       analysis,
       tokens_used: completion.usage || null,
@@ -189,4 +195,83 @@ ${JSON.stringify(SCHEMA_HINT, null, 2)}`;
       message: err.message || 'Unexpected error during analysis.',
     });
   }
+}
+
+// ============ Image resolution helpers ============
+
+const COMMONS_FILEPATH = (fn) =>
+  `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fn)}`;
+const COMMONS_SEARCH = (q) =>
+  `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srnamespace=6&srlimit=10&srsearch=${encodeURIComponent(q)}`;
+const PHOTO_TELLS = /(photograph|photo[_-]|portrait[_-]?(of|de)|self[_-]?portrait|snapshot|by[_-][A-Z][a-z]+_\d{4}|_\d{4}_(photo|snapshot)|wax_figure)/i;
+
+// HEAD the FilePath URL; treat 200 as valid, anything else as invalid.
+// Note: Special:FilePath 302-redirects to the file's canonical URL on success
+// and returns 404 if the file doesn't exist. fetch follows redirects by default.
+async function fileExists(filename) {
+  if (!filename || typeof filename !== 'string') return false;
+  try {
+    const r = await fetch(COMMONS_FILEPATH(filename), { method: 'HEAD' });
+    return r.ok;
+  } catch (_) { return false; }
+}
+
+async function searchCommons(query, opts = {}) {
+  const kind = opts.kind || 'artwork';
+  try {
+    const r = await fetch(COMMONS_SEARCH(query), {
+      headers: { 'User-Agent': 'Dreams/1.0 (dreams-livid.vercel.app)' },
+    });
+    if (!r.ok) return null;
+    const data = await r.json();
+    let hits = (data?.query?.search || []).filter((h) => /\.(jpe?g|png|gif|tiff?)$/i.test(h.title));
+    if (kind === 'artwork') {
+      const wantsSelfPortrait = /self[-_ ]?portrait/i.test(query);
+      hits = hits.filter((h) => wantsSelfPortrait || !PHOTO_TELLS.test(h.title));
+    }
+    const pick = hits[0];
+    return pick ? pick.title.replace(/^File:/, '') : null;
+  } catch (_) { return null; }
+}
+
+async function resolveCulturalRelative(r) {
+  if (!r) return;
+  // Build progressively looser queries
+  const queries = [];
+  if (r.artist && r.title) queries.push(`${r.artist} ${r.title}`);
+  if (r.title) queries.push(r.title);
+  if (r.artist) queries.push(`${r.artist} painting`);
+  // If LLM filename works, keep it
+  if (await fileExists(r.commons_filename)) return;
+  for (const q of queries) {
+    const found = await searchCommons(q, { kind: 'artwork' });
+    if (found) { r.commons_filename = found; return; }
+  }
+  // Final state: leave commons_filename as-is; frontend will hide if it fails
+}
+
+async function resolveHistoricalDreamer(d) {
+  if (!d || !d.name) return;
+  if (await fileExists(d.image_filename)) return;
+  const queries = [`${d.name} portrait`, d.name];
+  for (const q of queries) {
+    const found = await searchCommons(q, { kind: 'person' });
+    if (found) { d.image_filename = found; return; }
+  }
+}
+
+async function resolveAnalysisImages(analysis) {
+  if (!analysis || typeof analysis !== 'object') return;
+  const jobs = [];
+  if (Array.isArray(analysis.cultural_relatives)) {
+    for (const r of analysis.cultural_relatives) jobs.push(resolveCulturalRelative(r));
+  }
+  if (analysis.closest_historical_dreamer) {
+    jobs.push(resolveHistoricalDreamer(analysis.closest_historical_dreamer));
+  }
+  // Run in parallel; cap the wall-clock cost at ~3s
+  await Promise.race([
+    Promise.all(jobs),
+    new Promise((resolve) => setTimeout(resolve, 3000)),
+  ]);
 }
