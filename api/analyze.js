@@ -19,9 +19,42 @@ You must obey these rules:
 4. The reading is interpretive but humble: identify what this dream is most likely about in the dreamer's waking life, given the specific motifs present. Include a brief caveat that interpretation is a hypothesis, not a diagnosis.
 5. Cultural relatives must be REAL, well-known, public-domain artworks that share a specific motif with the dream. No fabricated artist names. Examples of safe choices: Hokusai's Great Wave, Friedrich's Monk by the Sea, Dürer's Melencolia I, Piranesi's Carceri, Botticelli's Madonnas, the Voynich Manuscript, Kuniyoshi prints, Bosch's Garden of Earthly Delights, Goya's Sleep of Reason, Klimt's The Kiss, Munch's The Scream, van Gogh's Starry Night, Vermeer's Girl with a Pearl Earring, Rembrandt's Night Watch, Rousseau's The Sleeping Gypsy. Pick artworks whose motif genuinely overlaps.
 
-6. Return 1 to 3 cultural relatives — whichever number genuinely fits this dream. One excellent match is better than three forced ones. Each cultural_relative entry maps to ONE artist and ONE artwork (one image per artist).
+6. Return EXACTLY 3 cultural relatives. Each must be a famous, public-domain artwork by a famous artist — one that 95%+ of art-literate readers have seen reproduced. NEVER invent paintings or attribute real titles to the wrong artist. Each cultural_relative entry maps to ONE artist and ONE artwork. If you cannot confidently name 3 distinct famous artworks that share specific motifs with the dream, fill the remaining slots with picks from this safe list (each is a guaranteed real, world-famous, in-the-public-domain image on Wikimedia Commons):
 
-7. For each cultural relative include a "commons_filename" field — the filename on Wikimedia Commons (without "File:" prefix). Use SIMPLE canonical filenames you have high confidence in (e.g. "The_Great_Wave_off_Kanagawa.jpg", "Albrecht_D%C3%BCrer_-_Melencolia_I.png"). The frontend has a safety net: if your filename 404s, it will search Wikimedia Commons using the artist + title and use the first hit. So when in doubt, prefer common spelling without weird suffixes; even an imperfect filename will get recovered by the search fallback.
+  - Hokusai · The Great Wave off Kanagawa · 1831
+  - Hieronymus Bosch · The Garden of Earthly Delights · c.1490–1510
+  - Albrecht Dürer · Melencolia I · 1514
+  - Caspar David Friedrich · Wanderer above the Sea of Fog · 1818
+  - Caspar David Friedrich · The Monk by the Sea · 1810
+  - Francisco Goya · The Sleep of Reason Produces Monsters · 1799
+  - Francisco Goya · Saturn Devouring His Son · 1819–1823
+  - Henri Rousseau · The Sleeping Gypsy · 1897
+  - Henri Rousseau · The Dream · 1910
+  - Edvard Munch · The Scream · 1893
+  - Vincent van Gogh · The Starry Night · 1889
+  - Johannes Vermeer · Girl with a Pearl Earring · c.1665
+  - Rembrandt · The Night Watch · 1642
+  - Sandro Botticelli · The Birth of Venus · c.1486
+  - John Henry Fuseli · The Nightmare · 1781
+  - Giovanni Battista Piranesi · Carceri d'Invenzione (Imaginary Prisons) · 1761
+  - Maria Sibylla Merian · Metamorphosis Insectorum Surinamensium · 1705
+  - Pieter Bruegel the Elder · The Tower of Babel · 1563
+  - Pieter Bruegel the Elder · Hunters in the Snow · 1565
+  - Diego Velázquez · Las Meninas · 1656
+  - John Everett Millais · Ophelia · 1851–1852
+  - J.M.W. Turner · The Slave Ship · 1840
+  - Théodore Géricault · The Raft of the Medusa · 1818–1819
+  - Eugène Delacroix · Liberty Leading the People · 1830
+  - Caravaggio · The Calling of Saint Matthew · 1599–1600
+  - El Greco · View of Toledo · c.1599
+  - Edward Hopper · Nighthawks · 1942
+  - Gustave Courbet · The Wave · c.1869
+  - Katsushika Hokusai · The Dream of the Fisherman's Wife · 1814
+  - Utagawa Kuniyoshi · Takiyasha the Witch and the Skeleton Spectre · c.1844
+
+  Prefer artworks whose specific motif overlaps with this dream. If nothing on the list overlaps, you may pick another equally famous public-domain work — but only if you are CERTAIN the artist actually painted it.
+
+7. For each cultural relative include a "commons_filename" field — the filename on Wikimedia Commons (without "File:" prefix). Use SIMPLE canonical filenames you have high confidence in (e.g. "The_Great_Wave_off_Kanagawa.jpg", "Albrecht_D%C3%BCrer_-_Melencolia_I.png"). The frontend has a multi-stage safety net: if your filename 404s, it searches Wikimedia Commons using "Artist Title", then falls back to "Title" alone, then to "Artist". So when in doubt, prefer common spelling.
 
 8. Also include "wikipedia_url" — the full Wikipedia article URL for THE ARTWORK ITSELF (e.g. "https://en.wikipedia.org/wiki/The_Garden_of_Earthly_Delights"), NOT a biography of the artist. The "Learn More" link on each card uses it. If you're unsure whether a dedicated article exists, omit the field — the frontend will fall back to a Wikipedia search URL built from the title.
 
@@ -40,6 +73,7 @@ const SCHEMA_HINT = {
   }],
   reading: "string (3-5 short paragraphs of interpretive reading; what this dream is most likely about in waking life; include one caveat sentence)",
   cultural_relatives: [{
+    _note: "EXACTLY 3 entries — see rule 6. Each is one artist, one artwork.",
     phrase: "string (from dream)",
     artist: "string (real, public-domain)",
     title: "string (real work title)",

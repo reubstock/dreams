@@ -308,8 +308,7 @@
   .capture-actions .btn.primary { background: var(--rust); border-color: var(--rust); }
   .capture-actions .btn.primary:hover { background: var(--rust-soft); border-color: var(--rust-soft); }
   .capture-actions .btn.analyzing,
-  .btn.analyzing,
-  .capture-actions .btn[data-action="analyze-recording"] {
+  .btn.analyzing {
     background-image: linear-gradient(90deg,
       #ff5e57 0%, #ff9c4a 14%, #ffd23e 28%, #57e08a 42%,
       #4abff5 57%, #8a7bff 71%, #d96ad9 85%, #ff5e57 100%) !important;
@@ -3645,47 +3644,38 @@
       statsEl.hidden = false;
       statsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-      // For each cultural-relative image: if the LLM-guessed filename 404s,
-      // fall back to a Wikimedia search via /api/wikimedia/search.
+      // Multi-stage image fallback for each cultural-relative card:
+      //   stage 0: LLM-supplied commons_filename (already in src)
+      //   stage 1: Wikimedia search for "Artist Title"
+      //   stage 2: Wikimedia search for "Title" only
+      //   stage 3: Wikimedia search for "Artist painting"
+      // We only hide the image if ALL stages fail — that should be vanishingly rare
+      // for famous public-domain art now that the LLM is anchored to a known list.
       statsEl.querySelectorAll('.ar-rel-img').forEach((img) => {
+        const li = img.closest('.ar-rel');
+        const queries = [];
+        const fullQ = li?.dataset.searchQ || '';
+        const artist = li?.querySelector('.ar-rel-attr b')?.textContent?.trim() || '';
+        const title = li?.querySelector('.ar-rel-attr i')?.textContent?.trim() || '';
+        if (fullQ) queries.push(decodeURIComponent(fullQ));
+        if (title) queries.push(title);
+        if (artist) queries.push(artist + ' painting');
         img.addEventListener('error', async function onErr() {
           const tried = parseInt(img.dataset.tried || '0', 10);
-          if (tried >= 1) {
-            // Search already attempted — hide image
-            const li = img.closest('.ar-rel');
+          if (tried >= queries.length) {
             if (li) li.classList.remove('has-img');
             img.remove();
             return;
           }
-          img.dataset.tried = '1';
-          const q = img.closest('.ar-rel')?.dataset.searchQ || '';
-          if (!q) { img.remove(); return; }
+          const q = queries[tried];
+          img.dataset.tried = String(tried + 1);
           try {
-            const r = await fetch('/api/wikimedia/search?q=' + q);
-            if (!r.ok) {
-              const li = img.closest('.ar-rel');
-              if (li) li.classList.remove('has-img');
-              img.remove();
-              return;
-            }
+            const r = await fetch('/api/wikimedia/search?q=' + encodeURIComponent(q));
+            if (!r.ok) { img.dispatchEvent(new Event('error')); return; }
             const data = await r.json();
-            if (data.url) {
-              img.src = data.url;
-              // Note: we intentionally don't re-point the Learn More link here.
-              // The original link is to the Wikipedia article for the artwork,
-              // which is more useful than the Wikimedia Commons file metadata
-              // page for the (possibly different) image we ended up using.
-            }
-            else {
-              const li = img.closest('.ar-rel');
-              if (li) li.classList.remove('has-img');
-              img.remove();
-            }
-          } catch (_) {
-            const li = img.closest('.ar-rel');
-            if (li) li.classList.remove('has-img');
-            img.remove();
-          }
+            if (data.url) { img.src = data.url; }
+            else { img.dispatchEvent(new Event('error')); }
+          } catch (_) { img.dispatchEvent(new Event('error')); }
         });
       });
 
