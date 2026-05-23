@@ -50,9 +50,14 @@ async function craftPrompt(text, analysis, dreamer, hasSelfie) {
   }
 
   // If a reference selfie will be attached, tell the prompt-crafter to write the
-  // prompt in a way that uses the reference for face/likeness consistency.
+  // prompt in a way that uses the reference for face/likeness consistency AND
+  // avoids triggering OpenAI's safety filter (it is unusually conservative when
+  // a real-face reference is combined with anything that could be read as
+  // intimate — even non-sexual "in bed" scenes get flagged).
   const selfieLine = hasSelfie
-    ? `\n\nA REFERENCE PHOTO of the dreamer is attached to the image-generation request. When you mention the dreamer in the prompt, refer to them as "the person in the reference photo". The image model will use the reference to maintain facial likeness. Do not describe the dreamer's specific facial features in the prompt — the reference handles that. DO still describe what the dreamer is wearing, doing, and the surrounding scene in detail.`
+    ? `\n\nA REFERENCE PHOTO of the dreamer is attached to the image-generation request. When you mention the dreamer in the prompt, refer to them as "the person in the reference photo". The image model will use the reference to maintain facial likeness. Do not describe the dreamer's specific facial features in the prompt — the reference handles that. DO still describe what the dreamer is wearing, doing, and the surrounding scene in detail.
+
+SAFETY CONSTRAINT (because a real-face reference is attached): Describe the dreamer as fully clothed in modest, period-appropriate clothing (pajamas, robe, day clothes — never lingerie/underwear/nude/towel-only). If the dream contains another person in a bed or intimate proximity, render them as a SEPARATE figure clearly not interacting intimately (e.g., the dreamer standing beside the bed, not in it together; the other person rendered as a partial/dissolving figure if needed). Avoid the words "in bed with", "naked", "undressed", "embracing", "kissing". This is required to pass OpenAI safety filters when a face reference is attached — the model is unusually strict in that combination.`
     : '';
 
   const userPrompt = `Compress this dream into a single tight image prompt for a surrealist painting. Include 4–6 VERY SPECIFIC visual elements directly from the dream — specific people, objects, settings, transformations. Be concrete: not "a figure" but "a 35-year-old man in a white nightgown"; not "a body of water" but "a clawfoot bathtub overflowing onto the floor". One paragraph, ~80 words. Do NOT add style direction (that's appended automatically). Output only the prompt text — no preamble, no commentary, no quotes.${dreamerLine}${selfieLine}
@@ -143,6 +148,21 @@ async function generateImage(promptText, selfieBuffer, selfieContentType, attemp
   if (res.status === 429) {
     throw new Error(`Rate limited — gpt-image-1 caps at 5 images/min per org. Wait a minute and tap Re-roll.`);
   }
+
+  // Safety-filter rejection — when a selfie was attached, gpt-image-1's safety
+  // filter is unusually conservative. Auto-retry once without the selfie so the
+  // user still gets an image (just without facial likeness).
+  const isSafetyHit = /safety|moderation/i.test(humanMessage) ||
+                      /SAFETY_VIOLATIONS/.test(humanMessage) ||
+                      res.status === 400;
+  if (isSafetyHit && selfieBuffer && attempt < 2) {
+    console.log('Safety filter flagged with selfie attached; retrying text-only');
+    return generateImage(promptText, null, null, attempt + 1);
+  }
+  if (isSafetyHit) {
+    throw new Error(`Safety filter — gpt-image-1 rejected the scene${selfieBuffer ? ' even without the reference photo' : ''}. Try editing the dream text to make the scene unambiguously non-intimate, then tap Re-roll.`);
+  }
+
   throw new Error(`Image API ${res.status}: ${humanMessage.slice(0, 240)}`);
 }
 

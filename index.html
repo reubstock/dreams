@@ -3386,9 +3386,13 @@
             title = 'Rate limit — too many images this minute';
             detail = 'gpt-image-1 caps at 5/min per org. Tap ↻ Re-roll in about a minute.';
           }
+          else if (/safety|SAFETY_VIOLATIONS|moderation/i.test(detail)) {
+            title = 'Safety filter caught the image';
+            detail = 'gpt-image-1 flagged the scene — usually because the dream describes close proximity to another person AND a real-face reference is attached. Try: edit the dream text to clarify the scene is non-intimate, OR remove your reference photo (row above) and tap Re-roll. Text-only has a much lower false-positive rate.';
+          }
           // Strip leading "Image API 502:" / "image model failed" prefixes
           detail = detail.replace(/^Image API \d+:\s*/i, '').replace(/^image model failed \d+:\s*/i, '').trim();
-          if (detail.length > 220) detail = detail.slice(0, 217) + '…';
+          if (detail.length > 360) detail = detail.slice(0, 357) + '…';
           if (loadingText) loadingText.textContent = title;
           if (loadingSub) loadingSub.textContent = detail;
           if (reroll) { reroll.hidden = false; }
