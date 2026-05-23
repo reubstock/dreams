@@ -23,6 +23,8 @@ You must obey these rules:
 
 7. For each cultural relative include a "commons_filename" field — the filename on Wikimedia Commons (without "File:" prefix). Use SIMPLE canonical filenames you have high confidence in (e.g. "The_Great_Wave_off_Kanagawa.jpg", "Albrecht_D%C3%BCrer_-_Melencolia_I.png"). The frontend has a safety net: if your filename 404s, it will search Wikimedia Commons using the artist + title and use the first hit. So when in doubt, prefer common spelling without weird suffixes; even an imperfect filename will get recovered by the search fallback.
 
+8. Also include "wikipedia_url" — the full Wikipedia article URL for THE ARTWORK ITSELF (e.g. "https://en.wikipedia.org/wiki/The_Garden_of_Earthly_Delights"), NOT a biography of the artist. The "Learn More" link on each card uses it. If you're unsure whether a dedicated article exists, omit the field — the frontend will fall back to a Wikipedia search URL built from the title.
+
 Return only valid JSON matching the schema. Do not wrap in markdown.`;
 
 const SCHEMA_HINT = {
@@ -43,7 +45,8 @@ const SCHEMA_HINT = {
     title: "string (real work title)",
     year: "string",
     why: "string (1 sentence on the specific motif overlap)",
-    commons_filename: "string OR omit if unsure — exact Wikimedia Commons filename, e.g. 'The_Great_Wave_off_Kanagawa.jpg'"
+    commons_filename: "string OR omit if unsure — exact Wikimedia Commons filename, e.g. 'The_Great_Wave_off_Kanagawa.jpg'",
+    wikipedia_url: "string OR omit — full Wikipedia article URL for the artwork itself, e.g. 'https://en.wikipedia.org/wiki/The_Great_Wave_off_Kanagawa'. Prefer the article ABOUT THE ARTWORK over the artist's biography."
   }],
   stats: {
     morph_count: "number",

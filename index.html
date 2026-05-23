@@ -2132,7 +2132,7 @@
         <figcaption class="rel-cap">
           <div class="rel-attr"><b>Maria Sibylla Merian</b> · <i>Metamorphosis Insectorum Surinamensium</i> · 1705</div>
           <div class="rel-why"><em>The word itself.</em> Merian followed every Surinamese insect from egg through larva to adult, documenting one of the first careful empirical records of becoming. Each plate is a sequence: caterpillar, chrysalis, butterfly. Same body, four bodies.</div>
-          <a class="rel-learn" href="https://commons.wikimedia.org/wiki/File:Maria_Sibylla_Merian_Metamorphosis_insectorum_Surinamensium_Amsterdam,_1705_-_BBB-46.jpg" target="_blank" rel="noopener">Learn More →</a>
+          <a class="rel-learn" href="https://en.wikipedia.org/wiki/Maria_Sibylla_Merian" target="_blank" rel="noopener">Learn More →</a>
         </figcaption>
       </figure>
 
@@ -2144,7 +2144,7 @@
         <figcaption class="rel-cap">
           <div class="rel-attr"><b>Hieronymus Bosch</b> · <i>The Garden of Earthly Delights</i> · c. 1490–1510</div>
           <div class="rel-why">Bodies that become other bodies. Limbs that become animals. The first total visual essay on the dream-state where every form refuses to stay itself. Five centuries before "morph" was a word, Bosch had drawn the verb.</div>
-          <a class="rel-learn" href="https://commons.wikimedia.org/wiki/File:The_Garden_of_earthly_delights.jpg" target="_blank" rel="noopener">Learn More →</a>
+          <a class="rel-learn" href="https://en.wikipedia.org/wiki/The_Garden_of_Earthly_Delights" target="_blank" rel="noopener">Learn More →</a>
         </figcaption>
       </figure>
 
@@ -2156,7 +2156,7 @@
         <figcaption class="rel-cap">
           <div class="rel-attr"><b>Katsushika Hokusai</b> · <i>The Great Wave off Kanagawa</i> · c. 1831</div>
           <div class="rel-why">A wave at the instant of breaking. Nature itself caught mid-transformation, frozen in the second before it stops being a wave and starts being foam — the exact temporal sliver where dreams happen.</div>
-          <a class="rel-learn" href="https://commons.wikimedia.org/wiki/File:The_Great_Wave_off_Kanagawa.jpg" target="_blank" rel="noopener">Learn More →</a>
+          <a class="rel-learn" href="https://en.wikipedia.org/wiki/The_Great_Wave_off_Kanagawa" target="_blank" rel="noopener">Learn More →</a>
         </figcaption>
       </figure>
     </div><!-- =================== READING =================== -->
@@ -3116,14 +3116,28 @@
           ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fname)}?width=480`
           : '';
         const searchQuery = encodeURIComponent(`${r.artist || ''} ${r.title || ''}`.trim());
-        const fileUrl = fname ? `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fname)}` : '';
+        // Prefer an LLM-provided Wikipedia article URL. Fall back to a
+        // Wikipedia article URL constructed from the title, then to a
+        // Wikipedia search URL (always works, even if no article exists).
+        let learnUrl = '';
+        if (typeof r.wikipedia_url === 'string' && /^https?:\/\/[a-z]{2,3}\.wikipedia\.org\//i.test(r.wikipedia_url)) {
+          learnUrl = r.wikipedia_url;
+        } else if (r.title) {
+          // Best-guess Wikipedia article slug from the title
+          const slug = r.title.trim().replace(/\s+/g, '_').replace(/[^\p{L}\p{N}_'\-()]/gu, '');
+          learnUrl = slug
+            ? `https://en.wikipedia.org/wiki/${encodeURIComponent(slug).replace(/%2F/g, '/')}`
+            : `https://en.wikipedia.org/wiki/Special:Search?search=${searchQuery}`;
+        } else {
+          learnUrl = `https://en.wikipedia.org/wiki/Special:Search?search=${searchQuery}`;
+        }
         return `
         <li class="ar-rel has-img" data-rel-idx="${idx}" data-search-q="${searchQuery}">
           <img class="ar-rel-img" src="${imgUrl}" alt="${escapeHTML((r.artist || '') + ' — ' + (r.title || ''))}" loading="lazy" data-tried="0">
           <div class="ar-rel-body">
             <div class="ar-rel-attr"><b>${escapeHTML(r.artist || '')}</b> · <i>${escapeHTML(r.title || '')}</i>${r.year ? ' · ' + escapeHTML(r.year) : ''}</div>
             ${r.why ? `<div class="ar-rel-why">${escapeHTML(r.why)}</div>` : ''}
-            ${fileUrl ? `<a class="rel-learn" href="${fileUrl}" target="_blank" rel="noopener" data-rel-learn>Learn More →</a>` : ''}
+            <a class="rel-learn" href="${learnUrl}" target="_blank" rel="noopener" data-rel-learn>Learn More →</a>
           </div>
         </li>`;
       }).join('');
@@ -3184,11 +3198,10 @@
             const data = await r.json();
             if (data.url) {
               img.src = data.url;
-              // Also re-point the Learn More link to the file actually used
-              const learn = img.closest('.ar-rel')?.querySelector('[data-rel-learn]');
-              if (learn && data.filename) {
-                learn.href = `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(data.filename)}`;
-              }
+              // Note: we intentionally don't re-point the Learn More link here.
+              // The original link is to the Wikipedia article for the artwork,
+              // which is more useful than the Wikimedia Commons file metadata
+              // page for the (possibly different) image we ended up using.
             }
             else {
               const li = img.closest('.ar-rel');
