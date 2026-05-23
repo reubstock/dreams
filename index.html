@@ -984,6 +984,26 @@
     color: var(--ink-2);
   }
   .rel-why em { font-style: italic; color: var(--rust-deep); }
+  .rel-learn {
+    display: inline-block;
+    margin-top: 12px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink-2);
+    padding-bottom: 1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .rel-learn:hover { color: var(--rust); border-color: var(--rust); }
+  /* same link style works inside the dark capture-banner analysis panel */
+  .ar-rel-body .rel-learn {
+    color: rgba(241, 234, 215, 0.55);
+    border-bottom-color: rgba(241, 234, 215, 0.25);
+  }
+  .ar-rel-body .rel-learn:hover { color: var(--rust-soft); border-bottom-color: var(--rust-soft); }
 
   /* ============ MORPH DEFINITION ============ */
   .morph-def {
@@ -2092,6 +2112,7 @@
         <figcaption class="rel-cap">
           <div class="rel-attr"><b>Maria Sibylla Merian</b> · <i>Metamorphosis Insectorum Surinamensium</i> · 1705</div>
           <div class="rel-why"><em>The word itself.</em> Merian followed every Surinamese insect from egg through larva to adult, documenting one of the first careful empirical records of becoming. Each plate is a sequence: caterpillar, chrysalis, butterfly. Same body, four bodies.</div>
+          <a class="rel-learn" href="https://commons.wikimedia.org/wiki/File:Maria_Sibylla_Merian_Metamorphosis_insectorum_Surinamensium_Amsterdam,_1705_-_BBB-46.jpg" target="_blank" rel="noopener">Learn More →</a>
         </figcaption>
       </figure>
 
@@ -2103,6 +2124,7 @@
         <figcaption class="rel-cap">
           <div class="rel-attr"><b>Hieronymus Bosch</b> · <i>The Garden of Earthly Delights</i> · c. 1490–1510</div>
           <div class="rel-why">Bodies that become other bodies. Limbs that become animals. The first total visual essay on the dream-state where every form refuses to stay itself. Five centuries before "morph" was a word, Bosch had drawn the verb.</div>
+          <a class="rel-learn" href="https://commons.wikimedia.org/wiki/File:The_Garden_of_earthly_delights.jpg" target="_blank" rel="noopener">Learn More →</a>
         </figcaption>
       </figure>
 
@@ -2114,6 +2136,7 @@
         <figcaption class="rel-cap">
           <div class="rel-attr"><b>Katsushika Hokusai</b> · <i>The Great Wave off Kanagawa</i> · c. 1831</div>
           <div class="rel-why">A wave at the instant of breaking. Nature itself caught mid-transformation, frozen in the second before it stops being a wave and starts being foam — the exact temporal sliver where dreams happen.</div>
+          <a class="rel-learn" href="https://commons.wikimedia.org/wiki/File:The_Great_Wave_off_Kanagawa.jpg" target="_blank" rel="noopener">Learn More →</a>
         </figcaption>
       </figure>
     </div><!-- =================== READING =================== -->
@@ -3073,12 +3096,14 @@
           ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fname)}?width=480`
           : '';
         const searchQuery = encodeURIComponent(`${r.artist || ''} ${r.title || ''}`.trim());
+        const fileUrl = fname ? `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(fname)}` : '';
         return `
         <li class="ar-rel has-img" data-rel-idx="${idx}" data-search-q="${searchQuery}">
           <img class="ar-rel-img" src="${imgUrl}" alt="${escapeHTML((r.artist || '') + ' — ' + (r.title || ''))}" loading="lazy" data-tried="0">
           <div class="ar-rel-body">
             <div class="ar-rel-attr"><b>${escapeHTML(r.artist || '')}</b> · <i>${escapeHTML(r.title || '')}</i>${r.year ? ' · ' + escapeHTML(r.year) : ''}</div>
             ${r.why ? `<div class="ar-rel-why">${escapeHTML(r.why)}</div>` : ''}
+            ${fileUrl ? `<a class="rel-learn" href="${fileUrl}" target="_blank" rel="noopener" data-rel-learn>Learn More →</a>` : ''}
           </div>
         </li>`;
       }).join('');
@@ -3137,7 +3162,14 @@
               return;
             }
             const data = await r.json();
-            if (data.url) img.src = data.url;
+            if (data.url) {
+              img.src = data.url;
+              // Also re-point the Learn More link to the file actually used
+              const learn = img.closest('.ar-rel')?.querySelector('[data-rel-learn]');
+              if (learn && data.filename) {
+                learn.href = `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(data.filename)}`;
+              }
+            }
             else {
               const li = img.closest('.ar-rel');
               if (li) li.classList.remove('has-img');
