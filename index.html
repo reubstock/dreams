@@ -3909,19 +3909,54 @@
       const visBtn = isOwner
         ? `<button class="vis-toggle" data-current="${visibility}" data-action="toggle-vis">${visibility === 'private' ? 'Private — make public' : 'Public — make private'}</button>`
         : '';
+      const reanalyzeBtn = isOwner
+        ? `<button class="vis-toggle" data-action="reanalyze" title="Re-run the LLM analysis (refreshes cultural relatives, morphs, reading)">Refresh analysis</button>`
+        : '';
       const noteBtn = (handle && !isOwner)
         ? `<button class="note-btn" data-action="open-note" data-to-handle="${escapeHtmlAuth(handle)}" data-dream-id="${escapeHtmlAuth(dream.id)}">Send a note</button>`
         : '';
 
-      line.innerHTML = `${dreamerLink}${visBtn ? ' · ' + visBtn : ''}${noteBtn ? ' · ' + noteBtn : ''}`;
+      line.innerHTML = `${dreamerLink}${visBtn ? ' · ' + visBtn : ''}${reanalyzeBtn ? ' · ' + reanalyzeBtn : ''}${noteBtn ? ' · ' + noteBtn : ''}`;
       // Direct-wire the buttons. We can't rely on a top-level delegated handler
       // because these helpers live inside this nested IIFE scope.
       const visEl = line.querySelector('[data-action="toggle-vis"]');
       if (visEl) visEl.addEventListener('click', () => toggleVisibility(visEl));
+      const reEl = line.querySelector('[data-action="reanalyze"]');
+      if (reEl) reEl.addEventListener('click', () => reanalyzeDream(reEl));
       const noteEl = line.querySelector('[data-action="open-note"]');
       if (noteEl) noteEl.addEventListener('click', () => {
         if (typeof window.__openNote === 'function') window.__openNote(noteEl.dataset.toHandle, noteEl.dataset.dreamId);
       });
+    }
+
+    // Refresh-analysis (owner-only) — re-runs /api/analyze under the current
+    // prompt and replaces the dream's analysis block, then re-renders.
+    async function reanalyzeDream(btn) {
+      const dream = window.__currentDream;
+      if (!dream || !dream.id) return;
+      if (!confirm('Re-run the analysis on this dream? This refreshes the cultural relatives, morphs, and reading using the current prompt. ~$0.01.')) return;
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = 'Re-analyzing…';
+      try {
+        const r = await fetch('/api/dream/reanalyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: dream.id }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          showToast(data.message || data.error || 'Re-analyze failed');
+          return;
+        }
+        window.__currentDream = data.dream;
+        renderAnalysis(data.dream.text, data.dream.analysis);
+        appendPermalinkPill(data.dream.id, '/d/' + data.dream.id);
+        showToast('Analysis refreshed');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
     }
 
     // Visibility toggle handler (delegated globally below)
