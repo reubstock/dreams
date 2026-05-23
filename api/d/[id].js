@@ -69,10 +69,30 @@ export default async function handler(req, res) {
   const image = dream.image_url || `${SITE_ORIGIN}/images/morpho.png`;
   const url = `${SITE_ORIGIN}/d/${id}`;
 
+  // Strip the hard-coded site-default OG/Twitter tags from index.html so we
+  // can replace them with dream-specific ones. Social card crawlers take the
+  // FIRST occurrence of each property and ignore later duplicates — appending
+  // wasn't enough; iMessage/Mail/Slack kept pulling the default morpho image.
+  let out = html
+    .replace(/\s*<meta\s+property="og:title"[^>]*>/i, '')
+    .replace(/\s*<meta\s+property="og:description"[^>]*>/i, '')
+    .replace(/\s*<meta\s+property="og:image"[^>]*>/i, '')
+    .replace(/\s*<meta\s+property="og:image:width"[^>]*>/i, '')
+    .replace(/\s*<meta\s+property="og:image:height"[^>]*>/i, '')
+    .replace(/\s*<meta\s+property="og:image:alt"[^>]*>/i, '')
+    .replace(/\s*<meta\s+property="og:url"[^>]*>/i, '')
+    .replace(/\s*<meta\s+property="og:type"[^>]*>/i, '')
+    .replace(/\s*<meta\s+name="twitter:title"[^>]*>/i, '')
+    .replace(/\s*<meta\s+name="twitter:description"[^>]*>/i, '')
+    .replace(/\s*<meta\s+name="twitter:image"[^>]*>/i, '')
+    .replace(/\s*<meta\s+name="twitter:card"[^>]*>/i, '')
+    .replace(/\s*<link\s+rel="canonical"[^>]*>/i, '');
+
   const ogTags = `
     <meta property="og:title" content="${escapeHTML(title)}">
     <meta property="og:description" content="${escapeHTML(description)}">
     <meta property="og:image" content="${escapeHTML(image)}">
+    <meta property="og:image:alt" content="${escapeHTML(title)} — dream illustration">
     <meta property="og:url" content="${escapeHTML(url)}">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Dreams">
@@ -83,7 +103,7 @@ export default async function handler(req, res) {
     <link rel="canonical" href="${escapeHTML(url)}">
   `;
 
-  const out = html.replace('</head>', ogTags + '\n</head>');
+  out = out.replace('</head>', ogTags + '\n</head>');
   // Cache at edge for 60s so social-card crawlers don't keep regenerating
   res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
   return res.status(200).send(out);
