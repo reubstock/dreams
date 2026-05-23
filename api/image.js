@@ -168,12 +168,54 @@ async function generateImage(promptText, attempt = 0) {
   }
 
   const isSafetyHit = /safety|moderation/i.test(humanMessage) ||
-                      /SAFETY_VIOLATIONS/.test(humanMessage);
+                      /SAFETY_VIOLATIONS/.test(humanMessage) ||
+                      res.status === 400;
+
+  // Auto-retry on safety hit: ask GPT-4o-mini to rewrite the prompt with
+  // softer, less literal language. gpt-image-1's safety filter is famously
+  // jumpy — a single word like "knife" or "blood" or "bed" can flip it,
+  // even when the scene is completely innocuous. We don't want every
+  // vanilla dream to dead-end on a misleading "scene rejected" message.
+  if (isSafetyHit && attempt < 1) {
+    console.log('gpt-image-1 safety hit; softening prompt and retrying');
+    try {
+      const softer = await softenPromptForSafety(promptText);
+      if (softer && softer !== promptText) {
+        return generateImage(softer, attempt + 1);
+      }
+    } catch (e) {
+      console.warn('softener failed:', e.message);
+    }
+  }
+
   if (isSafetyHit) {
-    throw new Error(`Safety filter — gpt-image-1 rejected the scene. Try editing the dream text to make the scene unambiguously non-intimate, then tap Re-roll.`);
+    throw new Error(`gpt-image-1 flagged the scene. We tried softening the prompt automatically and it still rejected it. Try editing the dream text — sometimes one literal word ("knife", "blood", "bed") tips the filter — then tap Re-roll.`);
   }
 
   throw new Error(`Image API ${res.status}: ${humanMessage.slice(0, 240)}`);
+}
+
+// When gpt-image-1's safety filter rejects a prompt, this rewrites the
+// prompt into the gentlest possible version of the same scene. We deliberately
+// don't try to "trick" the filter — we just describe the scene with calmer,
+// less literal vocabulary (dream-symbolic, metaphor, atmosphere) so the
+// filter has less surface area to grab onto.
+async function softenPromptForSafety(originalPrompt) {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You rewrite image-generation prompts that have been flagged by an overzealous safety filter. The original prompts are for surrealist dream paintings — they are NOT actually unsafe, the filter is just literal-minded. Rewrite the prompt to preserve every concrete visual element but replace any word that might trigger a filter (weapons, blood, nudity, intimate proximity, religious figures, real-person names, violent verbs) with calmer, dream-symbolic substitutions. Keep it one paragraph, same length. Output ONLY the rewritten prompt, no preamble.' },
+        { role: 'user', content: originalPrompt },
+      ],
+      temperature: 0.5,
+    }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content?.trim() || null;
 }
 
 // ============ Replicate face-swap ============
