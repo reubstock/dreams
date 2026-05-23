@@ -3184,8 +3184,8 @@
         <span class="ar-pl-label">Share this dream</span>
         <code class="ar-pl-url">${permalink}</code>
         <button class="ar-pl-copy" type="button">Copy link</button>
-        <a class="ar-pl-share" href="sms:?body=${body}" target="_blank" rel="noopener">Text</a>
-        <a class="ar-pl-share" href="mailto:?subject=${subject}&body=${body}" target="_blank" rel="noopener">Email</a>
+        <a class="ar-pl-share" href="sms:?body=${body}">Text</a>
+        <a class="ar-pl-share" href="mailto:?subject=${subject}&body=${body}">Email</a>
       `;
       statsEl.insertBefore(pill, statsEl.firstChild);
       pill.querySelector('.ar-pl-copy').addEventListener('click', async () => {
