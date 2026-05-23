@@ -19,7 +19,9 @@ You must obey these rules:
 4. The reading is interpretive but humble: identify what this dream is most likely about in the dreamer's waking life, given the specific motifs present. Include a brief caveat that interpretation is a hypothesis, not a diagnosis.
 5. Cultural relatives must be REAL, well-known, public-domain artworks that share a specific motif with the dream. No fabricated artist names. Examples of safe choices: Hokusai's Great Wave, Friedrich's Monk by the Sea, Dürer's Melencolia I, Piranesi's Carceri, Botticelli's Madonnas, the Voynich Manuscript, Kuniyoshi prints, Bosch's Garden of Earthly Delights, Goya's Sleep of Reason, Klimt's The Kiss, Munch's The Scream, van Gogh's Starry Night, Vermeer's Girl with a Pearl Earring, Rembrandt's Night Watch, Rousseau's The Sleeping Gypsy. Pick artworks whose motif genuinely overlaps.
 
-6. Return EXACTLY 2 cultural relatives. Each must be a famous, public-domain artwork by a famous artist — one that 95%+ of art-literate readers have seen reproduced. NEVER invent paintings or attribute real titles to the wrong artist. Each cultural_relative entry maps to ONE artist and ONE artwork. If you cannot confidently name 2 distinct famous artworks that share specific motifs with the dream, fill the remaining slot from this safe list (each is a guaranteed real, world-famous, in-the-public-domain image on Wikimedia Commons):
+6. Return EXACTLY 2 cultural relatives. **STRONGLY PREFER works from the safe list below.** You may pick a work outside the list only if you are 100% certain the artist actually painted it AND it is as famous as items on the safe list AND it shares a more specific motif with the dream than anything on the list. NEVER invent paintings, NEVER attribute real titles to the wrong artist, NEVER pick obscure works. When in doubt: pick from the safe list, even if the motif overlap is approximate. A famous artwork with loose overlap renders correctly; an obscure work that "matches better" fails to load an image and breaks the page.
+
+Safe list (each is a real, world-famous, public-domain image on Wikimedia Commons):
 
   - Hokusai · The Great Wave off Kanagawa · 1831
   - Hieronymus Bosch · The Garden of Earthly Delights · c.1490–1510
@@ -92,7 +94,9 @@ const SCHEMA_HINT = {
     name: "string (real historical figure with documented dream-relevant work, e.g. Kafka, Mary Shelley, Jung, Coleridge, Kekulé, Borges)",
     years: "string (e.g. '1883–1924')",
     work_or_dream: "string (the specific work or recorded dream)",
-    why_match: "string (1-2 sentences on the specific overlap)"
+    why_match: "string (1-2 sentences on the specific overlap)",
+    image_filename: "string OR omit — Wikimedia Commons filename of EITHER a portrait of the figure OR an image from their relevant work (e.g. 'Carl_Gustav_Jung_1910.jpeg' for Jung's portrait, or 'Liber_Novus_005.jpg' for a Red Book page; 'Franz_Kafka_1923.jpg' for Kafka's portrait). Same fallback safety net as cultural_relatives — frontend searches Wikimedia for the dreamer's name if the filename 404s.",
+    wikipedia_url: "string OR omit — Wikipedia article URL for the figure or their work"
   }
 };
 

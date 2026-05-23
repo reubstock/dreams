@@ -16,8 +16,14 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'bad_query' });
   }
 
+  // `kind` lets callers tell us they're looking for an artwork (default) vs. a
+  // person/portrait. Artwork searches skip obvious photo-of-a-person filenames
+  // so we don't end up showing a snapshot of Picasso as if it were a painting.
+  const kind = (req.query.kind || 'artwork').toString();
+  const PHOTO_TELLS = /(photograph|photo[_-]|portrait[_-]?(of|de)|self[_-]?portrait|snapshot|by[_-][A-Z][a-z]+_\d{4}|_\d{4}_(photo|snapshot)|wax_figure)/i;
+
   try {
-    const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srnamespace=6&srlimit=5&srsearch=${encodeURIComponent(q)}`;
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srnamespace=6&srlimit=12&srsearch=${encodeURIComponent(q)}`;
     const r = await fetch(url, {
       headers: { 'User-Agent': 'Dreams/1.0 (dreams-livid.vercel.app)' },
     });
@@ -26,16 +32,30 @@ export default async function handler(req, res) {
     }
     const data = await r.json();
     const hits = data?.query?.search || [];
-    // Prefer .jpg/.png/.gif hits
-    const filenameMatch = hits.find((h) => /\.(jpe?g|png|gif)$/i.test(h.title));
-    if (!filenameMatch) {
+
+    // Keep only image extensions
+    let pool = hits.filter((h) => /\.(jpe?g|png|gif|tiff?)$/i.test(h.title));
+
+    // For artwork searches, drop hits whose filename screams "person photo".
+    // (Self-portraits explicitly requested by query are an exception.)
+    if (kind === 'artwork') {
+      const userWantsSelfPortrait = /self[-_ ]?portrait/i.test(q);
+      pool = pool.filter((h) => {
+        if (userWantsSelfPortrait) return true;
+        return !PHOTO_TELLS.test(h.title);
+      });
+    }
+
+    const pick = pool[0] || hits.find((h) => /\.(jpe?g|png|gif|tiff?)$/i.test(h.title));
+    if (!pick) {
       return res.status(404).json({ error: 'no_image_found' });
     }
-    const filename = filenameMatch.title.replace(/^File:/, '');
+    const filename = pick.title.replace(/^File:/, '');
     return res.status(200).json({
       filename,
       url: `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=480`,
       query: q,
+      kind,
     });
   } catch (err) {
     return res.status(500).json({ error: 'search_failed', message: err.message });

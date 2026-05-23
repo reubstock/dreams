@@ -511,6 +511,21 @@
     color: rgba(241, 234, 215, 0.8);
   }
   .ar-dreamer b { color: var(--paper); }
+  .ar-dreamer-body {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 18px;
+    align-items: start;
+    margin-top: 10px;
+  }
+  .ar-dreamer-body.no-img { grid-template-columns: 1fr; }
+  .ar-dreamer-img {
+    width: 120px; height: 160px;
+    object-fit: cover;
+    border: 1px solid rgba(241, 234, 215, 0.18);
+    background: rgba(241, 234, 215, 0.04);
+    display: block;
+  }
   .ar-dreamer-work { font-style: italic; margin-top: 4px; font-size: 14px; }
   .ar-dreamer-why { margin-top: 8px; font-size: 14px; line-height: 1.55; }
   .ar-foot {
@@ -3615,12 +3630,22 @@
       }).join('');
 
       const dreamer = a.closest_historical_dreamer || {};
+      const dreamerImgUrl = dreamer.image_filename
+        ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(dreamer.image_filename)}?width=320`
+        : '';
+      const dreamerSearchQ = encodeURIComponent(`${dreamer.name || ''} portrait`.trim());
       const dreamerHTML = dreamer.name ? `
-        <div class="ar-dreamer">
+        <div class="ar-dreamer" data-dreamer-search="${dreamerSearchQ}">
           <div class="ar-section-h">Closest historical dreamer</div>
-          <div><b>${escapeHTML(dreamer.name)}</b>${dreamer.years ? ' · ' + escapeHTML(dreamer.years) : ''}</div>
-          ${dreamer.work_or_dream ? `<div class="ar-dreamer-work"><i>${escapeHTML(dreamer.work_or_dream)}</i></div>` : ''}
-          ${dreamer.why_match ? `<div class="ar-dreamer-why">${escapeHTML(dreamer.why_match)}</div>` : ''}
+          <div class="ar-dreamer-body">
+            <img class="ar-dreamer-img" alt="${escapeHTML(dreamer.name)}" src="${dreamerImgUrl}" loading="lazy" data-tried="0">
+            <div class="ar-dreamer-text">
+              <div><b>${escapeHTML(dreamer.name)}</b>${dreamer.years ? ' · ' + escapeHTML(dreamer.years) : ''}</div>
+              ${dreamer.work_or_dream ? `<div class="ar-dreamer-work"><i>${escapeHTML(dreamer.work_or_dream)}</i></div>` : ''}
+              ${dreamer.why_match ? `<div class="ar-dreamer-why">${escapeHTML(dreamer.why_match)}</div>` : ''}
+              ${dreamer.wikipedia_url && /^https?:\/\/[a-z]{2,3}\.wikipedia\.org\//i.test(dreamer.wikipedia_url) ? `<a class="rel-learn" href="${escapeHTML(dreamer.wikipedia_url)}" target="_blank" rel="noopener">Learn More →</a>` : ''}
+            </div>
+          </div>
         </div>` : '';
 
       statsEl.classList.add('ar-mode');
@@ -3646,11 +3671,11 @@
 
       // Multi-stage image fallback for each cultural-relative card:
       //   stage 0: LLM-supplied commons_filename (already in src)
-      //   stage 1: Wikimedia search for "Artist Title"
+      //   stage 1: Wikimedia search for "Artist Title" (kind=artwork)
       //   stage 2: Wikimedia search for "Title" only
       //   stage 3: Wikimedia search for "Artist painting"
-      // We only hide the image if ALL stages fail — that should be vanishingly rare
-      // for famous public-domain art now that the LLM is anchored to a known list.
+      // The search endpoint filters out obvious portrait-photo hits when kind=artwork
+      // so we don't end up showing a snapshot of the artist in place of the artwork.
       statsEl.querySelectorAll('.ar-rel-img').forEach((img) => {
         const li = img.closest('.ar-rel');
         const queries = [];
@@ -3670,7 +3695,7 @@
           const q = queries[tried];
           img.dataset.tried = String(tried + 1);
           try {
-            const r = await fetch('/api/wikimedia/search?q=' + encodeURIComponent(q));
+            const r = await fetch('/api/wikimedia/search?kind=artwork&q=' + encodeURIComponent(q));
             if (!r.ok) { img.dispatchEvent(new Event('error')); return; }
             const data = await r.json();
             if (data.url) { img.src = data.url; }
@@ -3678,6 +3703,39 @@
           } catch (_) { img.dispatchEvent(new Event('error')); }
         });
       });
+
+      // Same fallback chain for the historical-dreamer portrait:
+      //   stage 0: LLM-supplied image_filename
+      //   stage 1: search "{Name} portrait"   (kind=person, lets portraits through)
+      //   stage 2: search "{Name}"            (kind=person)
+      const dreamerImg = statsEl.querySelector('.ar-dreamer-img');
+      if (dreamerImg) {
+        const name = (a.closest_historical_dreamer && a.closest_historical_dreamer.name) || '';
+        const dreamerQueries = name ? [`${name} portrait`, name] : [];
+        const dreamerBody = dreamerImg.closest('.ar-dreamer-body');
+        // If the LLM didn't supply image_filename, immediately fire error → triggers fallback
+        if (!dreamerImg.getAttribute('src')) {
+          // src is empty — manually start the fallback
+          setTimeout(() => dreamerImg.dispatchEvent(new Event('error')), 0);
+        }
+        dreamerImg.addEventListener('error', async function onErr() {
+          const tried = parseInt(dreamerImg.dataset.tried || '0', 10);
+          if (tried >= dreamerQueries.length) {
+            if (dreamerBody) dreamerBody.classList.add('no-img');
+            dreamerImg.remove();
+            return;
+          }
+          const q = dreamerQueries[tried];
+          dreamerImg.dataset.tried = String(tried + 1);
+          try {
+            const r = await fetch('/api/wikimedia/search?kind=person&q=' + encodeURIComponent(q));
+            if (!r.ok) { dreamerImg.dispatchEvent(new Event('error')); return; }
+            const data = await r.json();
+            if (data.url) { dreamerImg.src = data.url; }
+            else { dreamerImg.dispatchEvent(new Event('error')); }
+          } catch (_) { dreamerImg.dispatchEvent(new Event('error')); }
+        });
+      }
 
       // (Note: persistence + redirect happens in analyzeRecording AFTER this
       // function returns — NOT inside renderAnalysis, because renderAnalysis
