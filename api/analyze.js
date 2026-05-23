@@ -19,7 +19,7 @@ You must obey these rules:
 4. The reading is interpretive but humble: identify what this dream is most likely about in the dreamer's waking life, given the specific motifs present. Include a brief caveat that interpretation is a hypothesis, not a diagnosis.
 5. Cultural relatives must be REAL, well-known, public-domain artworks that share a specific motif with the dream. No fabricated artist names. Examples of safe choices: Hokusai's Great Wave, Friedrich's Monk by the Sea, Dürer's Melencolia I, Piranesi's Carceri, Botticelli's Madonnas, the Voynich Manuscript, Kuniyoshi prints, Bosch's Garden of Earthly Delights, Goya's Sleep of Reason, Klimt's The Kiss, Munch's The Scream, van Gogh's Starry Night, Vermeer's Girl with a Pearl Earring, Rembrandt's Night Watch, Rousseau's The Sleeping Gypsy. Pick artworks whose motif genuinely overlaps.
 
-6. Return EXACTLY 2 cultural relatives. **STRONGLY PREFER works from the safe list below.** You may pick a work outside the list only if you are 100% certain the artist actually painted it AND it is as famous as items on the safe list AND it shares a more specific motif with the dream than anything on the list. NEVER invent paintings, NEVER attribute real titles to the wrong artist, NEVER pick obscure works. When in doubt: pick from the safe list, even if the motif overlap is approximate. A famous artwork with loose overlap renders correctly; an obscure work that "matches better" fails to load an image and breaks the page.
+6. Return EXACTLY 1 cultural relative — the single best-matching famous artwork. Combined with the historical dreamer below, that's two reference points per dream; that's enough. **STRONGLY PREFER a work from the safe list below.** You may pick a work outside the list only if you are 100% certain the artist actually painted it AND it is as famous as items on the safe list AND it shares a more specific motif with the dream than anything on the list. NEVER invent paintings, NEVER attribute real titles to the wrong artist, NEVER pick obscure works. When in doubt: pick from the safe list, even if the motif overlap is approximate. A famous artwork with loose overlap renders correctly; an obscure work that "matches better" fails to load an image and breaks the page.
 
 Safe list (each is a real, world-famous, public-domain image on Wikimedia Commons):
 
@@ -75,7 +75,7 @@ const SCHEMA_HINT = {
   }],
   reading: "string (3-5 short paragraphs of interpretive reading; what this dream is most likely about in waking life; include one caveat sentence)",
   cultural_relatives: [{
-    _note: "EXACTLY 2 entries — see rule 6. Each is one artist, one artwork.",
+    _note: "EXACTLY 1 entry — see rule 6. One artist, one artwork.",
     phrase: "string (from dream)",
     artist: "string (real, public-domain)",
     title: "string (real work title)",
