@@ -321,9 +321,11 @@ async function resolveAnalysisImages(analysis) {
   if (analysis.closest_historical_dreamer) {
     jobs.push(resolveHistoricalDreamer(analysis.closest_historical_dreamer));
   }
-  // Run in parallel; cap the wall-clock cost at ~3s
+  // Run in parallel; cap the wall-clock cost. 3s was too tight — Wikimedia
+  // 404 + redirect chains sometimes take a few seconds, and abandoning the
+  // jobs mid-flight left bad LLM filenames in the saved record.
   await Promise.race([
     Promise.all(jobs),
-    new Promise((resolve) => setTimeout(resolve, 3000)),
+    new Promise((resolve) => setTimeout(resolve, 10000)),
   ]);
 }
