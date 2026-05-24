@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'storage_not_configured' });
 
-  const { id, title, visibility } = req.body || {};
+  const { id, title, visibility, text } = req.body || {};
   if (!id || typeof id !== 'string' || !/^[A-Za-z0-9_-]{8,20}$/.test(id)) {
     return res.status(400).json({ error: 'bad_id' });
   }
@@ -36,14 +36,22 @@ export default async function handler(req, res) {
     }
     patch.visibility = visibility;
   }
+  if (typeof text === 'string') {
+    const tx = text.trim();
+    if (tx.length < 20 || tx.length > 8000) {
+      return res.status(400).json({ error: 'bad_text', message: 'Text must be 20-8000 characters.' });
+    }
+    patch.text = tx;
+    patch.word_count = tx.split(/\s+/).filter(Boolean).length;
+  }
   if (Object.keys(patch).length === 0) {
     return res.status(400).json({ error: 'no_fields', message: 'Provide at least one updatable field.' });
   }
 
-  // Visibility changes are owner-only. (Title is too in practice — the editable
-  // title only appears in the owner's UI — but we don't currently gate it.)
+  // Visibility and text changes are owner-only. (Title is too in practice —
+  // the editable title only appears in the owner's UI.)
   let requesterEmail = null;
-  if (patch.visibility) {
+  if (patch.visibility || patch.text) {
     const cookieMatch = (req.headers.cookie || '').match(/(?:^|;\s*)dreams_session=([^;]+)/);
     const token = cookieMatch ? cookieMatch[1] : null;
     if (!token) return res.status(401).json({ error: 'not_signed_in' });
@@ -67,7 +75,7 @@ export default async function handler(req, res) {
     if (!result) return res.status(404).json({ error: 'dream_not_found' });
     const dream = typeof result === 'string' ? JSON.parse(result) : result;
 
-    if (patch.visibility && dream.owner_email && dream.owner_email !== requesterEmail) {
+    if ((patch.visibility || patch.text) && dream.owner_email && dream.owner_email !== requesterEmail) {
       return res.status(403).json({ error: 'not_owner' });
     }
 

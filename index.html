@@ -1978,6 +1978,39 @@
     border-color: rgba(196, 62, 26, 0.45); color: rgba(196, 62, 26, 0.75);
   }
   .vis-toggle.vis-toggle-danger:hover { background: #c43e1a; border-color: #c43e1a; color: var(--paper); }
+  /* Real, prominent owner-action buttons (Edit, Delete) that sit on their
+     own row below the dreamer line, separated from the visibility toggle. */
+  .owner-actions {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .owner-action {
+    appearance: none;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    padding: 7px 14px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .owner-action:hover { background: var(--ink); color: var(--paper); }
+  .owner-action.is-editing { background: var(--rust); border-color: var(--rust); color: var(--paper); }
+  .owner-action.is-editing:hover { background: var(--rust-soft); border-color: var(--rust-soft); }
+  .owner-action.danger {
+    border-color: rgba(196, 62, 26, 0.45);
+    color: rgba(196, 62, 26, 0.85);
+  }
+  .owner-action.danger:hover { background: #c43e1a; border-color: #c43e1a; color: var(--paper); }
+  .owner-action:disabled { opacity: 0.5; cursor: not-allowed; }
+  /* When the dream is in edit mode, the textarea gets a stronger border so
+     the user clearly sees the field is now editable. */
+  .capture-textarea.is-editing {
+    border-color: var(--rust) !important;
+    background: var(--paper-2);
+    outline: none;
+  }
   .note-btn {
     border: 1px solid var(--rust); background: var(--rust);
     color: var(--paper); cursor: pointer;
@@ -3786,7 +3819,24 @@
       // accidentally duplicating dreams + re-rolling images.
       const currentId = window.__currentDream?.id;
       if (currentId) {
+        const wasEditing = analyzeBtn.dataset.editMode === '1';
+        const editedText = textareaEl.value.trim();
+        const originalText = textareaEl.dataset.originalText;
         try {
+          // If we were in edit mode AND text actually changed, persist the
+          // new text first, then re-analyze.
+          if (wasEditing && editedText && editedText !== originalText) {
+            const ur = await fetch('/api/dream/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: currentId, text: editedText }),
+            });
+            if (!ur.ok) {
+              const u = await ur.json().catch(() => ({}));
+              renderAnalyzeError('Could not save edits', u.message || `HTTP ${ur.status}`);
+              return;
+            }
+          }
           const r = await fetch('/api/dream/reanalyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3800,11 +3850,19 @@
           window.__currentDream = data.dream;
           renderAnalysis(data.dream.text, data.dream.analysis);
           appendPermalinkPill(data.dream.id, '/d/' + data.dream.id);
-          showToast('Analysis refreshed');
+          showToast(wasEditing ? 'Edits saved and re-analyzed' : 'Analysis refreshed');
+          // Drop out of edit mode if we were in it
+          if (wasEditing) {
+            textareaEl.readOnly = true;
+            textareaEl.classList.remove('is-editing');
+            const editBtn = document.querySelector('[data-action="edit-dream"]');
+            if (editBtn) { editBtn.classList.remove('is-editing'); editBtn.textContent = 'Edit'; }
+            delete analyzeBtn.dataset.editMode;
+          }
         } catch (err) {
           renderAnalyzeError('Could not re-analyze', err.message || String(err));
         } finally {
-          analyzeBtn.textContent = original;
+          analyzeBtn.textContent = wasEditing && analyzeBtn.dataset.editMode === '1' ? 'Save changes & re-analyze' : original;
           analyzeBtn.disabled = false;
           analyzeBtn.classList.remove('analyzing');
         }
@@ -4344,30 +4402,64 @@
       const visBtn = isOwner
         ? `<button class="vis-toggle" data-current="${visibility}" data-action="toggle-vis">${visibility === 'private' ? 'Private — make public' : 'Public — make private'}</button>`
         : '';
-      // "Refresh analysis" is now consolidated into the main "Re-analyze"
-      // button at the bottom of the transcript box (analyzeRecording branches
-      // when the dream is already saved). Keeping the owner controls minimal.
-      const reanalyzeBtn = '';
-      const deleteBtn = isOwner
-        ? `<button class="vis-toggle vis-toggle-danger" data-action="delete-dream" title="Permanently delete this dream">Delete</button>`
-        : '';
       const noteBtn = (handle && !isOwner)
         ? `<button class="note-btn" data-action="open-note" data-to-handle="${escapeHtmlAuth(handle)}" data-dream-id="${escapeHtmlAuth(dream.id)}">Send a note</button>`
         : '';
+      // Owner gets a proper action row with real Edit + Delete buttons,
+      // separate from the dreamer + visibility line. Edit toggles transcript
+      // edit mode; Save & cancel buttons appear when editing.
+      const ownerActions = isOwner ? `
+        <div class="owner-actions">
+          <button class="owner-action" data-action="edit-dream">Edit</button>
+          <button class="owner-action danger" data-action="delete-dream">Delete</button>
+        </div>` : '';
 
-      line.innerHTML = `${dreamerLink}${visBtn ? ' · ' + visBtn : ''}${reanalyzeBtn ? ' · ' + reanalyzeBtn : ''}${deleteBtn ? ' · ' + deleteBtn : ''}${noteBtn ? ' · ' + noteBtn : ''}`;
+      line.innerHTML = `${dreamerLink}${visBtn ? ' · ' + visBtn : ''}${noteBtn ? ' · ' + noteBtn : ''}${ownerActions}`;
       // Direct-wire the buttons. We can't rely on a top-level delegated handler
       // because these helpers live inside this nested IIFE scope.
       const visEl = line.querySelector('[data-action="toggle-vis"]');
       if (visEl) visEl.addEventListener('click', () => toggleVisibility(visEl));
-      const reEl = line.querySelector('[data-action="reanalyze"]');
-      if (reEl) reEl.addEventListener('click', () => reanalyzeDream(reEl));
+      const editEl = line.querySelector('[data-action="edit-dream"]');
+      if (editEl) editEl.addEventListener('click', () => toggleEditMode(editEl));
       const delEl = line.querySelector('[data-action="delete-dream"]');
       if (delEl) delEl.addEventListener('click', () => deleteDream(delEl));
       const noteEl = line.querySelector('[data-action="open-note"]');
       if (noteEl) noteEl.addEventListener('click', () => {
         if (typeof window.__openNote === 'function') window.__openNote(noteEl.dataset.toHandle, noteEl.dataset.dreamId);
       });
+    }
+
+    // Edit mode: makes the transcript textarea editable and changes the
+    // bottom "Re-analyze" button into "Save changes" (which posts the new
+    // text + re-analyzes). The Edit button itself toggles into "Cancel" to
+    // bail out without saving.
+    function toggleEditMode(btn) {
+      const ta = document.getElementById('capture-textarea');
+      const analyzeBtn = document.querySelector('[data-action="analyze-recording"]');
+      const isEditing = btn.classList.toggle('is-editing');
+      if (isEditing) {
+        // Enter edit mode
+        ta.dataset.originalText = ta.value;
+        ta.readOnly = false;
+        ta.classList.add('is-editing');
+        ta.focus();
+        btn.textContent = 'Cancel';
+        if (analyzeBtn) {
+          analyzeBtn.textContent = 'Save changes & re-analyze';
+          analyzeBtn.dataset.editMode = '1';
+        }
+      } else {
+        // Cancel: restore original text
+        const orig = ta.dataset.originalText;
+        if (orig !== undefined) ta.value = orig;
+        ta.readOnly = true;
+        ta.classList.remove('is-editing');
+        btn.textContent = 'Edit';
+        if (analyzeBtn) {
+          analyzeBtn.textContent = 'Re-analyze';
+          delete analyzeBtn.dataset.editMode;
+        }
+      }
     }
 
     // Owner-only: permanently delete this dream. Two-step confirm so it can't
