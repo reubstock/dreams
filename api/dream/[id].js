@@ -106,7 +106,35 @@ export default async function handler(req, res) {
       }
     } catch (_) {}
 
-    return res.status(200).json({ dream, prev_id, next_id });
+    // Add `favorited` boolean for the requester (so the heart icon knows
+    // whether to render filled or empty on first paint).
+    let favorited = false;
+    try {
+      const cookies = req.headers.cookie || '';
+      const m = cookies.match(/(?:^|;\s*)dreams_session=([^;]+)/);
+      if (m) {
+        const sr = await fetch(`${KV_URL}/get/session:${m[1]}`, {
+          headers: { Authorization: `Bearer ${KV_TOKEN}` },
+        });
+        if (sr.ok) {
+          const { result: sRes } = await sr.json();
+          if (sRes) {
+            const session = typeof sRes === 'string' ? JSON.parse(sRes) : sRes;
+            if (session?.email) {
+              const fr = await fetch(`${KV_URL}/get/${encodeURIComponent(`favorited:${session.email}:${id}`)}`, {
+                headers: { Authorization: `Bearer ${KV_TOKEN}` },
+              });
+              if (fr.ok) {
+                const { result: fRes } = await fr.json();
+                favorited = !!fRes;
+              }
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    return res.status(200).json({ dream, prev_id, next_id, favorited });
   } catch (err) {
     console.error('get failed:', err);
     return res.status(500).json({ error: 'fetch_failed', message: err.message });
