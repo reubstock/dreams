@@ -64,33 +64,65 @@ Safe list (each is a real, world-famous, public-domain image on Wikimedia Common
 
 8. Also include "wikipedia_url" — the full Wikipedia article URL for THE ARTWORK ITSELF (e.g. "https://en.wikipedia.org/wiki/The_Garden_of_Earthly_Delights"), NOT a biography of the artist. The "Learn More" link on each card uses it. If you're unsure whether a dedicated article exists, omit the field — the frontend will fall back to a Wikipedia search URL built from the title.
 
-9. For closest_historical_dreamer, **pick the figure whose documented dream-related work most specifically matches THIS dream's motifs.** Vary your picks across dreams — Freud and Jung are the lazy defaults; only choose them when no one else fits better. Anchor list of historical dreamers, each with the motifs their work is best known for:
+9. For closest_historical_dreamer, follow this SELECTION PROCESS — do not skip it:
 
-  - Franz Kafka (1883–1924) — bodily metamorphosis, voice loss, bureaucratic absurdity, family alienation
-  - Mary Shelley (1797–1851) — life animated from death, Frankenstein born from a waking dream
-  - Samuel Taylor Coleridge (1772–1834) — Kubla Khan, opium reverie, interrupted vision
-  - Lewis Carroll (1832–1898) — falling, talking animals, logic that bends, Alice
-  - Robert Louis Stevenson (1850–1894) — Jekyll & Hyde, split identity, the "Brownies" who wrote his dreams
-  - Jorge Luis Borges (1899–1986) — labyrinths, infinite libraries, doubles, mirrors
-  - Marcel Proust (1871–1922) — involuntary memory, the half-waking moment, the long unbroken interior
-  - William Blake (1757–1827) — angels, devils, prophetic visions, illuminated manuscripts
-  - Gérard de Nerval (1808–1855) — Aurélia, melancholic descent, the dream as second life
-  - August Strindberg (1849–1912) — A Dream Play, reality fragmenting on stage
-  - Edgar Allan Poe (1809–1849) — premature burial, the fevered nightmare, the haunted room
-  - August Kekulé (1829–1896) — the benzene-ring snake dream, scientific intuition
-  - Dmitri Mendeleev (1834–1907) — the periodic table arrived in a dream
-  - Elias Howe (1819–1867) — the sewing-machine eye in a dream, mechanical solution
-  - René Descartes (1596–1650) — three formative dreams of November 1619
-  - Hildegard von Bingen (1098–1179) — radiant visions of fire and light, illuminated by God
-  - Julian of Norwich (1342–c.1416) — Revelations of Divine Love, the hazelnut, the wound
-  - Emanuel Swedenborg (1688–1772) — spirit-world journeys, dream journals
-  - Hervey de Saint-Denys (1822–1892) — pioneering lucid-dreaming experiments, voluntary dream control
-  - Carl Jung (1875–1961) — archetypes, shadow, the Red Book, the collective unconscious
-  - Sigmund Freud (1856–1939) — wish-fulfillment, repression, latent vs. manifest content
+   STEP A. Internally list the dream's 2–3 most specific motifs (e.g. "bodily transformation; failed phone call; younger mother"). These are the SPECIFIC visual + structural elements in the dream text, not generic Jungian categories.
+
+   STEP B. Scan the list below. Each figure is tagged with the motifs their documented work centers on. Pick the figure with the MOST SPECIFIC motif overlap to your STEP A list.
+
+   STEP C. Vary picks across dreams. The figures are diverse in geography, gender, era, and tradition by design. A reading that consistently picks the same three figures (Freud / Jung / Kafka) is a failure of imagination, not a feature.
+
+   STEP D. **Freud is ONLY appropriate when the dream is genuinely about repression, wish-fulfillment, sexual or familial conflict.** **Jung is ONLY appropriate when the dream is genuinely about archetypes (anima/animus, shadow, mandala), the collective unconscious, or alchemical transformation.** **Kafka is ONLY appropriate when the dream is genuinely about bureaucratic powerlessness, bodily metamorphosis, or familial alienation.** If none of those apply, pick someone else from the list.
+
+ANCHOR LIST. Each entry is one figure, life span, and 3–5 SPECIFIC motifs.
+
+LITERARY / VISIONARY DREAMERS
+  - Mary Shelley (1797–1851) — life animated from death; the laboratory; the waking dream that becomes Frankenstein
+  - Samuel Taylor Coleridge (1772–1834) — Kubla Khan; opium reverie; the interrupted vision; the dome built in air
+  - Lewis Carroll (1832–1898) — falling down a hole; talking animals; logic that bends; the dream within a dream
+  - Robert Louis Stevenson (1850–1894) — Jekyll & Hyde; split identity; the "Brownies" who wrote his dreams
+  - Edgar Allan Poe (1809–1849) — premature burial; the fevered nightmare; the haunted room; uncanny doubling
+  - William Blake (1757–1827) — angels and devils; prophetic visions; illuminated manuscripts; the four Zoas
+  - Gérard de Nerval (1808–1855) — Aurélia; melancholic descent; the dream as second life; lost beloved
+  - August Strindberg (1849–1912) — A Dream Play; reality fragmenting on stage; the daughter of Indra
+  - Marcel Proust (1871–1922) — involuntary memory; the half-waking moment; the petite madeleine
+  - Jorge Luis Borges (1899–1986) — labyrinths; infinite libraries; doubles; mirrors; the dreamer dreamed
+  - Franz Kafka (1883–1924) — bodily metamorphosis; bureaucratic absurdity; family alienation; the trial
+  - Emily Dickinson (1830–1886) — death-as-sleep; the visionary moment at the threshold; "I heard a fly buzz"
+  - Olive Schreiner (1855–1920) — allegorical dream-tales; women's awakening in vast landscapes (Dreams, 1890)
+  - Christina Rossetti (1830–1894) — Goblin Market; sister-as-rescuer; forbidden fruit; the dream-allegory
+  - Murasaki Shikibu (c.978–c.1014) — The Tale of Genji; dream-visitations; spirit possession; the absent beloved
+  - Rabindranath Tagore (1861–1941) — Bengali poetry of half-waking; the soul's wandering; nature as inner landscape
+
+MYSTICS, VISIONARIES, MEDIUMS, PROPHETS
+  - Hildegard von Bingen (1098–1179) — radiant visions of fire and light; illuminated by God; the cosmos as living body
+  - Julian of Norwich (1342–c.1416) — Revelations of Divine Love; the hazelnut held in the palm; the wound
+  - St. Teresa of Ávila (1515–1582) — mystical ecstasies; the interior castle of the soul; spiritual marriage
+  - Mechthild of Magdeburg (c.1207–c.1282) — The Flowing Light of the Godhead; the soul as bride; divine longing
+  - Joan of Arc (c.1412–1431) — divine voices; prophetic visions; the call from beyond; the impossible mission
+  - Emanuel Swedenborg (1688–1772) — spirit-world journeys; conversations with angels; the heavens charted
+  - Black Elk (1863–1950) — Oglala Lakota holy man; the Great Vision at age nine; the sacred tree; the hoop of the people
+  - Sojourner Truth (c.1797–1883) — visionary call to truth-telling; abolitionist prophecy; the voice that comes from elsewhere
+  - Ibn al-ʿArabi (1165–1240) — Andalusian Sufi; dreams as the imaginal realm; the divine forms that appear
+  - Rumi (1207–1273) — Persian Sufi; mystical love of Shams; the lost beloved; the reed cut from the bed
+  - Ramakrishna (1836–1886) — Bengali mystic; ecstatic visions of the Divine Mother; samadhi; the temple at Dakshineswar
+  - Sun Bu'er (1119–1182) — Daoist alchemist; inner-alchemy dream-poetry; the spirit-body's transformation
+  - Maimonides (1138–1204) — Jewish philosopher writing in Arabic; dream-as-prophecy; the Guide for the Perplexed
+
+SCIENTIFIC + DISCOVERY DREAMERS
+  - August Kekulé (1829–1896) — the benzene-ring snake dream; scientific intuition; the ouroboros
+  - Dmitri Mendeleev (1834–1907) — the periodic table arrived in a dream; ordered emergence from chaos
+  - Elias Howe (1819–1867) — the sewing-machine eye in a dream; mechanical breakthrough
+  - René Descartes (1596–1650) — three formative dreams of November 1619; the philosophy founded on dreams
+
+DREAM THEORISTS
+  - Hervey de Saint-Denys (1822–1892) — pioneering lucid-dreaming experiments; voluntary dream control
+  - Artemidorus (2nd century CE) — Oneirocritica; the first systematic dream-interpretation manual; dreams as portents
   - Zhuangzi (c.369–286 BCE) — the butterfly dream; "Am I a man dreaming I'm a butterfly, or a butterfly dreaming I'm a man?"
-  - Artemidorus (2nd century CE) — Oneirocritica, the first systematic dream interpretation manual
+  - Carl Jung (1875–1961) — archetypes; shadow; mandala; the collective unconscious; the Red Book (USE ONLY when dream is genuinely archetypal — see STEP D)
+  - Sigmund Freud (1856–1939) — wish-fulfillment; repression; latent vs. manifest content (USE ONLY when dream is genuinely about repression — see STEP D)
 
-You may use a figure outside the list if their work is even more specifically on-point. But cross-check: if the dream is about transformation, Kafka beats Freud; if it's about a fevered nightmare, Poe beats Jung; if it's about scientific insight, Kekulé or Mendeleev beats Freud. DO NOT default to Freud or Jung unless the dream is genuinely about wish-fulfillment, repression, archetypes, or the unconscious.
+You MAY pick a figure outside this list if their work matches a specific motif of THIS dream more sharply than anyone on the list. But the figure must have died before 1929 (public domain for portrait images) AND must have documented dream-related work. Cross-check: if the dream is about visions of light, Hildegard or Black Elk before Jung. If it's about prophecy or being called, Joan of Arc or Sojourner Truth before Freud. If it's about the lost beloved, Rumi or Nerval before Freud. If it's about metamorphosis of the body, Kafka or Sun Bu'er before Jung.
 
 Return only valid JSON matching the schema. Do not wrap in markdown.`;
 
@@ -123,11 +155,11 @@ const SCHEMA_HINT = {
     other_speakers: "number"
   },
   closest_historical_dreamer: {
-    name: "string (real historical figure with documented dream-relevant work, e.g. Kafka, Mary Shelley, Jung, Coleridge, Kekulé, Borges)",
+    name: "string (real historical figure with documented dream-related work — see rule 9. Examples spanning the actual list: Hildegard von Bingen, Black Elk, Rumi, Murasaki Shikibu, Joan of Arc, Sojourner Truth, Ramakrishna, Emily Dickinson, Mary Shelley, Coleridge, Kafka, Borges. Do NOT default to Kafka/Freud/Jung unless their tagged motifs genuinely match.)",
     years: "string (e.g. '1883–1924')",
     work_or_dream: "string (the specific work or recorded dream)",
-    why_match: "string (1-2 sentences on the specific overlap)",
-    image_filename: "string OR omit — Wikimedia Commons filename of EITHER a portrait of the figure OR an image from their relevant work (e.g. 'Carl_Gustav_Jung_1910.jpeg' for Jung's portrait, or 'Liber_Novus_005.jpg' for a Red Book page; 'Franz_Kafka_1923.jpg' for Kafka's portrait). Same fallback safety net as cultural_relatives — frontend searches Wikimedia for the dreamer's name if the filename 404s.",
+    why_match: "string (1-2 sentences on the SPECIFIC motif overlap — cite the concrete dream element, not generic 'about the unconscious')",
+    image_filename: "string OR omit — Wikimedia Commons filename of EITHER a portrait of the figure OR an image from their relevant work (e.g. 'Hildegard_von_Bingen.jpg', 'Black_Elk.jpg', 'Murasaki_Shikibu.jpg', 'Sojourner_Truth_c1870.jpg'). Same fallback safety net — frontend searches Wikimedia for the dreamer's name if the filename 404s.",
     wikipedia_url: "string OR omit — Wikipedia article URL for the figure or their work"
   }
 };
