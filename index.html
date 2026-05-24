@@ -4343,14 +4343,20 @@
         if (playBtn) playBtn.style.display = dream.audio_url ? '' : 'none';
         // On an already-saved dream, the "Analyze and Save" button renames
         // to "Re-analyze" and (via analyzeRecording's branching below)
-        // re-runs the LLM on the existing record without creating a
-        // duplicate or touching the image. "Discard & record again" is
-        // destructive on a saved dream, so we hide it.
+        // re-runs the LLM on the existing record. Owner-only — the server
+        // rejects re-analyze from non-owners, and we don't want to tease
+        // visitors with a button they can't use. "Discard & record again"
+        // is also owner-only (and even then, destructive).
+        const dreamIsOwner = !!(authState.signedIn && dream.owner_email && authState.email && dream.owner_email.toLowerCase() === authState.email.toLowerCase());
         const analyzeBtn = document.querySelector('[data-action="analyze-recording"]');
         if (analyzeBtn) {
-          analyzeBtn.style.display = '';
-          analyzeBtn.textContent = 'Re-analyze';
-          analyzeBtn.title = 'Re-run the LLM analysis on this dream. Costs ~$0.01. Does not change the image.';
+          if (dreamIsOwner) {
+            analyzeBtn.style.display = '';
+            analyzeBtn.textContent = 'Re-analyze';
+            analyzeBtn.title = 'Re-run the LLM analysis on this dream. Costs ~$0.01. Does not change the image.';
+          } else {
+            analyzeBtn.style.display = 'none';
+          }
         }
         const discardBtn = document.querySelector('[data-action="discard-recording"]');
         if (discardBtn) discardBtn.style.display = 'none';
@@ -4398,6 +4404,10 @@
       // If the user just signed in and had clicked the heart pre-auth,
       // auto-complete that favorite now.
       try { if (typeof completePendingFavorite === 'function') completePendingFavorite(); } catch (_) {}
+      // Re-analyze button at the bottom of the transcript is owner-only
+      // (server rejects others anyway, but don't tease).
+      const analyzeBtn = document.querySelector('[data-action="analyze-recording"]');
+      if (analyzeBtn) analyzeBtn.style.display = isOwner ? '' : 'none';
       const visibility = dream.visibility === 'private' ? 'private' : 'public';
       const visBtn = isOwner
         ? `<button class="vis-toggle" data-current="${visibility}" data-action="toggle-vis">${visibility === 'private' ? 'Private — make public' : 'Public — make private'}</button>`
