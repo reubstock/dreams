@@ -54,11 +54,11 @@ export default async function handler(req, res) {
   const dreams = (values || [])
     .map((v) => { if (!v) return null; try { return typeof v === 'string' ? JSON.parse(v) : v; } catch (_) { return null; } })
     .filter(Boolean)
-    // Skip private dreams owned by someone else (in case visibility flipped after favorite)
-    .filter((d) => {
-      if (d.visibility !== 'private') return true;
-      return d.owner_email && d.owner_email.toLowerCase() === email.toLowerCase();
-    })
+    // Favorites are for others' dreams — your own already live in My Dreams.
+    // Filter out dreams whose owner_email matches the requester.
+    .filter((d) => !d.owner_email || d.owner_email.toLowerCase() !== email.toLowerCase())
+    // Skip private dreams (someone made it private after you favorited it).
+    .filter((d) => d.visibility !== 'private')
     .map((d) => ({
       id: d.id,
       title: d.title || d.analysis?.title || null,
