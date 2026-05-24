@@ -4211,6 +4211,9 @@
       // Re-run reroll-button gating any time isOwner changes
       try { if (typeof refreshRerollButton === 'function') refreshRerollButton(); } catch (_) {}
       try { if (typeof refreshFavoriteButton === 'function') refreshFavoriteButton(); } catch (_) {}
+      // If the user just signed in and had clicked the heart pre-auth,
+      // auto-complete that favorite now.
+      try { if (typeof completePendingFavorite === 'function') completePendingFavorite(); } catch (_) {}
       const visibility = dream.visibility === 'private' ? 'private' : 'public';
       const visBtn = isOwner
         ? `<button class="vis-toggle" data-current="${visibility}" data-action="toggle-vis">${visibility === 'private' ? 'Private — make public' : 'Public — make private'}</button>`
@@ -4459,43 +4462,52 @@
       reroll.hidden = !window.__currentDreamIsOwner;
     }
 
-    // Heart icon — anyone signed in can favorite any dream (including their own).
-    // Shows after the image renders. Click toggles the favorite state with
-    // an optimistic update; on failure we revert.
+    // Heart icon — visible to EVERYONE once the image renders. Click while
+    // signed in toggles the favorite. Click while signed out shows a toast
+    // and opens the sign-in modal; the click intent is stashed in
+    // localStorage so it auto-completes once the user lands back signed in.
     function refreshFavoriteButton() {
       const btn = document.getElementById('hero-favorite');
       if (!btn) return;
       const img = document.getElementById('hero-img');
       // Only expose once the image is showing
       if (!img || img.hidden) { btn.hidden = true; return; }
-      if (!window.authState || !window.authState.signedIn) { btn.hidden = true; return; }
       btn.hidden = false;
       btn.classList.toggle('is-favorited', !!window.__currentFavorited);
+      // Subtle hint for signed-out users
+      btn.title = window.authState?.signedIn
+        ? (window.__currentFavorited ? 'Remove from favorites' : 'Save to favorites')
+        : 'Sign in to favorite';
+    }
+    async function doFavorite(dreamId, on) {
+      const r = await fetch('/api/dream/favorite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: dreamId, on }),
+      });
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || 'favorite failed');
     }
     function wireFavorite() {
       const btn = document.getElementById('hero-favorite');
       if (!btn || btn.dataset.wired) return;
       btn.dataset.wired = '1';
       btn.addEventListener('click', async () => {
+        const dream = window.__currentDream;
+        if (!dream?.id) return;
+        // Signed-out → save the intent and prompt to sign in
         if (!window.authState?.signedIn) {
-          showToast('Sign in to favorite dreams');
+          try { localStorage.setItem('dreams:pending_favorite', dream.id); } catch (_) {}
+          showToast('Sign in to favorite — we\'ll save this one for you');
           openSignin();
           return;
         }
-        const dream = window.__currentDream;
-        if (!dream?.id) return;
         const next = !window.__currentFavorited;
         // Optimistic
         window.__currentFavorited = next;
         btn.classList.toggle('is-favorited', next);
         btn.disabled = true;
         try {
-          const r = await fetch('/api/dream/favorite', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: dream.id, on: next }),
-          });
-          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || 'favorite failed');
+          await doFavorite(dream.id, next);
           showToast(next ? 'Added to favorites' : 'Removed from favorites');
         } catch (err) {
           // Revert
@@ -4506,6 +4518,27 @@
           btn.disabled = false;
         }
       });
+    }
+    // After sign-in, if there's a pending favorite for this dream, complete it.
+    async function completePendingFavorite() {
+      if (!window.authState?.signedIn) return;
+      let pending = null;
+      try { pending = localStorage.getItem('dreams:pending_favorite'); } catch (_) {}
+      if (!pending) return;
+      const dream = window.__currentDream;
+      if (!dream?.id || dream.id !== pending) return;
+      // Already favorited? clear the intent and bail
+      if (window.__currentFavorited) {
+        try { localStorage.removeItem('dreams:pending_favorite'); } catch (_) {}
+        return;
+      }
+      try {
+        await doFavorite(pending, true);
+        window.__currentFavorited = true;
+        try { localStorage.removeItem('dreams:pending_favorite'); } catch (_) {}
+        showToast('Added to your favorites');
+        refreshFavoriteButton();
+      } catch (_) { /* leave pending so a manual click can complete it */ }
     }
 
     function wireReroll(dream) {
