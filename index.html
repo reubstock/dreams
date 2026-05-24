@@ -933,17 +933,70 @@
       drop-shadow(0 -1px 0 var(--ink))
       drop-shadow(0 8px 14px rgba(10, 31, 92, 0.22));
   }
-  /* When the homepage example is a real dream painting (not the
-     chroma-keyed butterfly cutout), the rectangular drop-shadow cutout
-     becomes a small framed painting in miniature instead. */
-  .dream-icon.dream-icon--painting {
-    width: 220px; height: 220px;
-    object-fit: cover;
-    border: 1px solid var(--ink);
-    filter: drop-shadow(0 12px 24px rgba(10, 31, 92, 0.28));
-    transition: transform 0.18s;
+  /* ============ FEATURED DREAM card (below the fold) ============
+     Sits between the example section and the recent-dreams feed. One
+     specific saved dream rendered as a side-by-side painting + excerpt
+     card. The eerie painting can live here without dominating the page. */
+  .featured-dream {
+    margin: 24px 0 56px;
   }
-  .dream-icon-wrap a:hover .dream-icon.dream-icon--painting { transform: scale(1.02); }
+  .fd-card {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    padding: 22px;
+    border: 1px solid rgba(13, 10, 4, 0.12);
+    background: var(--paper-2);
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  }
+  .fd-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(13, 10, 4, 0.10);
+    border-color: rgba(13, 10, 4, 0.22);
+  }
+  .fd-img-wrap {
+    width: 280px; height: 280px;
+    overflow: hidden;
+    border: 1px solid var(--ink);
+  }
+  .fd-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .fd-kicker {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--rust);
+  }
+  .fd-kicker em { font-style: italic; }
+  .fd-title {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-size: 32px; font-style: italic; font-weight: 400;
+    line-height: 1.1; margin: 8px 0 12px;
+    color: var(--ink);
+  }
+  .fd-excerpt {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 16px; line-height: 1.55;
+    color: var(--ink-2);
+    margin: 0 0 14px;
+  }
+  .fd-meta {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10.5px; letter-spacing: 0.10em;
+    color: var(--muted);
+  }
+  .fd-meta b { color: var(--ink); }
+  .fd-cta { color: var(--rust); }
+  @media (max-width: 720px) {
+    .fd-card { grid-template-columns: 1fr; gap: 18px; padding: 16px; }
+    .fd-img-wrap { width: 100%; aspect-ratio: 1 / 1; height: auto; }
+    .fd-title { font-size: 26px; }
+  }
   .dream-icon-caption {
     font-family: ui-monospace, Menlo, monospace; font-size: 10px;
     letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
@@ -2690,26 +2743,25 @@
     <!-- =================== HEADLINE =================== -->
     <section class="headline-block example-only">
       <div class="headline-text">
-        <div class="kicker">Example diagnosis</div>
-        <h1 class="pattern">A dream of <em>spatial distortion.</em></h1>
+        <div class="kicker">Example diagnosis · Dream 0001</div>
+        <h1 class="pattern">A dream of <em>metamorphoses.</em></h1>
         <p class="one-liner">
-          The childhood house is wrong. The mother is younger than the dreamer.
-          The ceiling is water; fish swim above. The phone has letters in a
-          language no one speaks. The floor becomes a beach.
-          <span class="pop">The dreamer is the last thing in the room that stays the dreamer.</span>
+          Eight things transform or break in eighty-seven words.
+          The dreamer is the <b>only stable identity</b> on the page.
+          Read structurally, this is a dream about being
+          <span class="pop">the last fixed point in a world losing its grammar.</span>
         </p>
       </div>
       <div class="dream-icon-wrap">
-        <a href="/d/OuvHHpl2u-8" aria-label="Open the full diagnosis of this dream">
-          <img class="dream-icon dream-icon--painting"
-               src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/dreams/OuvHHpl2u-8-1779659990145-a5GYixDQyZHhtknjZblSy1MTJFScrH.jpg"
-               alt="The Ceiling Made of Water — surrealist painting of a man with a younger woman, fish swimming through a watery ceiling, a phone showing illegible letters, orange sky through a window"
-               loading="lazy">
-        </a>
+        <img class="dream-icon"
+             src="/images/morpho.png"
+             alt="Morpho didius male, dorsal view — chroma-keyed from Wikimedia / MHNT photo"
+             loading="lazy">
         <div class="dream-icon-caption">
-          <b>The Ceiling Made of Water</b><br>
-          <i>Dreamed by <a href="/u/reubstock">reubstock</a>.</i><br>
-          <a href="/d/OuvHHpl2u-8" class="dream-icon-credit">Read the full diagnosis →</a>
+          <b>Morpho didius</b><br>
+          from <i>morphē</i>, Greek: <i>form</i>.<br>
+          Same root as <i>morph</i>.<br>
+          <span class="dream-icon-credit">Photo: D. Descouens · MHNT · CC BY-SA</span>
         </div>
       </div>
     </section>
@@ -2949,6 +3001,37 @@
       </div>
     </div>
 
+
+    <!-- =================== FEATURED DREAM (below the fold) =================== -->
+    <!-- A quiet featured-dream banner that uses one specific dream's
+         gpt-image-1 painting as the visual. Sits well below the fold
+         (after the example diagnosis + source sections) so the eerie/
+         ominous register of the painting doesn't dominate the homepage. -->
+    <div class="section-head example-only">
+      <div class="num">iia.</div>
+      <div class="title">A recent dream</div>
+      <div class="rule"></div>
+    </div>
+    <section class="featured-dream example-only">
+      <a class="fd-card" href="/d/OuvHHpl2u-8">
+        <div class="fd-img-wrap">
+          <img class="fd-img"
+               src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/dreams/OuvHHpl2u-8-1779659990145-a5GYixDQyZHhtknjZblSy1MTJFScrH.jpg"
+               alt="The Ceiling Made of Water — surrealist painting"
+               loading="lazy">
+        </div>
+        <div class="fd-body">
+          <div class="fd-kicker">A dream of <em>spatial distortion</em></div>
+          <h3 class="fd-title">The Ceiling Made of Water</h3>
+          <p class="fd-excerpt">
+            I was in my childhood house but the rooms were all wrong.
+            My mother was there but younger than me. The ceiling was made
+            of water and I could see fish swimming above…
+          </p>
+          <div class="fd-meta">Dreamed by <b>reubstock</b> · <span class="fd-cta">Read the full diagnosis →</span></div>
+        </div>
+      </a>
+    </section>
 
     <!-- =================== RECENT DREAMS =================== -->
     <div class="section-head home-recent-head" id="home-recent-head">
