@@ -859,6 +859,21 @@
       drop-shadow(0 -1px 0 var(--ink))
       drop-shadow(0 3px 5px rgba(10, 31, 92, 0.2));
   }
+  /* When the butterfly is swapped for a dream image (homepage only),
+     it becomes a small square thumbnail of an actual dream's
+     gpt-image-1 painting. Drops the cutout drop-shadow because the
+     dream image is rectangular with painterly content; replaces it
+     with a soft inset border + drop shadow that reads as a framed
+     painting in miniature. */
+  .brand-butterfly.is-dream {
+    width: 44px; height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--ink);
+    filter: drop-shadow(0 2px 4px rgba(10, 31, 92, 0.25));
+    transition: transform 0.15s;
+  }
+  .brand-link:hover .brand-butterfly.is-dream { transform: scale(1.04); }
   .masthead-meta {
     font-family: ui-monospace, Menlo, monospace; font-size: 11px;
     letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
@@ -4930,6 +4945,31 @@
     }
   }
   loadRecentDreams();
+
+  // ============ Homepage: swap the brand butterfly for a recent dream image ============
+  // The masthead butterfly stays everywhere else (brand identity), but on
+  // the homepage we swap it for the gpt-image-1 painting of a recent
+  // public dream. Makes the brand feel alive — the icon literally changes
+  // each visit to show a current example. The brand link still goes to /.
+  async function swapBrandToDreamOnHome() {
+    if (window.location.pathname !== '/') return;
+    try {
+      const r = await fetch('/api/dreams/recent?limit=20');
+      if (!r.ok) return;
+      const { dreams } = await r.json();
+      const withImg = (dreams || []).filter((d) => d.image_url);
+      if (withImg.length === 0) return;
+      // Pick a random one — gives the homepage variety across visits
+      const pick = withImg[Math.floor(Math.random() * withImg.length)];
+      const img = document.querySelector('.brand-butterfly');
+      if (!img) return;
+      img.src = pick.image_url;
+      img.alt = pick.title || 'A recent dream';
+      img.classList.add('is-dream');
+      img.title = (pick.title || 'A dream') + ' — click brand to refresh';
+    } catch (_) { /* keep the butterfly */ }
+  }
+  swapBrandToDreamOnHome();
 
   // ============ Bottom CTA → scroll to top capture ============
   document.querySelectorAll('[data-action="scroll-to-capture"]').forEach((el) => {
