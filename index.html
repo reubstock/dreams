@@ -2665,6 +2665,43 @@
       </div>
     </section>
 
+    <!-- =================== RECIPIENT PROMPT (on /d/:id when not signed in) =================== -->
+    <div class="recipient-prompt" id="recipient-prompt">
+      <div class="recipient-prompt-text">
+        Someone shared their dream with you. <em>Record yours</em> and the system finds dreams that share patterns with it.
+      </div>
+      <button data-action="open-signin">Sign in to start</button>
+    </div>
+
+    <!-- =================== HERO IMAGE (dream pages only) =================== -->
+    <section class="hero-image" id="hero-image" hidden>
+      <figure class="hero-image-frame">
+        <img id="hero-img" alt="Generated dream image" hidden>
+        <div class="hero-loading" id="hero-loading" hidden>
+          <div class="hero-spinner"></div>
+          <div class="hero-loading-text" id="hero-loading-text">Painting your dream… <span class="hero-elapsed-inline" id="hero-elapsed">0:00</span></div>
+          <div class="hero-loading-sub">gpt-image-1 · usually 20–30 seconds</div>
+        </div>
+        <button class="hero-reroll" id="hero-reroll" type="button" hidden>↻ Re-roll</button>
+        <button class="hero-favorite" id="hero-favorite" type="button" hidden aria-label="Favorite this dream" title="Save to your favorites">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 21s-7.5-4.5-9.5-9.5C0.5 6 5.5 2 9 4.5 10.5 5.6 12 7.5 12 7.5s1.5-1.9 3-3C18.5 2 23.5 6 21.5 11.5 19.5 16.5 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="hero-saved-badge" id="hero-saved-badge" hidden>Saved</div>
+      </figure>
+      <!-- Inline note bar that appears when you click the heart on someone
+           else's dream. Optional one-line message to the dreamer that
+           rides along with the favorite as a single notification. -->
+      <div class="fav-note-bar" id="fav-note-bar" hidden>
+        <input class="fav-note-input" id="fav-note-input" type="text" maxlength="500" placeholder="Tell the dreamer why this resonated (optional)…">
+        <button class="fav-note-send" id="fav-note-send" type="button">Send</button>
+        <button class="fav-note-skip" id="fav-note-skip" type="button" aria-label="Skip the note">Skip</button>
+      </div>
+      <figcaption class="hero-caption" id="hero-caption" hidden></figcaption>
+    </section>
+    </div><!-- /.dream-frame -->
+
     <!-- =================== LIBRARY (signed-in user's dreams + favorites, only on /library) =================== -->
     <section class="library-section" id="library-section">
       <div class="library-kicker" id="library-kicker">My dreams</div>
@@ -2720,43 +2757,6 @@
         </div>
       </form>
     </section>
-
-    <!-- =================== RECIPIENT PROMPT (on /d/:id when not signed in) =================== -->
-    <div class="recipient-prompt" id="recipient-prompt">
-      <div class="recipient-prompt-text">
-        Someone shared their dream with you. <em>Record yours</em> and the system finds dreams that share patterns with it.
-      </div>
-      <button data-action="open-signin">Sign in to start</button>
-    </div>
-
-    <!-- =================== HERO IMAGE (dream pages only) =================== -->
-    <section class="hero-image" id="hero-image" hidden>
-      <figure class="hero-image-frame">
-        <img id="hero-img" alt="Generated dream image" hidden>
-        <div class="hero-loading" id="hero-loading" hidden>
-          <div class="hero-spinner"></div>
-          <div class="hero-loading-text" id="hero-loading-text">Painting your dream… <span class="hero-elapsed-inline" id="hero-elapsed">0:00</span></div>
-          <div class="hero-loading-sub">gpt-image-1 · usually 20–30 seconds</div>
-        </div>
-        <button class="hero-reroll" id="hero-reroll" type="button" hidden>↻ Re-roll</button>
-        <button class="hero-favorite" id="hero-favorite" type="button" hidden aria-label="Favorite this dream" title="Save to your favorites">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M12 21s-7.5-4.5-9.5-9.5C0.5 6 5.5 2 9 4.5 10.5 5.6 12 7.5 12 7.5s1.5-1.9 3-3C18.5 2 23.5 6 21.5 11.5 19.5 16.5 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="hero-saved-badge" id="hero-saved-badge" hidden>Saved</div>
-      </figure>
-      <!-- Inline note bar that appears when you click the heart on someone
-           else's dream. Optional one-line message to the dreamer that
-           rides along with the favorite as a single notification. -->
-      <div class="fav-note-bar" id="fav-note-bar" hidden>
-        <input class="fav-note-input" id="fav-note-input" type="text" maxlength="500" placeholder="Tell the dreamer why this resonated (optional)…">
-        <button class="fav-note-send" id="fav-note-send" type="button">Send</button>
-        <button class="fav-note-skip" id="fav-note-skip" type="button" aria-label="Skip the note">Skip</button>
-      </div>
-      <figcaption class="hero-caption" id="hero-caption" hidden></figcaption>
-    </section>
-    </div><!-- /.dream-frame -->
 
     <!-- =================== SOURCE =================== -->
     <div class="section-head example-only">
