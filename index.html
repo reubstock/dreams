@@ -3299,6 +3299,9 @@
       if (window.__currentDream) renderDreamOwnerControls(window.__currentDream);
     } catch (_) {}
   }
+  // Expose for nested-scope code that needs to force an auth refresh
+  // (e.g. heart click on first paint, before initial refreshAuth resolves).
+  window.refreshAuth = refreshAuth;
 
   function renderSelfieState() {
     const uploadBtn = document.getElementById('selfie-upload-btn');
@@ -4789,6 +4792,14 @@
       btn.addEventListener('click', async () => {
         const dream = window.__currentDream;
         if (!dream?.id) return;
+        // If we don't think we're signed in but there's actually a session
+        // cookie present, the initial refreshAuth() probably hasn't resolved
+        // yet — give it one shot before deciding to prompt sign-in. Prevents
+        // a race where a fast cached image lets the user click the heart
+        // before /api/auth/me returns.
+        if (!window.authState?.signedIn && /(?:^|;\s*)dreams_session=/.test(document.cookie)) {
+          try { if (typeof window.refreshAuth === 'function') await window.refreshAuth(); } catch (_) {}
+        }
         // Signed-out → save the intent and prompt to sign in
         if (!window.authState?.signedIn) {
           try { localStorage.setItem('dreams:pending_favorite', dream.id); } catch (_) {}
