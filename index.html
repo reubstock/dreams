@@ -204,6 +204,32 @@
   }
   .hero-favorite.is-favorited { color: #ff5e57; }
   .hero-favorite:disabled { opacity: 0.5; cursor: not-allowed; }
+  .fav-note-bar {
+    display: flex; gap: 8px; align-items: center;
+    margin-top: 10px; padding: 10px 12px;
+    background: rgba(216, 122, 62, 0.08);
+    border: 1px solid rgba(216, 122, 62, 0.3);
+    border-radius: 6px;
+  }
+  .fav-note-input {
+    flex: 1; min-width: 0;
+    background: transparent; border: none; outline: none;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 14px; color: var(--ink);
+  }
+  .fav-note-input::placeholder { color: rgba(13, 10, 4, 0.45); font-style: italic; }
+  .fav-note-send, .fav-note-skip {
+    appearance: none; border: 1px solid var(--rust);
+    background: transparent; color: var(--rust);
+    padding: 5px 12px; cursor: pointer;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    border-radius: 4px;
+  }
+  .fav-note-send { background: var(--rust); color: var(--paper); }
+  .fav-note-send:hover { background: var(--rust-soft); border-color: var(--rust-soft); }
+  .fav-note-skip { border-color: rgba(13, 10, 4, 0.2); color: rgba(13, 10, 4, 0.55); }
+  .fav-note-skip:hover { color: var(--ink); border-color: var(--ink); }
   .hero-saved-badge {
     position: absolute; top: 14px; left: 14px;
     background: rgba(13, 10, 4, 0.78); color: var(--paper);
@@ -2096,10 +2122,40 @@
     border: 1px solid var(--ink);
     padding: 14px 18px;
     background: transparent;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .inbox-msg:has(.inbox-dream-img) {
+    grid-template-columns: 100px 1fr;
+    align-items: start;
   }
   .inbox-msg.unread {
     background: rgba(216, 122, 62, 0.08);
     border-left-width: 4px;
+  }
+  .inbox-dream-img {
+    display: block; width: 100px; height: 100px;
+    overflow: hidden; border: 1px solid rgba(13, 10, 4, 0.2);
+    background: rgba(13, 10, 4, 0.04);
+  }
+  .inbox-dream-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .inbox-msg-content { min-width: 0; }
+  .inbox-fav-pill {
+    display: inline-block; margin-left: 6px;
+    padding: 1px 6px; border-radius: 3px;
+    background: rgba(255, 94, 87, 0.15);
+    color: #c43e1a;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .inbox-fav-quote {
+    color: var(--rust); font-size: 18px; line-height: 0;
+    margin: 0 2px; vertical-align: -2px;
+  }
+  @media (max-width: 540px) {
+    .inbox-msg:has(.inbox-dream-img) { grid-template-columns: 72px 1fr; gap: 10px; }
+    .inbox-dream-img { width: 72px; height: 72px; }
   }
   .inbox-msg-head {
     display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px;
@@ -2679,6 +2735,14 @@
         </button>
         <div class="hero-saved-badge" id="hero-saved-badge" hidden>Saved</div>
       </figure>
+      <!-- Inline note bar that appears when you click the heart on someone
+           else's dream. Optional one-line message to the dreamer that
+           rides along with the favorite as a single notification. -->
+      <div class="fav-note-bar" id="fav-note-bar" hidden>
+        <input class="fav-note-input" id="fav-note-input" type="text" maxlength="500" placeholder="Tell the dreamer why this resonated (optional)…">
+        <button class="fav-note-send" id="fav-note-send" type="button">Send</button>
+        <button class="fav-note-skip" id="fav-note-skip" type="button" aria-label="Skip the note">Skip</button>
+      </div>
       <figcaption class="hero-caption" id="hero-caption" hidden></figcaption>
     </section>
     </div><!-- /.dream-frame -->
@@ -4479,16 +4543,40 @@
         ? (window.__currentFavorited ? 'Remove from favorites' : 'Save to favorites')
         : 'Sign in to favorite';
     }
-    async function doFavorite(dreamId, on) {
+    async function doFavorite(dreamId, on, note) {
       const r = await fetch('/api/dream/favorite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: dreamId, on }),
+        body: JSON.stringify({ id: dreamId, on, note: note || '' }),
       });
       if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || 'favorite failed');
     }
+    async function commitFavorite(next, note) {
+      const btn = document.getElementById('hero-favorite');
+      const dream = window.__currentDream;
+      if (!dream?.id) return;
+      window.__currentFavorited = next;
+      if (btn) { btn.classList.toggle('is-favorited', next); btn.disabled = true; }
+      try {
+        await doFavorite(dream.id, next, note);
+        const msg = next
+          ? (note ? 'Note sent with your heart' : 'Added to favorites')
+          : 'Removed from favorites';
+        showToast(msg);
+      } catch (err) {
+        window.__currentFavorited = !next;
+        if (btn) btn.classList.toggle('is-favorited', !next);
+        showToast(err.message || 'Could not favorite');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
     function wireFavorite() {
       const btn = document.getElementById('hero-favorite');
+      const noteBar = document.getElementById('fav-note-bar');
+      const noteInput = document.getElementById('fav-note-input');
+      const noteSend = document.getElementById('fav-note-send');
+      const noteSkip = document.getElementById('fav-note-skip');
       if (!btn || btn.dataset.wired) return;
       btn.dataset.wired = '1';
       btn.addEventListener('click', async () => {
@@ -4501,22 +4589,37 @@
           openSignin();
           return;
         }
-        const next = !window.__currentFavorited;
-        // Optimistic
-        window.__currentFavorited = next;
-        btn.classList.toggle('is-favorited', next);
-        btn.disabled = true;
-        try {
-          await doFavorite(dream.id, next);
-          showToast(next ? 'Added to favorites' : 'Removed from favorites');
-        } catch (err) {
-          // Revert
-          window.__currentFavorited = !next;
-          btn.classList.toggle('is-favorited', !next);
-          showToast(err.message || 'Could not favorite');
-        } finally {
-          btn.disabled = false;
+        // Already favorited → unfavorite immediately, no note prompt
+        if (window.__currentFavorited) {
+          if (noteBar) noteBar.hidden = true;
+          return commitFavorite(false);
         }
+        // Hearting own dream → no note prompt, just toggle
+        if (window.__currentDreamIsOwner) {
+          return commitFavorite(true);
+        }
+        // Hearting someone else's dream → reveal the optional-note bar
+        if (noteBar) {
+          noteBar.hidden = false;
+          if (noteInput) setTimeout(() => noteInput.focus(), 50);
+        }
+      });
+      const sendWithNote = async () => {
+        const note = (noteInput?.value || '').trim();
+        if (noteBar) noteBar.hidden = true;
+        if (noteInput) noteInput.value = '';
+        await commitFavorite(true, note);
+      };
+      const skip = async () => {
+        if (noteBar) noteBar.hidden = true;
+        if (noteInput) noteInput.value = '';
+        await commitFavorite(true);
+      };
+      if (noteSend) noteSend.addEventListener('click', sendWithNote);
+      if (noteSkip) noteSkip.addEventListener('click', skip);
+      if (noteInput) noteInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); sendWithNote(); }
+        if (e.key === 'Escape') { e.preventDefault(); skip(); }
       });
     }
     // After sign-in, if there's a pending favorite for this dream, complete it.
@@ -4759,20 +4862,38 @@
         const fromLink = m.from_handle
           ? `<a href="/u/${escapeHtmlAuth(m.from_handle)}">${escapeHtmlAuth(fromName)}</a>`
           : escapeHtmlAuth(fromName);
+        const isFav = m.kind === 'favorite';
+        // Dream-anchored visual cue: the dream image is the conversation
+        // anchor. Both the favorite-card and a note-with-dream-id show the
+        // image and link to the dream itself.
+        const dreamImg = (m.dream_image_url && m.dream_id)
+          ? `<a class="inbox-dream-img" href="/d/${escapeHtmlAuth(m.dream_id)}"><img src="${escapeHtmlAuth(m.dream_image_url)}" alt="" loading="lazy"></a>`
+          : '';
         const dreamLink = m.dream_id
-          ? `<div class="inbox-msg-dream">About your dream: <a href="/d/${escapeHtmlAuth(m.dream_id)}">/d/${escapeHtmlAuth(m.dream_id)}</a></div>`
+          ? `<div class="inbox-msg-dream">${isFav ? 'Hearted your dream' : 'About your dream'}: <a href="/d/${escapeHtmlAuth(m.dream_id)}">${escapeHtmlAuth(m.dream_title || ('/d/' + m.dream_id))}</a></div>`
           : '';
+        // Reply: pre-anchored to the dream so the visual stays consistent.
+        const replyAttrs = `data-to-handle="${escapeHtmlAuth(m.from_handle || '')}"${m.dream_id ? ` data-dream-id="${escapeHtmlAuth(m.dream_id)}"` : ''}`;
         const replyBtn = m.from_handle
-          ? `<button class="vis-toggle" data-action="open-note" data-to-handle="${escapeHtmlAuth(m.from_handle)}">Reply</button>`
+          ? `<button class="vis-toggle" data-action="open-note" ${replyAttrs}>${isFav ? 'Send a note back' : 'Reply'}</button>`
           : '';
-        return `<article class="inbox-msg ${m.read ? '' : 'unread'}" data-msg-id="${escapeHtmlAuth(m.id)}">
-          <div class="inbox-msg-head">
-            <div class="inbox-msg-from">From ${fromLink}</div>
-            <div class="inbox-msg-time">${escapeHtmlAuth(when)}</div>
+        const headLine = isFav
+          ? `<div class="inbox-msg-from">${fromLink} <span class="inbox-fav-pill">♥ favorited</span></div>`
+          : `<div class="inbox-msg-from">From ${fromLink}</div>`;
+        const bodyHTML = m.body
+          ? `<div class="inbox-msg-body">${isFav ? '<span class="inbox-fav-quote">“</span>' : ''}${escapeHtmlAuth(m.body)}${isFav ? '<span class="inbox-fav-quote">”</span>' : ''}</div>`
+          : (isFav ? '' : '');
+        return `<article class="inbox-msg ${m.read ? '' : 'unread'} ${isFav ? 'is-favorite' : ''}" data-msg-id="${escapeHtmlAuth(m.id)}">
+          ${dreamImg}
+          <div class="inbox-msg-content">
+            <div class="inbox-msg-head">
+              ${headLine}
+              <div class="inbox-msg-time">${escapeHtmlAuth(when)}</div>
+            </div>
+            ${bodyHTML}
+            ${dreamLink}
+            <div class="inbox-msg-actions">${replyBtn}</div>
           </div>
-          <div class="inbox-msg-body">${escapeHtmlAuth(m.body)}</div>
-          ${dreamLink}
-          <div class="inbox-msg-actions">${replyBtn}</div>
         </article>`;
       }).join('');
       // Mark all read in the background (best-effort)

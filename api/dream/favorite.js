@@ -1,11 +1,20 @@
-// POST /api/dream/favorite  { id, on: true|false }
+// POST /api/dream/favorite  { id, on: true|false, note?: string }
 // Toggle (or set) the signed-in user's favorite state for a dream.
 // Returns { favorited: boolean }.
+//
+// When toggling ON and the dreamer is someone else, this also pushes a
+// notification into the dreamer's inbox. The notification is dream-anchored
+// — both parties have the dream image as a persistent visual cue when they
+// reply to each other. If a `note` is included, it ships with the heart so
+// the dreamer immediately knows WHY their dream resonated.
 //
 // Storage:
 //   favorited:{email}:{id}            → "1" when favorited
 //   user_favorites:{email}            → LIST of dream ids, newest first
-//   favorite_count:{id}               → counter (optional, for future)
+//   favorite_count:{id}               → counter
+//   inbox:{owner_email}               → notification messages (favorite kind)
+
+import crypto from 'node:crypto';
 
 export const config = { api: { bodyParser: true }, maxDuration: 10 };
 
@@ -53,10 +62,11 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method_not_allowed' });
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'storage_not_configured' });
 
-  const { id, on } = req.body || {};
+  const { id, on, note } = req.body || {};
   if (!id || !/^[A-Za-z0-9_-]{8,20}$/.test(id)) {
     return res.status(400).json({ error: 'bad_id' });
   }
+  const cleanNote = typeof note === 'string' ? note.trim().slice(0, 500) : '';
 
   // Auth
   const token = getCookie(req, 'dreams_session');
@@ -89,6 +99,40 @@ export default async function handler(req, res) {
       await kvCmd(`lpush/${encodeURIComponent(listKey)}/${encodeURIComponent(id)}`);
       await kvCmd(`ltrim/${encodeURIComponent(listKey)}/0/499`);
       await kvCmd(`incr/${encodeURIComponent(countKey)}`);
+
+      // Notify the dreamer — only if it's someone else's dream, and only
+      // if we haven't already pushed a favorite notification for THIS
+      // hearter+dream combo (so re-hearting after un-hearting doesn't spam).
+      if (dream.owner_email && dream.owner_email.toLowerCase() !== email.toLowerCase()) {
+        const ownerEmail = dream.owner_email;
+        const alreadyNotifiedKey = `fav_notified:${ownerEmail}:${email}:${id}`;
+        const alreadyNotified = await kvGet(alreadyNotifiedKey);
+        if (!alreadyNotified) {
+          await kvSet(alreadyNotifiedKey, '1');
+          // Build a dream-anchored inbox message. The fave_kind field tells
+          // the inbox renderer to use the favorite-card layout (heart icon +
+          // dream image) instead of the standard note layout.
+          const hearter = await kvGet(`user:${email}`);
+          const fromHandle = hearter?.handle || null;
+          const fromDisplay = hearter?.display_name || email.split('@')[0];
+          const msg = {
+            id: crypto.randomBytes(6).toString('base64url'),
+            kind: 'favorite',
+            from_handle: fromHandle,
+            from_display_name: fromDisplay,
+            from_email: email,
+            to_handle: null, // resolved on render via dream.owner_handle
+            body: cleanNote || '',
+            dream_id: id,
+            dream_title: dream.title || dream.analysis?.title || null,
+            dream_image_url: dream.image_url || null,
+            created_at: new Date().toISOString(),
+            read: false,
+          };
+          await kvCmd(`lpush/${encodeURIComponent(`inbox:${ownerEmail}`)}/${encodeURIComponent(JSON.stringify(msg))}`);
+          await kvCmd(`ltrim/${encodeURIComponent(`inbox:${ownerEmail}`)}/0/199`);
+        }
+      }
     } else {
       // Clear the flag, remove from list, decrement count
       await kvCmd(`del/${encodeURIComponent(flagKey)}`);
