@@ -337,11 +337,22 @@ export default async function handler(req, res) {
     }
   } else {
     // Orphan dream (no owner stamped). Require sign-in and claim it for the
-    // requester so future re-rolls are gated to the same person.
+    // requester so future re-rolls are gated to the same person. We also
+    // push to user_dreams here so the dream actually shows up in the
+    // requester's library — the previous version only set owner_email and
+    // forgot the list, so claimed dreams were invisible in /library.
     if (!requesterEmail) {
       return res.status(401).json({ error: 'sign_in_required', message: 'Sign in to generate the image for this dream.' });
     }
     dream.owner_email = requesterEmail;
+    try {
+      await fetch(`${KV_URL}/lpush/${encodeURIComponent(`user_dreams:${requesterEmail}`)}/${encodeURIComponent(id)}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` },
+      });
+      await fetch(`${KV_URL}/lpush/${encodeURIComponent(`user_dreams:${encodeURIComponent(requesterEmail)}`)}/${encodeURIComponent(id)}`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` },
+      });
+    } catch (_) {}
   }
 
   // Selfie lookup for face-swap. We already verified ownership above, so
