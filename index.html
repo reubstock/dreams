@@ -1974,6 +1974,10 @@
     border-color: #999; color: #999;
   }
   .vis-toggle[data-current="private"]:hover { background: #999; color: var(--paper); }
+  .vis-toggle.vis-toggle-danger {
+    border-color: rgba(196, 62, 26, 0.45); color: rgba(196, 62, 26, 0.75);
+  }
+  .vis-toggle.vis-toggle-danger:hover { background: #c43e1a; border-color: #c43e1a; color: var(--paper); }
   .note-btn {
     border: 1px solid var(--rust); background: var(--rust);
     color: var(--paper); cursor: pointer;
@@ -4296,21 +4300,59 @@
       const reanalyzeBtn = isOwner
         ? `<button class="vis-toggle" data-action="reanalyze" title="Re-run the LLM analysis (refreshes cultural relatives, morphs, reading)">Refresh analysis</button>`
         : '';
+      const deleteBtn = isOwner
+        ? `<button class="vis-toggle vis-toggle-danger" data-action="delete-dream" title="Permanently delete this dream">Delete</button>`
+        : '';
       const noteBtn = (handle && !isOwner)
         ? `<button class="note-btn" data-action="open-note" data-to-handle="${escapeHtmlAuth(handle)}" data-dream-id="${escapeHtmlAuth(dream.id)}">Send a note</button>`
         : '';
 
-      line.innerHTML = `${dreamerLink}${visBtn ? ' · ' + visBtn : ''}${reanalyzeBtn ? ' · ' + reanalyzeBtn : ''}${noteBtn ? ' · ' + noteBtn : ''}`;
+      line.innerHTML = `${dreamerLink}${visBtn ? ' · ' + visBtn : ''}${reanalyzeBtn ? ' · ' + reanalyzeBtn : ''}${deleteBtn ? ' · ' + deleteBtn : ''}${noteBtn ? ' · ' + noteBtn : ''}`;
       // Direct-wire the buttons. We can't rely on a top-level delegated handler
       // because these helpers live inside this nested IIFE scope.
       const visEl = line.querySelector('[data-action="toggle-vis"]');
       if (visEl) visEl.addEventListener('click', () => toggleVisibility(visEl));
       const reEl = line.querySelector('[data-action="reanalyze"]');
       if (reEl) reEl.addEventListener('click', () => reanalyzeDream(reEl));
+      const delEl = line.querySelector('[data-action="delete-dream"]');
+      if (delEl) delEl.addEventListener('click', () => deleteDream(delEl));
       const noteEl = line.querySelector('[data-action="open-note"]');
       if (noteEl) noteEl.addEventListener('click', () => {
         if (typeof window.__openNote === 'function') window.__openNote(noteEl.dataset.toHandle, noteEl.dataset.dreamId);
       });
+    }
+
+    // Owner-only: permanently delete this dream. Two-step confirm so it can't
+    // be triggered by accident on mobile. On success, redirect to /library.
+    async function deleteDream(btn) {
+      const dream = window.__currentDream;
+      if (!dream?.id) return;
+      const title = dream.title || dream.analysis?.title || 'this dream';
+      const ok = confirm(`Permanently delete "${title}"? This cannot be undone.`);
+      if (!ok) return;
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'Deleting…';
+      try {
+        const r = await fetch('/api/dream/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: dream.id }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          showToast(data.message || data.error || 'Delete failed');
+          btn.disabled = false;
+          btn.textContent = original;
+          return;
+        }
+        showToast('Dream deleted');
+        setTimeout(() => { window.location.href = '/library'; }, 400);
+      } catch (err) {
+        showToast(err.message || 'Delete failed');
+        btn.disabled = false;
+        btn.textContent = original;
+      }
     }
 
     // Refresh-analysis (owner-only) — re-runs /api/analyze under the current
@@ -4423,11 +4465,15 @@
       if (dream.image_url && !opts.force) {
         loading.hidden = true;
         img.hidden = false;
+        // Don't auto-regenerate on cache miss. The dream's image is the
+        // moment-of-creation artifact — we never replace it without an
+        // explicit Re-roll. If the URL ever fails (rare; Vercel Blob URLs
+        // are permanent), log it and show a tiny placeholder rather than
+        // silently spending money + producing a different image.
         img.onerror = () => {
-          console.warn('Cached image failed to load, regenerating:', dream.image_url);
-          delete dream.image_url;
+          console.warn('Cached image failed to load:', dream.image_url);
           img.onerror = null;
-          loadHeroImage(dream);
+          img.alt = 'Image unavailable';
         };
         img.src = dream.image_url;
         reroll.hidden = !window.__currentDreamIsOwner;
