@@ -2404,8 +2404,22 @@
     h1.dream-title { font-size: 36px; letter-spacing: -0.005em; }
     .dream-title-meta { font-size: 9.5px; }
     .dream-title-hint { font-size: 9px; }
-    .masthead-meta { text-align: left; font-size: 10px; }
-    .sub-bar { font-size: 9px; flex-direction: column; gap: 4px; }
+    .masthead-meta { text-align: left; font-size: 10px; width: 100%; }
+    /* Auth slot wraps gracefully on phones — flexible row layout instead
+       of a single inline overflow that bleeds off the right edge. */
+    .auth-slot {
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 4px 10px;
+      font-size: 10px;
+      text-align: left;
+      letter-spacing: 0.12em;
+    }
+    .auth-sep { margin: 0; }
+    .inbox-link { font-size: 12px; }
+    /* The editorial sub-bar ("Reading · Hall/Van de Castle coded…") is
+       nice typography on desktop but pure noise on a phone screen.
+       Hide it on mobile (we already do on dream pages; do it homepage too). */
+    .sub-bar { display: none !important; }
 
     .headline-block {
       padding: 32px 0 32px;
@@ -2564,6 +2578,50 @@
     .capture-cta .capture-sub { font-size: 9px; }
     .capture-cta .capture-btn { width: 52px; height: 52px; }
     .capture-cta .capture-btn svg { width: 22px; height: 22px; }
+
+    /* Featured dream card on mobile — stacked, full-width image */
+    .featured-dream { margin: 16px 0 40px; }
+    .fd-card { padding: 14px; gap: 14px; }
+    .fd-img-wrap { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+    .fd-title { font-size: 24px; margin: 6px 0 8px; }
+    .fd-excerpt { font-size: 15px; }
+    .fd-kicker { font-size: 9.5px; }
+    .fd-meta { font-size: 9.5px; letter-spacing: 0.06em; }
+
+    /* Recipient prompt (someone shared a dream with you) — keep punchy
+       on phones; full-width tap target for the sign-in button. */
+    .recipient-prompt {
+      padding: 18px 16px;
+      gap: 14px;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .recipient-prompt-text { font-size: 16px; line-height: 1.4; }
+    .recipient-prompt button { width: 100%; padding: 14px; font-size: 11px; }
+
+    /* Dreamer profile (gender / age / hair / glasses / photo) needs to
+       wrap nicely on phones — it's a long row of selects + a thumbnail. */
+    .dreamer-profile {
+      flex-wrap: wrap;
+      gap: 6px 10px;
+      font-size: 10.5px;
+    }
+    .dp-label { font-size: 10px; }
+    .dp-input { font-size: 13px; padding: 4px 8px; }
+    .dp-age { width: 56px; }
+    .dp-sep { display: none; }
+    .dp-hint { flex-basis: 100%; font-size: 9.5px; margin-top: 4px; }
+
+    /* Share-this-dream permalink pill (Copy link / Text / Email) —
+       wrap to two rows on phones so the buttons remain tappable. */
+    .ar-permalink {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      font-size: 11px;
+    }
+    .ar-pl-url { font-size: 10px; }
+    .ar-pl-copy, .ar-pl-share { font-size: 9.5px; padding: 8px 12px; }
   }
 
   @media (max-width: 380px) {
