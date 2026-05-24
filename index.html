@@ -3237,6 +3237,9 @@
 
   // ============ Auth state, sign-in modal, library, recipient prompt ============
   const authState = { signedIn: false, email: null, handle: null, displayName: null, unreadCount: 0 };
+  // Expose on window so nested-IIFE code (heart icon, etc.) can read it.
+  // refreshAuth mutates the same object so the window reference stays live.
+  window.authState = authState;
 
   function escapeHtmlAuth(s) {
     return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
