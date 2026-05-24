@@ -2031,7 +2031,18 @@
   body.profile-page .library-section,
   body.profile-page .inbox-section,
   body.profile-page .settings-section,
+  body.profile-page .home-recent-head,
+  body.profile-page .sub-bar,
   body.profile-page .dream-title-section { display: none !important; }
+  /* Same chrome-hides on library/inbox/settings pages — the "Recent dreams
+     from the repository" section-head and the reading sub-bar belong to
+     the homepage and just clutter the sub-pages. */
+  body.library-page .home-recent-head,
+  body.library-page .sub-bar,
+  body.inbox-page .home-recent-head,
+  body.inbox-page .sub-bar,
+  body.settings-page .home-recent-head,
+  body.settings-page .sub-bar { display: none !important; }
   .profile-head {
     display: flex; align-items: center; gap: 24px;
     border-bottom: 1px solid var(--ink); padding-bottom: 22px; margin-bottom: 26px;
@@ -2891,7 +2902,7 @@
 
 
     <!-- =================== RECENT DREAMS =================== -->
-    <div class="section-head">
+    <div class="section-head home-recent-head" id="home-recent-head">
       <div class="num">iii.</div>
       <div class="title">Recent dreams from the repository</div>
       <div class="rule"></div>
