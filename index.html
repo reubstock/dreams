@@ -1037,6 +1037,11 @@
     font-family: 'Iowan Old Style', Georgia, serif;
     font-size: 21px; line-height: 1.65; color: var(--ink);
   }
+  /* Mobile-only: the dream painting above the example text. Hidden on
+     desktop (the dedicated featured-dream card below already shows the
+     painting); on mobile it sits directly above the text the painting
+     depicts, so reader sees image + words paired. */
+  .source-mobile-image-link { display: none; }
   .source-text mark {
     background: transparent;
     color: var(--ink);
@@ -2447,8 +2452,30 @@
     .section-head .num { font-size: 22px; }
     .section-head .title { font-size: 9.5px; letter-spacing: 0.18em; }
 
-    .source-grid { grid-template-columns: 1fr; gap: 28px; }
+    .source-grid { grid-template-columns: 1fr; gap: 20px; }
     .source-text { font-size: 18px; line-height: 1.6; }
+    /* Show the AI illustration of the example dream above the text on
+       phones — paint and words paired. */
+    .source-mobile-image-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      margin-bottom: 16px;
+    }
+    .source-mobile-image {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border: 1px solid var(--ink);
+    }
+    .source-mobile-image-caption {
+      display: block;
+      margin-top: 8px;
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted);
+    }
     .source-stats { border-left: none; border-top: 1px solid var(--ink); padding-left: 0; padding-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 24px; }
     .source-stats .stat { margin-bottom: 0; }
     .source-stats .stat-num { font-size: 32px; }
@@ -2927,6 +2954,18 @@
       <div class="rule"></div>
     </div>
     <div class="source-grid example-only">
+      <!-- Mobile-only: the AI illustration of this exact dream, paired with
+           its text. Same dream as /d/OuvHHpl2u-8. On desktop the image
+           already lives in the featured-dream card below; on a phone the
+           reader benefits from seeing the painting right next to the
+           words it depicts. -->
+      <a class="source-mobile-image-link" href="/d/OuvHHpl2u-8" aria-label="Open the full analysis of this dream">
+        <img class="source-mobile-image"
+             src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/dreams/OuvHHpl2u-8-1779659990145-a5GYixDQyZHhtknjZblSy1MTJFScrH.jpg"
+             alt="The Ceiling Made of Water — surrealist painting of the dream described below"
+             loading="lazy">
+        <span class="source-mobile-image-caption">The Ceiling Made of Water · AI illustration of this dream</span>
+      </a>
       <div class="source-text">
         I was in my childhood house but
         <mark data-n="1">the rooms were all wrong</mark>.
