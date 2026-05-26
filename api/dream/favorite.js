@@ -152,6 +152,11 @@ export default async function handler(req, res) {
       // versions need lrem/key/count/value path order; we use 0 = remove all.
       await kvCmd(`lrem/${encodeURIComponent(listKey)}/0/${encodeURIComponent(id)}`);
       await kvCmd(`decr/${encodeURIComponent(countKey)}`);
+      // Clear the per-pair notification dedup so a future re-favorite
+      // (a genuine new act of interest) sends a fresh notification.
+      if (dream.owner_email && dream.owner_email.toLowerCase() !== email.toLowerCase()) {
+        await kvCmd(`del/${encodeURIComponent(`fav_notified:${dream.owner_email}:${email}:${id}`)}`);
+      }
     }
     return res.status(200).json({ favorited: nextState });
   } catch (err) {
