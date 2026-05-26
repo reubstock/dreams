@@ -131,6 +131,18 @@ export default async function handler(req, res) {
           };
           await kvCmd(`lpush/${encodeURIComponent(`inbox:${ownerEmail}`)}/${encodeURIComponent(JSON.stringify(msg))}`);
           await kvCmd(`ltrim/${encodeURIComponent(`inbox:${ownerEmail}`)}/0/199`);
+          // Also email the dreamer. Best-effort — never block on failure.
+          try {
+            await sendFavoriteEmail({
+              toEmail: ownerEmail,
+              fromDisplayName: fromDisplay,
+              fromHandle: fromHandle,
+              note: cleanNote,
+              dreamId: id,
+              dreamTitle: dream.title || dream.analysis?.title || null,
+              dreamImageUrl: dream.image_url || null,
+            });
+          } catch (e) { console.warn('favorite email failed:', e.message); }
         }
       }
     } else {
@@ -146,4 +158,59 @@ export default async function handler(req, res) {
     console.error('favorite failed:', err);
     return res.status(500).json({ error: 'favorite_failed', message: err.message });
   }
+}
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const SITE_ORIGIN = 'https://dreams-livid.vercel.app';
+
+function escapeHTML(s) {
+  return String(s || '').replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
+}
+
+async function sendFavoriteEmail({ toEmail, fromDisplayName, fromHandle, note, dreamId, dreamTitle, dreamImageUrl }) {
+  if (!RESEND_API_KEY) return false;
+  const profileUrl = fromHandle ? `${SITE_ORIGIN}/u/${encodeURIComponent(fromHandle)}` : null;
+  const dreamUrl = `${SITE_ORIGIN}/d/${dreamId}`;
+  const inboxUrl = `${SITE_ORIGIN}/inbox`;
+  const fromLabel = profileUrl
+    ? `<a href="${profileUrl}" style="color:#d87a3e; text-decoration:none;">${escapeHTML(fromDisplayName)}</a>`
+    : escapeHTML(fromDisplayName);
+  const titleLabel = dreamTitle
+    ? `<a href="${dreamUrl}" style="color:#0d0a04; text-decoration:none;">${escapeHTML(dreamTitle)}</a>`
+    : `<a href="${dreamUrl}" style="color:#0d0a04; text-decoration:none;">your dream</a>`;
+  const imageHtml = dreamImageUrl
+    ? `<a href="${dreamUrl}"><img src="${escapeHTML(dreamImageUrl)}" alt="${escapeHTML(dreamTitle || 'Your dream')}" style="width:100%; max-width:420px; display:block; border:1px solid #0d0a04; margin:18px 0;"></a>`
+    : '';
+  const noteHtml = note
+    ? `<blockquote style="border-left: 3px solid #d87a3e; padding: 6px 0 6px 14px; margin: 16px 0; color: #444; font-style: italic;">${escapeHTML(note)}</blockquote>`
+    : '';
+  const subject = note
+    ? `${fromDisplayName} favorited ${dreamTitle ? '"' + dreamTitle + '"' : 'your dream'} — and left a note`
+    : `${fromDisplayName} favorited ${dreamTitle ? '"' + dreamTitle + '"' : 'your dream'}`;
+  const text = `${fromDisplayName} (@${fromHandle || '?'}) favorited your dream "${dreamTitle || 'untitled'}" on Dreams.${note ? `\n\nThey added: "${note}"` : ''}\n\nView the dream: ${dreamUrl}\nYour inbox: ${inboxUrl}`;
+  const html = `
+    <div style="font-family: Georgia, serif; max-width: 520px; line-height: 1.55; color: #0d0a04;">
+      <p style="font-family: ui-monospace, Menlo, monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #999;">A favorite on Dreams</p>
+      <h2 style="margin: 6px 0 10px; font-weight: 400; font-style: italic;">${fromLabel} favorited ${titleLabel}.</h2>
+      ${imageHtml}
+      ${noteHtml}
+      <p style="font-size: 13px;"><a href="${dreamUrl}" style="background:#d87a3e; color:white; padding:8px 14px; text-decoration:none;">Open your dream →</a></p>
+      <p style="font-size: 11px; color: #999; margin-top: 24px;">You're getting this because someone favorited a dream you posted on Dreams.</p>
+    </div>`;
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'Dreams <noreply@reubstock.com>',
+        to: toEmail,
+        subject,
+        text,
+        html,
+      }),
+    });
+    return r.ok;
+  } catch (_) { return false; }
 }

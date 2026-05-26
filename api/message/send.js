@@ -84,7 +84,7 @@ async function sendNotificationEmail({ toEmail, fromDisplayName, fromHandle, bod
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'Dreams <onboarding@resend.dev>',
+        from: 'Dreams <noreply@reubstock.com>',
         to: toEmail,
         subject: `${fromDisplayName} sent you a note on Dreams`,
         text,
