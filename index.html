@@ -784,6 +784,26 @@
   /* Library view */
   .library-section { display: none; padding: 32px 0; }
   body.library-page .library-section { display: block; }
+  /* All-dreams view (/all) — public feed of every dream. Uses the same
+     grid layout as the library so the visual register stays consistent. */
+  .all-dreams-section { display: none; padding: 32px 0; }
+  body.all-dreams-page .all-dreams-section { display: block; }
+  body.all-dreams-page .example-only,
+  body.all-dreams-page .dream-frame,
+  body.all-dreams-page .recent-feed,
+  body.all-dreams-page .recent-foot,
+  body.all-dreams-page .capture-cta,
+  body.all-dreams-page .relatives-header,
+  body.all-dreams-page .relatives-grid,
+  body.all-dreams-page .reading-block,
+  body.all-dreams-page .library-section,
+  body.all-dreams-page .profile-section,
+  body.all-dreams-page .inbox-section,
+  body.all-dreams-page .settings-section,
+  body.all-dreams-page .home-recent-head,
+  body.all-dreams-page .sub-bar,
+  body.all-dreams-page .featured-dream,
+  body.all-dreams-page .dream-title-section { display: none !important; }
   body.library-page .example-only,
   body.library-page .dream-frame,
   body.library-page .recent-feed,
@@ -2741,7 +2761,7 @@
     <nav class="feed-rail" id="feed-rail" aria-label="Recent dreams">
       <span class="feed-rail-label">Browse</span>
       <div class="feed-rail-track" id="feed-rail-track"></div>
-      <a class="feed-rail-more" href="/" id="feed-rail-more">All →</a>
+      <a class="feed-rail-more" href="/all" id="feed-rail-more">All →</a>
     </nav>
 
     <!-- =================== DREAM TITLE (only shown on /d/:id) =================== -->
@@ -2948,6 +2968,13 @@
         <button class="library-tab" data-library-tab="favorites" role="tab" aria-selected="false">Favorites</button>
       </div>
       <div id="library-grid"></div>
+    </section>
+
+    <!-- =================== ALL DREAMS (public feed, only on /all) =================== -->
+    <section class="all-dreams-section" id="all-dreams-section">
+      <div class="library-kicker">Every public dream</div>
+      <h1 class="library-title">All dreams.</h1>
+      <div id="all-dreams-grid"></div>
     </section>
 
     <!-- =================== PROFILE (only on /u/:handle) =================== -->
@@ -3205,7 +3232,7 @@
         <div class="rd-foot">M · 41 · 7h ago · 5 morphs</div>
       </article>
     </div>
-    <div class="recent-foot">→ all dreams (coming soon)</div>
+    <a class="recent-foot" href="/all">→ all dreams</a>
 
     <!-- =================== HISTORICAL DREAMER =================== -->
     <div class="section-head example-only">
@@ -3859,6 +3886,48 @@
     maybeLoadLibrary();
     maybeLoadProfile(); // re-render with accurate auth state (no-op if not on /u/...)
   });
+  maybeLoadAllDreams(); // public feed; doesn't need auth
+
+  // ============ /all — the global public dreams feed ============
+  // Loads up to 50 recent PUBLIC dreams from /api/dreams/recent and renders
+  // them as cards using the same .library-grid + .library-card styles so
+  // the visual register matches the library and favorites tabs.
+  async function maybeLoadAllDreams() {
+    if (window.location.pathname !== '/all') return;
+    document.body.classList.add('all-dreams-page');
+    const grid = document.getElementById('all-dreams-grid');
+    if (!grid) return;
+    grid.innerHTML = `<div class="library-empty">Loading…</div>`;
+    try {
+      const r = await fetch('/api/dreams/recent?limit=50');
+      if (!r.ok) {
+        grid.innerHTML = `<div class="library-empty">Couldn't load dreams.</div>`;
+        return;
+      }
+      const { dreams } = await r.json();
+      if (!dreams || dreams.length === 0) {
+        grid.innerHTML = `<div class="library-empty">No public dreams yet. <a class="auth-link" href="/" style="margin-left: 12px;">Record the first</a></div>`;
+        return;
+      }
+      grid.className = 'library-grid';
+      grid.innerHTML = dreams.map((d) => {
+        const fb = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
+        const title = (d.title && d.title.trim()) || (fb ? fb + '…' : 'Untitled');
+        const img = d.image_url ? `<img src="${escapeHtmlAuth(d.image_url)}" alt="" loading="lazy">` : '';
+        const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : '';
+        const by = d.owner_handle ? ` · by @${escapeHtmlAuth(d.owner_handle)}` : '';
+        return `<a class="library-card" href="/d/${escapeHtmlAuth(d.id)}">
+          ${img}
+          <div class="lc-body">
+            <div class="lc-title">${escapeHtmlAuth(title)}</div>
+            <div class="lc-meta">${escapeHtmlAuth(created)} · ${d.morph_count || 0} morphs${by}</div>
+          </div>
+        </a>`;
+      }).join('');
+    } catch (err) {
+      grid.innerHTML = `<div class="library-empty">${escapeHtmlAuth(err.message || 'Error')}</div>`;
+    }
+  }
 
   // ============ Voice capture (record → Whisper → dream record) ============
   // Pipeline:

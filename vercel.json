@@ -4,6 +4,7 @@
     { "source": "/u/:handle", "destination": "/api/u/:handle" },
     { "source": "/library", "destination": "/index.html" },
     { "source": "/inbox", "destination": "/index.html" },
-    { "source": "/settings", "destination": "/index.html" }
+    { "source": "/settings", "destination": "/index.html" },
+    { "source": "/all", "destination": "/index.html" }
   ]
 }
