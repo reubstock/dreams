@@ -4935,7 +4935,7 @@
         const r = await fetch('/api/image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: dream.id, force: !!opts.force, dreamer: getDreamer() }),
+          body: JSON.stringify({ id: dream.id, force: !!opts.force, dreamer: getDreamer(), device_id: getDeviceId() }),
         });
         if (!r.ok) {
           clearInterval(tickTimer);

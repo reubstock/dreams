@@ -336,14 +336,29 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'not_owner', message: 'Only the dreamer can re-roll this image.' });
     }
   } else {
-    // Orphan dream (no owner stamped). Require sign-in and claim it for the
-    // requester so future re-rolls are gated to the same person. We also
-    // push to user_dreams here so the dream actually shows up in the
-    // requester's library — the previous version only set owner_email and
-    // forgot the list, so claimed dreams were invisible in /library.
+    // Orphan dream (no owner stamped). We will NOT silently claim it for
+    // the viewer — that's how dreams ended up attributed to the wrong
+    // person when a different user viewed an unattributed link.
+    //
+    // Auto-claim is OK only when we're confident the requester IS the
+    // original creator. We use device_id as the heuristic: if the
+    // requester is signed in AND sent us a device_id that matches the
+    // dream's saved device_id, they recorded it on this device, just
+    // weren't signed in yet. Otherwise we refuse.
+    const requesterDeviceId = (req.body || {}).device_id;
+    const isCreatorDevice = requesterDeviceId &&
+                            dream.device_id &&
+                            requesterDeviceId === dream.device_id;
     if (!requesterEmail) {
-      return res.status(401).json({ error: 'sign_in_required', message: 'Sign in to generate the image for this dream.' });
+      return res.status(401).json({ error: 'sign_in_required', message: 'Sign in to generate this image.' });
     }
+    if (!isCreatorDevice) {
+      return res.status(403).json({
+        error: 'not_owner',
+        message: 'This dream has no owner stamped yet — only the original dreamer can generate its image. Open it on the device where it was recorded, sign in, and tap "Show my Dream".',
+      });
+    }
+    // Same device + signed in → genuinely the creator, claim it.
     dream.owner_email = requesterEmail;
     try {
       await fetch(`${KV_URL}/lpush/${encodeURIComponent(`user_dreams:${requesterEmail}`)}/${encodeURIComponent(id)}`, {
