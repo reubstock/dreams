@@ -4368,12 +4368,21 @@
     function appendPermalinkPill(id, permalink) {
       const existing = statsEl.querySelector('.ar-permalink');
       if (existing) existing.remove();
-      const fullUrl = window.location.origin + permalink;
-      const titleEl = document.getElementById('dream-title');
-      const title = (titleEl && titleEl.textContent && titleEl.textContent.trim()) || 'A dream';
       // Image URL pulled from the rendered hero <img>; null if not yet generated.
       const heroImgEl = document.getElementById('hero-image');
       const heroSrc = (heroImgEl && heroImgEl.src && !heroImgEl.src.includes('morpho.png')) ? heroImgEl.src : null;
+      // Cache-bust shared URLs with a short stable token derived from the
+      // image filename. Social platforms (iMessage / Gmail / Slack / FB)
+      // cache the OG preview for the FIRST URL they scrape; if a dream's
+      // image was generated AFTER an early share, the platform keeps
+      // showing the morpho butterfly fallback. The token changes when the
+      // image changes (re-roll → new blob URL → new token) so each fresh
+      // share looks like a new URL and forces a fresh OG scrape.
+      const heroSrcMatch = (heroSrc || '').match(/-([A-Za-z0-9_-]{6,})\.[a-z]+$/);
+      const cacheBust = heroSrcMatch ? heroSrcMatch[1].slice(0, 10) : null;
+      const fullUrl = window.location.origin + permalink + (cacheBust ? '?v=' + cacheBust : '');
+      const titleEl = document.getElementById('dream-title');
+      const title = (titleEl && titleEl.textContent && titleEl.textContent.trim()) || 'A dream';
       // Body for plain mailto:/sms: + Gmail compose. We include the image URL on
       // its own line so Gmail and iMessage render it as an inline preview when
       // the recipient opens the message.
