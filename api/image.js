@@ -336,48 +336,54 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'not_owner', message: 'Only the dreamer can re-roll this image.' });
     }
   } else {
-    // Orphan dream (no owner stamped). We will NOT silently claim it for
-    // the viewer — that's how dreams ended up attributed to the wrong
-    // person when a different user viewed an unattributed link.
+    // Orphan dream (no owner stamped) — created by someone not yet signed
+    // in. We let them generate the image anyway (it's the whole point of
+    // the product; making the visual conditional on sign-in defeats it).
+    // We DO require that the requester recorded this dream on this same
+    // device — device_id match — so a random visitor opening someone's
+    // share link can't spend $0.05 of gpt-image-1 budget for free.
     //
-    // Auto-claim is OK only when we're confident the requester IS the
-    // original creator. We use device_id as the heuristic: if the
-    // requester is signed in AND sent us a device_id that matches the
-    // dream's saved device_id, they recorded it on this device, just
-    // weren't signed in yet. Otherwise we refuse.
+    // If they're also signed in, we claim the dream for them. If they're
+    // anonymous, we generate but don't claim — they can claim later by
+    // signing in (the orphan-claim flow).
     const requesterDeviceId = (req.body || {}).device_id;
     const isCreatorDevice = requesterDeviceId &&
                             dream.device_id &&
                             requesterDeviceId === dream.device_id;
-    if (!requesterEmail) {
-      return res.status(401).json({ error: 'sign_in_required', message: 'Sign in to generate this image.' });
-    }
     if (!isCreatorDevice) {
       return res.status(403).json({
-        error: 'not_owner',
-        message: 'This dream has no owner stamped yet — only the original dreamer can generate its image. Open it on the device where it was recorded, sign in, and tap "Show my Dream".',
+        error: 'not_creator',
+        message: 'Only the person who recorded this dream can generate its image. Open it on the device where you recorded it.',
       });
     }
-    // Same device + signed in → genuinely the creator, claim it.
-    dream.owner_email = requesterEmail;
-    try {
-      await fetch(`${KV_URL}/lpush/${encodeURIComponent(`user_dreams:${requesterEmail}`)}/${encodeURIComponent(id)}`, {
-        headers: { Authorization: `Bearer ${KV_TOKEN}` },
-      });
-      await fetch(`${KV_URL}/lpush/${encodeURIComponent(`user_dreams:${encodeURIComponent(requesterEmail)}`)}/${encodeURIComponent(id)}`, {
-        headers: { Authorization: `Bearer ${KV_TOKEN}` },
-      });
-    } catch (_) {}
+    if (requesterEmail) {
+      // Signed-in + creator device → claim for them.
+      dream.owner_email = requesterEmail;
+      try {
+        await fetch(`${KV_URL}/lpush/${encodeURIComponent(`user_dreams:${requesterEmail}`)}/${encodeURIComponent(id)}`, {
+          headers: { Authorization: `Bearer ${KV_TOKEN}` },
+        });
+        await fetch(`${KV_URL}/lpush/${encodeURIComponent(`user_dreams:${encodeURIComponent(requesterEmail)}`)}/${encodeURIComponent(id)}`, {
+          headers: { Authorization: `Bearer ${KV_TOKEN}` },
+        });
+      } catch (_) {}
+    }
+    // Anonymous creator: generate without claiming. Face-swap will skip
+    // automatically below (no signed-in user → no selfie lookup).
   }
 
-  // Selfie lookup for face-swap. We already verified ownership above, so
-  // we look up the owner's selfie.
+  // Selfie lookup for face-swap. Only meaningful if we have an owner email
+  // (anonymous orphan dreamers have no stored selfie, so skip the lookup
+  // and just generate text-only — face-swap can run on a later re-roll
+  // after they sign in).
   let selfieUrl = null;
-  try {
-    const user = await kvGetRaw(`user:${dream.owner_email}`);
-    if (user?.selfie_url) selfieUrl = user.selfie_url;
-  } catch (err) {
-    console.warn('Selfie lookup failed:', err.message);
+  if (dream.owner_email) {
+    try {
+      const user = await kvGetRaw(`user:${dream.owner_email}`);
+      if (user?.selfie_url) selfieUrl = user.selfie_url;
+    } catch (err) {
+      console.warn('Selfie lookup failed:', err.message);
+    }
   }
   const willFaceSwap = !!(selfieUrl && REPLICATE_TOKEN);
 
