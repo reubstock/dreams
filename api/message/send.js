@@ -28,7 +28,14 @@ async function kvGet(key) {
   if (!r.ok) return null;
   const { result } = await r.json();
   if (!result) return null;
-  return typeof result === 'string' ? JSON.parse(result) : result;
+  // Some values (e.g. handle:{handle} → email) are stored as plain strings,
+  // others (user records, session blobs) are JSON. Try parse; on failure,
+  // return the raw string. Without this try/catch the handle lookup throws
+  // "Unexpected token 'g'" because "gregg@wescottcapital.com" isn't valid JSON.
+  if (typeof result === 'string') {
+    try { return JSON.parse(result); } catch (_) { return result; }
+  }
+  return result;
 }
 
 async function kvIncrEx(key, ttl) {
