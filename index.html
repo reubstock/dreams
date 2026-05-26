@@ -356,34 +356,36 @@
   .capture-actions .btn.primary:hover { background: var(--rust-soft); border-color: var(--rust-soft); }
 
   /* "Show my Dream" — the CTA that turns recording into the AI illustration.
-     The whole product turns on this click, so the button gets a warm gradient
-     fill, a soft outer glow, slightly bigger type, and a subtle breath
-     animation when idle. Pulled out as its own class so the calmer
-     primary-button color still applies to other primary actions. */
+     Idle state is a STATIC frame of the same rainbow gradient that the
+     button animates through when the analysis is running (the "analyzing"
+     class). Same vocabulary across both states: idle = the still version
+     of the same rainbow, active = the moving version. Tells the user
+     "this button is the rainbow." */
   .capture-actions .btn.primary.btn-show-dream {
-    background: linear-gradient(135deg, #d87a3e 0%, #c43e1a 55%, #8a2a14 100%);
-    background-size: 200% 200%;
+    background-image: linear-gradient(90deg,
+      #ff5e57 0%, #ff9c4a 14%, #ffd23e 28%, #57e08a 42%,
+      #4abff5 57%, #8a7bff 71%, #d96ad9 85%, #ff5e57 100%);
+    background-color: transparent;
+    background-size: 100% 100%;
     border-color: transparent;
-    color: var(--paper);
+    color: #0d0a04;
     font-size: 12.5px;
     letter-spacing: 0.18em;
     padding: 13px 22px;
-    font-weight: 500;
+    font-weight: 600;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.55);
     box-shadow:
-      0 1px 0 rgba(255, 220, 180, 0.20) inset,
-      0 0 0 1px rgba(196, 62, 26, 0.45),
-      0 8px 24px rgba(196, 62, 26, 0.32);
-    transition: transform 0.15s, box-shadow 0.25s, background-position 0.6s;
-    animation: showdream-breath 4.5s ease-in-out infinite;
+      0 1px 0 rgba(255, 255, 255, 0.4) inset,
+      0 8px 22px rgba(184, 66, 26, 0.20);
+    transition: transform 0.15s, box-shadow 0.25s, filter 0.2s;
   }
   .capture-actions .btn.primary.btn-show-dream:hover {
-    background-position: 100% 50%;
     transform: translateY(-1px) scale(1.015);
+    filter: saturate(1.1) brightness(1.04);
     box-shadow:
-      0 1px 0 rgba(255, 220, 180, 0.30) inset,
-      0 0 0 1px rgba(255, 154, 80, 0.6),
-      0 12px 30px rgba(196, 62, 26, 0.45),
-      0 0 24px rgba(255, 154, 80, 0.25);
+      0 1px 0 rgba(255, 255, 255, 0.5) inset,
+      0 12px 28px rgba(184, 66, 26, 0.32),
+      0 0 24px rgba(255, 154, 80, 0.20);
   }
   .capture-actions .btn.primary.btn-show-dream:active {
     transform: translateY(0) scale(1.0);
@@ -392,20 +394,9 @@
     display: inline-block;
     margin-left: 8px;
     font-size: 14px;
-    color: rgba(255, 220, 180, 0.95);
-    text-shadow: 0 0 8px rgba(255, 220, 180, 0.5);
+    color: #0d0a04;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
     animation: bsd-twinkle 2.8s ease-in-out infinite;
-  }
-  @keyframes showdream-breath {
-    0%, 100% { box-shadow:
-      0 1px 0 rgba(255, 220, 180, 0.20) inset,
-      0 0 0 1px rgba(196, 62, 26, 0.45),
-      0 8px 24px rgba(196, 62, 26, 0.32); }
-    50% { box-shadow:
-      0 1px 0 rgba(255, 220, 180, 0.28) inset,
-      0 0 0 1px rgba(255, 154, 80, 0.55),
-      0 10px 30px rgba(196, 62, 26, 0.42),
-      0 0 24px rgba(255, 154, 80, 0.18); }
   }
   @keyframes bsd-twinkle {
     0%, 100% { opacity: 0.85; transform: rotate(0deg) scale(1); }
