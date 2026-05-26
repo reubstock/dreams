@@ -10,7 +10,10 @@ const KV_URL = process.env.KV_REST_API_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const SITE_ORIGIN = 'https://dreams-livid.vercel.app';
-const FROM_EMAIL = 'Dreams <onboarding@resend.dev>';
+// Verified domain on Resend (reubstock.com). Switching away from
+// onboarding@resend.dev unlocks sending to any recipient — the resend.dev
+// sandbox only allows sending to the account holder's verified address.
+const FROM_EMAIL = 'Dreams <noreply@reubstock.com>';
 
 function isValidEmail(s) {
   return typeof s === 'string' &&
