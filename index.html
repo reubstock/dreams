@@ -3899,14 +3899,21 @@
     if (!grid) return;
     grid.innerHTML = `<div class="library-empty">Loading…</div>`;
     try {
+      // Pull more than we need so the post-filter (only illustrated dreams)
+      // still leaves a healthy grid.
       const r = await fetch('/api/dreams/recent?limit=50');
       if (!r.ok) {
         grid.innerHTML = `<div class="library-empty">Couldn't load dreams.</div>`;
         return;
       }
-      const { dreams } = await r.json();
+      const { dreams: allDreams } = await r.json();
+      // The /all page only shows dreams that actually have an image — text-
+      // only entries (someone saved without tapping Show my Dream) look
+      // broken in a card grid. Hide them here; the dream still exists, it
+      // just doesn't surface in the public gallery.
+      const dreams = (allDreams || []).filter((d) => d.image_url);
       if (!dreams || dreams.length === 0) {
-        grid.innerHTML = `<div class="library-empty">No public dreams yet. <a class="auth-link" href="/" style="margin-left: 12px;">Record the first</a></div>`;
+        grid.innerHTML = `<div class="library-empty">No illustrated dreams yet. <a class="auth-link" href="/" style="margin-left: 12px;">Record the first</a></div>`;
         return;
       }
       grid.className = 'library-grid';
