@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Style anchor comparison · Dreams</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root { --paper: #f1ead7; --paper-2: #ebe2c8; --ink: #0d0a04; --ink-2: #3a2e15; --rust: #b8421a; --muted: #7a6e4f; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Iowan Old Style', Georgia, serif; padding: 56px 32px 80px; }
+    .wrap { max-width: 1240px; margin: 0 auto; }
+    h1 { font-family: 'Didot', 'Bodoni 72', serif; font-style: italic; font-weight: 400; font-size: 56px; line-height: 1.05; margin: 0 0 12px; letter-spacing: -0.015em; }
+    .kicker { font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--rust); margin-bottom: 12px; }
+    .prompt-card {
+      background: #0d0a04;
+      color: rgba(241, 234, 215, 0.92);
+      padding: 28px 32px;
+      margin: 28px 0 48px;
+      font-family: 'Iowan Old Style', Georgia, serif;
+      font-size: 17px; line-height: 1.6;
+      border-left: 4px solid var(--rust);
+    }
+    .prompt-card .pc-label {
+      display: block;
+      font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(241, 234, 215, 0.55);
+      margin-bottom: 10px;
+    }
+    .meta {
+      font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 32px;
+    }
+    .meta b { color: var(--ink); font-weight: 500; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+    }
+    @media (max-width: 720px) {
+      body { padding: 28px 18px 60px; }
+      h1 { font-size: 36px; }
+      .grid { grid-template-columns: 1fr; gap: 22px; }
+      .prompt-card { padding: 18px 20px; font-size: 15.5px; }
+    }
+    .card {
+      background: var(--paper-2);
+      border: 1px solid var(--ink);
+      padding: 0;
+      display: flex; flex-direction: column;
+    }
+    .card img {
+      width: 100%; aspect-ratio: 1 / 1;
+      object-fit: cover; display: block;
+      border-bottom: 1px solid var(--ink);
+    }
+    .card-body { padding: 20px 22px 24px; }
+    .card-num {
+      font-family: 'Didot', 'Bodoni 72', serif;
+      font-style: italic;
+      color: var(--rust);
+      font-size: 32px; line-height: 1;
+      margin-bottom: 8px;
+    }
+    .card-name {
+      font-family: 'Didot', 'Bodoni 72', serif;
+      font-style: italic; font-weight: 400;
+      font-size: 28px; line-height: 1.1;
+      margin: 0 0 14px;
+    }
+    .card-anchor {
+      font-family: 'Iowan Old Style', Georgia, serif;
+      font-size: 14px; line-height: 1.55;
+      color: var(--ink-2);
+      font-style: italic;
+    }
+    .nav-back {
+      display: inline-block;
+      margin-top: 48px;
+      font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--rust); text-decoration: none;
+      border-bottom: 1px solid var(--rust); padding-bottom: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="kicker">Style anchor comparison · gpt-image-1</div>
+    <h1>One dream, four hands.</h1>
+    <div class="meta">
+      Subject: <b>55-year-old man, silver hair, black rectangular glasses</b> · Same dream text below, same prompt-crafter, same dreamer · Only the style anchor varies.
+    </div>
+
+    <div class="prompt-card">
+      <span class="pc-label">The dream</span>
+      I was in my childhood house but the rooms were all wrong. My mother was there but younger than me. The ceiling was made of water and I could see fish swimming above. I tried to call my brother but my phone had no numbers, only letters in a language I didn't recognize. Then the floor became sand and I was on a beach with no one around. The sky was orange and I felt I was late for something important but couldn't remember what.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <img src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/samples/1779849416537-izirlp-kOANfqeKgqlFxszeCXTNNZuAhLIxPF.png" alt="In the style of Bosch">
+        <div class="card-body">
+          <div class="card-num">i.</div>
+          <h2 class="card-name">Hieronymus Bosch</h2>
+          <div class="card-anchor">Dense surreal allegory on wooden panel, jewel-toned palette of crimson, indigo, ochre, forest green. Small grotesque creatures threaded through. Fine northern-Renaissance brushwork, panoramic.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/samples/1779849445675-29v83u-01BpkyOaDfKamhWyMkLnSFQqfnvshe.png" alt="In the style of Bonnard">
+        <div class="card-body">
+          <div class="card-num">ii.</div>
+          <h2 class="card-name">Pierre Bonnard</h2>
+          <div class="card-anchor">Warm domestic interior in high-key oil. Dappled afternoon light. Pinks, lavenders, butter yellows. Intimate cropped framing. Soft edges. The figure half-merging with the room's color.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/samples/1779849496585-5v1pea-7QEVebkit7IZcWAXYr7WWOZRfeS0Pp.png" alt="In the style of Hopper">
+        <div class="card-body">
+          <div class="card-num">iii.</div>
+          <h2 class="card-name">Edward Hopper</h2>
+          <div class="card-anchor">Hard geometric light cutting through the room. Flat blocky color planes. Late-afternoon mustard, teal, brick red. Isolated figure stilled in middle distance. Architectural clarity with psychological vacancy.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/samples/1779849537886-2bupx2-Z40TworF5OnJ337x5uyGQmJ3b9qBbF.png" alt="In the style of Arbus">
+        <div class="card-body">
+          <div class="card-num">iv.</div>
+          <h2 class="card-name">Diane Arbus</h2>
+          <div class="card-anchor">Square-format black-and-white documentary photograph. Direct flash. Frontal pose. The subject staring straight at the camera. Slightly uncanny. Sharp medium-format clarity. 1960s grain.</div>
+        </div>
+      </div>
+    </div>
+
+    <a class="nav-back" href="/">← back to Dreams</a>
+  </div>
+</body>
+</html>
