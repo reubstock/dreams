@@ -854,6 +854,7 @@
     font-family: 'Iowan Old Style', Georgia, serif; font-size: 15.5px;
   }
   .library-card {
+    position: relative;
     border: 1px solid var(--ink); background: var(--paper);
     cursor: pointer; transition: transform 0.12s, box-shadow 0.15s;
     display: flex; flex-direction: column;
@@ -861,6 +862,32 @@
   }
   .library-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(13, 10, 4, 0.12); }
   .library-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; background: var(--paper-2); }
+  /* Heart on each library card — appears in the top-right of the image
+     thumbnail. preventDefault on the wrapping <a> happens in JS so a
+     heart-tap doesn't navigate to the dream page. */
+  .library-card .lc-heart {
+    position: absolute; top: 10px; right: 10px;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: rgba(13, 10, 4, 0.55);
+    border: 1px solid rgba(241, 234, 215, 0.32);
+    color: rgba(241, 234, 215, 0.9);
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    transition: background 0.12s, color 0.12s, transform 0.1s;
+    z-index: 2;
+  }
+  .library-card .lc-heart svg { width: 16px; height: 16px; display: block; }
+  .library-card .lc-heart:hover { background: rgba(13, 10, 4, 0.78); color: #fff; }
+  .library-card .lc-heart:active { transform: scale(0.92); }
+  .library-card .lc-heart.is-favorited svg path {
+    fill: #ff5e57;
+    stroke: #ff5e57;
+  }
+  .library-card .lc-heart.is-favorited { color: #ff5e57; }
+  .library-card .lc-heart:disabled { opacity: 0.55; cursor: wait; }
   .library-card .lc-body { padding: 14px 16px; }
   .library-card .lc-title {
     font-family: 'Didot', serif; font-size: 20px; font-style: italic;
@@ -3901,12 +3928,24 @@
     try {
       // Pull more than we need so the post-filter (only illustrated dreams)
       // still leaves a healthy grid.
-      const r = await fetch('/api/dreams/recent?limit=50');
-      if (!r.ok) {
+      // In parallel: fetch the signed-in user's favorites so each card
+      // can render with the correct heart state on first paint.
+      const [recentRes, favRes] = await Promise.all([
+        fetch('/api/dreams/recent?limit=50'),
+        window.authState?.signedIn ? fetch('/api/user/favorites').catch(() => null) : Promise.resolve(null),
+      ]);
+      if (!recentRes.ok) {
         grid.innerHTML = `<div class="library-empty">Couldn't load dreams.</div>`;
         return;
       }
-      const { dreams: allDreams } = await r.json();
+      const { dreams: allDreams } = await recentRes.json();
+      const favSet = new Set();
+      if (favRes && favRes.ok) {
+        try {
+          const { dreams: favs } = await favRes.json();
+          (favs || []).forEach((d) => favSet.add(d.id));
+        } catch (_) {}
+      }
       // The /all page only shows dreams that actually have an image — text-
       // only entries (someone saved without tapping Show my Dream) look
       // broken in a card grid. Hide them here; the dream still exists, it
@@ -3923,14 +3962,58 @@
         const img = d.image_url ? `<img src="${escapeHtmlAuth(d.image_url)}" alt="" loading="lazy">` : '';
         const created = d.created_at ? new Date(d.created_at).toLocaleDateString() : '';
         const by = d.owner_handle ? ` · by @${escapeHtmlAuth(d.owner_handle)}` : '';
+        const isFav = favSet.has(d.id);
+        const heartClass = isFav ? 'lc-heart is-favorited' : 'lc-heart';
         return `<a class="library-card" href="/d/${escapeHtmlAuth(d.id)}">
           ${img}
+          <button type="button" class="${heartClass}" data-fav-id="${escapeHtmlAuth(d.id)}" aria-label="Favorite this dream">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 21s-7.5-4.5-9.5-9.5C0.5 6 5.5 2 9 4.5 10.5 5.6 12 7.5 12 7.5s1.5-1.9 3-3C18.5 2 23.5 6 21.5 11.5 19.5 16.5 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </button>
           <div class="lc-body">
             <div class="lc-title">${escapeHtmlAuth(title)}</div>
             <div class="lc-meta">${escapeHtmlAuth(created)} · ${d.morph_count || 0} morphs${by}</div>
           </div>
         </a>`;
       }).join('');
+      // Wire heart clicks. We use a delegated handler on the grid so we don't
+      // bind one listener per card. The button click must preventDefault on
+      // the wrapping <a> so the page doesn't navigate when the user just
+      // wants to heart.
+      grid.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.lc-heart');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const dreamId = btn.dataset.favId;
+        if (!dreamId) return;
+        // Signed-out: prompt sign in (with pending favorite saved across)
+        if (!window.authState?.signedIn) {
+          try { localStorage.setItem('dreams:pending_favorite', dreamId); } catch (_) {}
+          showToast('Sign in to favorite');
+          openSignin();
+          return;
+        }
+        const next = !btn.classList.contains('is-favorited');
+        // Optimistic
+        btn.classList.toggle('is-favorited', next);
+        btn.disabled = true;
+        try {
+          const r = await fetch('/api/dream/favorite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: dreamId, on: next }),
+          });
+          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).message || 'favorite failed');
+          showToast(next ? 'Added to favorites' : 'Removed from favorites');
+        } catch (err) {
+          btn.classList.toggle('is-favorited', !next);
+          showToast(err.message || 'Could not favorite');
+        } finally {
+          btn.disabled = false;
+        }
+      });
     } catch (err) {
       grid.innerHTML = `<div class="library-empty">${escapeHtmlAuth(err.message || 'Error')}</div>`;
     }
