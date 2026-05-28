@@ -320,6 +320,7 @@
   }
   .rec-timer[data-zone="good"]  { color: #f3c060; }
   .rec-timer[data-zone="sweet"] { color: #6fd58f; }
+  .rec-timer[data-zone="over"]  { color: #f4d8a0; }
   .rec-timer[data-zone="long"]  { color: #f3c060; }
   .rec-timer[data-zone="risky"] { color: #ff5a5a; }
   .capture-hint {
@@ -2820,7 +2821,7 @@
         <div>
           <div class="capture-title">Record <em>your</em> dream.</div>
           <div class="capture-sub">Speak it · we'll transcribe with Whisper · analyze what it's doing</div>
-          <div class="capture-sub capture-hint">Ideal length: about 90 seconds · longer than 3 minutes can fail to upload</div>
+          <div class="capture-sub capture-hint">Ideal length: under a minute · longer is fine, but over 3 minutes can fail to upload</div>
         </div>
         <button class="capture-btn" data-action="record-start" aria-label="Start recording">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -2833,7 +2834,7 @@
       <div class="capture-pane pane-recording">
         <div>
           <div class="capture-title"><span class="rec-dot"></span> Recording <span class="rec-timer" id="rec-timer">0:00</span></div>
-          <div class="capture-sub" id="rec-sub">Speak naturally · ideal length about 90 seconds</div>
+          <div class="capture-sub" id="rec-sub">Speak naturally · aim for under a minute</div>
         </div>
         <button class="capture-btn stop" data-action="record-stop" aria-label="Stop recording">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -4125,21 +4126,23 @@
         const elapsed = Date.now() - recordStart;
         const sec = Math.floor(elapsed / 1000);
         timerEl.textContent = fmtTime(elapsed);
-        // Length feedback: shifts the sub-text and the timer color as you
-        // move through under / ideal / fine / long / risky zones.
+        // Length guidance: target is under a minute. Going over is fine,
+        // but we set expectation up front and warn at the upload-risk edge.
         let zone = 'under';
-        if (sec >= 210) zone = 'risky';
-        else if (sec >= 150) zone = 'long';
-        else if (sec >= 90)  zone = 'sweet';
-        else if (sec >= 60)  zone = 'good';
+        if (sec >= 180) zone = 'risky';
+        else if (sec >= 120) zone = 'long';
+        else if (sec >= 60)  zone = 'over';
+        else if (sec >= 45)  zone = 'sweet';
+        else if (sec >= 30)  zone = 'good';
         if (timerEl.dataset.zone !== zone) {
           timerEl.dataset.zone = zone;
           if (recSubEl) {
             const msg = {
-              under: 'Speak naturally · ideal length about 90 seconds',
-              good:  'Good length · keep going',
-              sweet: 'Sweet spot · tap stop when ready',
-              long:  'Long enough · the analysis lands best around 90 seconds',
+              under: 'Speak naturally · aim for under a minute',
+              good:  'Good · keep going',
+              sweet: 'Sweet spot · finish when ready',
+              over:  'A bit over a minute · that\'s fine',
+              long:  'Long — most analyses land best under a minute',
               risky: 'Very long — recordings over 3 minutes can fail to upload',
             }[zone];
             recSubEl.textContent = msg;
