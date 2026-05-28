@@ -1995,18 +1995,18 @@
     body.dream-page footer,
     body.dream-page .historical-dreamer { order: 4; }
 
-    /* Inside .dream-frame on mobile: recipient prompt → transcript →
-       image (with its painterly caption directly below). The dream text
-       is what the reader came to see; the image is the AI illustration
-       of that text and belongs next to it, not before it. */
+    /* Inside .dream-frame on mobile: title (outside frame, above) →
+       image → dream text → recipient prompt. The AI illustration is the
+       visceral first impression; the transcript is what you linger on
+       after; the recipient CTA comes last as "whatever's left." */
     body.dream-page .dream-frame {
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-    body.dream-page .dream-frame .recipient-prompt { order: 0; }
+    body.dream-page .dream-frame .hero-image { order: 0; }
     body.dream-page .dream-frame .capture { order: 1; }
-    body.dream-page .dream-frame .hero-image { order: 2; }
+    body.dream-page .dream-frame .recipient-prompt { order: 2; }
 
     /* Title above the image is more prominent now — keep it bold but
        remove the "click to edit" hint (which is a noise on a phone). */
