@@ -17,7 +17,9 @@ async function kvGet(key) {
   if (!r.ok) return null;
   const { result } = await r.json();
   if (!result) return null;
-  return typeof result === 'string' ? JSON.parse(result) : result;
+  if (typeof result !== 'string') return result;
+  // `handle:*` keys store plain email strings; `user:*` etc. store JSON.
+  try { return JSON.parse(result); } catch { return result; }
 }
 
 async function kvSetEx(key, value, ttl) {
