@@ -316,6 +316,16 @@
     font-family: ui-monospace, Menlo, monospace;
     font-size: 22px; font-weight: 600;
     color: #ff8870; letter-spacing: 0.04em;
+    transition: color 0.4s ease;
+  }
+  .rec-timer[data-zone="good"]  { color: #f3c060; }
+  .rec-timer[data-zone="sweet"] { color: #6fd58f; }
+  .rec-timer[data-zone="long"]  { color: #f3c060; }
+  .rec-timer[data-zone="risky"] { color: #ff5a5a; }
+  .capture-hint {
+    margin-top: 4px;
+    opacity: 0.7;
+    font-style: italic;
   }
   .spinner {
     display: inline-block;
@@ -2810,6 +2820,7 @@
         <div>
           <div class="capture-title">Record <em>your</em> dream.</div>
           <div class="capture-sub">Speak it · we'll transcribe with Whisper · analyze what it's doing</div>
+          <div class="capture-sub capture-hint">Ideal length: about 90 seconds · longer than 3 minutes can fail to upload</div>
         </div>
         <button class="capture-btn" data-action="record-start" aria-label="Start recording">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -2822,7 +2833,7 @@
       <div class="capture-pane pane-recording">
         <div>
           <div class="capture-title"><span class="rec-dot"></span> Recording <span class="rec-timer" id="rec-timer">0:00</span></div>
-          <div class="capture-sub">Speak naturally · tap stop when done</div>
+          <div class="capture-sub" id="rec-sub">Speak naturally · ideal length about 90 seconds</div>
         </div>
         <button class="capture-btn stop" data-action="record-stop" aria-label="Stop recording">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -4109,7 +4120,32 @@
       recordStart = Date.now();
       setState('recording');
       timerEl.textContent = '0:00';
-      timerInterval = setInterval(() => { timerEl.textContent = fmtTime(Date.now() - recordStart); }, 200);
+      const recSubEl = document.getElementById('rec-sub');
+      timerInterval = setInterval(() => {
+        const elapsed = Date.now() - recordStart;
+        const sec = Math.floor(elapsed / 1000);
+        timerEl.textContent = fmtTime(elapsed);
+        // Length feedback: shifts the sub-text and the timer color as you
+        // move through under / ideal / fine / long / risky zones.
+        let zone = 'under';
+        if (sec >= 210) zone = 'risky';
+        else if (sec >= 150) zone = 'long';
+        else if (sec >= 90)  zone = 'sweet';
+        else if (sec >= 60)  zone = 'good';
+        if (timerEl.dataset.zone !== zone) {
+          timerEl.dataset.zone = zone;
+          if (recSubEl) {
+            const msg = {
+              under: 'Speak naturally · ideal length about 90 seconds',
+              good:  'Good length · keep going',
+              sweet: 'Sweet spot · tap stop when ready',
+              long:  'Long enough · the analysis lands best around 90 seconds',
+              risky: 'Very long — recordings over 3 minutes can fail to upload',
+            }[zone];
+            recSubEl.textContent = msg;
+          }
+        }
+      }, 200);
     }
 
     function stopRecording() {
@@ -5092,18 +5128,33 @@
           const data = await r.json().catch(() => ({}));
           let title = 'Image generation failed';
           let detail = data.message || `HTTP ${r.status}`;
-          if (data.error === 'blob_not_configured') title = 'Image storage not yet enabled';
+          let matched = false;
+          if (data.error === 'blob_not_configured') {
+            title = 'Image storage not yet enabled';
+            matched = true;
+          }
           else if (r.status === 429 || /rate limit/i.test(detail)) {
             title = 'Rate limit — too many images this minute';
             detail = 'gpt-image-1 caps at 5/min per org. Tap ↻ Re-roll in about a minute.';
+            matched = true;
           }
           else if (/safety|SAFETY_VIOLATIONS|moderation|flagged the scene/i.test(detail)) {
             title = 'Image generation flagged';
             detail = 'gpt-image-1\'s safety filter rejected the scene even after we softened the prompt. It can be set off by surprisingly innocuous words ("knife", "blood", "bed"). Try lightly rewording the dream text — keeping the same meaning but swapping a literal word for a softer one — then tap Re-roll.';
+            matched = true;
+          }
+          else if (/timeout|timed out|504/i.test(detail)) {
+            title = 'Image timed out';
+            detail = 'gpt-image-1 was slow this time. Tap ↻ Re-roll — usually it lands on the second try.';
+            matched = true;
           }
           // Strip leading "Image API 502:" / "image model failed" prefixes
           detail = detail.replace(/^Image API \d+:\s*/i, '').replace(/^image model failed \d+:\s*/i, '').trim();
-          if (detail.length > 360) detail = detail.slice(0, 357) + '…';
+          if (!matched) {
+            // Generic fallback with action-oriented advice so users know what to do next.
+            detail = `${detail.length > 200 ? detail.slice(0, 197) + '…' : detail} — Tap ↻ Re-roll to try again. If it keeps failing, a single literal word in the dream text can trip the model; try softening one strong word ("knife", "blood", "naked", a real-person name) and re-roll.`;
+          }
+          if (detail.length > 480) detail = detail.slice(0, 477) + '…';
           if (loadingText) loadingText.textContent = title;
           if (loadingSub) loadingSub.textContent = detail;
           if (reroll) { reroll.hidden = !window.__currentDreamIsOwner; }
@@ -5129,8 +5180,9 @@
         wireFavorite();
       } catch (err) {
         clearInterval(tickTimer);
-        if (loadingText) loadingText.textContent = 'Could not generate image';
-        if (loadingSub) loadingSub.textContent = (err.message || String(err)).slice(0, 220);
+        if (loadingText) loadingText.textContent = 'Could not reach the image service';
+        const reason = (err.message || String(err)).slice(0, 200);
+        if (loadingSub) loadingSub.textContent = `${reason} — Check your connection and tap ↻ Re-roll to try again.`;
         if (reroll) reroll.hidden = !window.__currentDreamIsOwner;
       }
     }
