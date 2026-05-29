@@ -1133,38 +1133,55 @@
     font-size: 21px; line-height: 1.65; color: var(--ink);
   }
 
-  /* ============ DREAM ILLUSTRATION (the painting, after the text) ============
-     Sits between the dream text and the reading. The image of the dream the
-     reader just read, before the interpretation and the related artworks. */
-  .dream-illustration {
-    display: block;
-    max-width: 880px;
-    margin: 36px auto 8px;
-    text-decoration: none;
-    color: inherit;
+  /* ============ DREAM BLOCK (quoted text left + smaller painting right) ============
+     The dream text and its illustration form one compact two-column unit
+     instead of two stacked full-width sections. Reads as a dream recounted
+     by its dreamer: quoted, italic, attributed. */
+  .dream-block {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 36px;
+    align-items: start;
+    max-width: 1040px;
+    margin: 8px auto 0;
   }
-  .dream-illustration .di-img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    display: block;
+  .db-text { align-self: center; }
+  .db-quote {
+    margin: 0;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-style: italic;
+    font-size: 22px; line-height: 1.55;
+    color: var(--ink);
+    quotes: "\201C" "\201D";
+    padding-left: 20px;
+    border-left: 2px solid var(--rust);
+  }
+  .db-quote::before { content: open-quote; }
+  .db-quote::after { content: close-quote; }
+  .db-attr {
+    margin-top: 16px; padding-left: 20px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .db-attr a { color: var(--rust); text-decoration: none; border-bottom: 1px dotted var(--rust); }
+  .db-image {
+    display: block; text-decoration: none; color: inherit;
+  }
+  .db-image img {
+    width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block;
     border: 1px solid var(--ink);
-    box-shadow: 0 12px 30px rgba(10, 31, 92, 0.18);
+    box-shadow: 0 10px 26px rgba(10, 31, 92, 0.18);
     transition: transform 0.18s, box-shadow 0.18s;
   }
-  .dream-illustration:hover .di-img {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 38px rgba(10, 31, 92, 0.26);
-  }
-  .dream-illustration .di-caption {
-    margin-top: 12px;
+  .db-image:hover img { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(10, 31, 92, 0.26); }
+  .db-image-cap {
+    display: block; margin-top: 10px;
     font-family: ui-monospace, Menlo, monospace;
-    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--muted);
-    text-align: center;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); text-align: center;
   }
-  .dream-illustration .di-caption b { color: var(--ink); font-weight: 600; }
-  .dream-illustration .di-cta { color: var(--rust); }
+  .db-image-cap b { color: var(--ink); font-weight: 600; }
   .source-text mark {
     background: transparent;
     color: var(--ink);
@@ -2577,7 +2594,11 @@
 
     .source-grid { grid-template-columns: 1fr; gap: 20px; }
     .source-text { font-size: 18px; line-height: 1.6; }
-    .dream-illustration { margin: 24px auto 6px; }
+    /* Dream block stacks on phones: quoted text, then the painting below. */
+    .dream-block { grid-template-columns: 1fr; gap: 18px; margin-top: 4px; }
+    .db-quote { font-size: 18px; padding-left: 14px; }
+    .db-attr { padding-left: 14px; }
+    .db-image { max-width: 360px; }
     .source-stats { border-left: none; border-top: 1px solid var(--ink); padding-left: 0; padding-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 24px; }
     .source-stats .stat { margin-bottom: 0; }
     .source-stats .stat-num { font-size: 32px; }
@@ -3062,33 +3083,34 @@
       <div class="title">Example dream — Subject 0341, annotated</div>
       <div class="rule"></div>
     </div>
-    <div class="source-grid example-only">
-      <div class="source-text">
-        I was in my childhood house but
-        <mark data-n="1">the rooms were all wrong</mark>.
-        My mother was there but <mark data-n="2">younger than me</mark>.
-        <mark data-n="3">The ceiling was made of water</mark> and I could see
-        <mark data-n="4">fish swimming above</mark>. I tried to call my brother
-        but my phone had no numbers, only
-        <mark data-n="5">letters in a language I didn't recognize</mark>. Then
-        <mark data-n="6">the floor became sand</mark> and I was on
-        <mark data-n="7">a beach with no one around</mark>. The sky was orange
-        and I felt I was
-        <mark data-n="8">late for something important but couldn't remember what</mark>.
+    <!-- Dream block: quoted dream text (left) + smaller painting (right),
+         forming a single compact unit instead of two stacked full-width
+         sections. The text reads as a dream recounted by its dreamer,
+         so it's quoted, italicised, and attributed to reubstock. -->
+    <div class="dream-block example-only">
+      <div class="db-text">
+        <blockquote class="db-quote">
+          I was in my childhood house but
+          <mark data-n="1">the rooms were all wrong</mark>.
+          My mother was there but <mark data-n="2">younger than me</mark>.
+          <mark data-n="3">The ceiling was made of water</mark> and I could see
+          <mark data-n="4">fish swimming above</mark>. I tried to call my brother
+          but my phone had no numbers, only
+          <mark data-n="5">letters in a language I didn't recognize</mark>. Then
+          <mark data-n="6">the floor became sand</mark> and I was on
+          <mark data-n="7">a beach with no one around</mark>. The sky was orange
+          and I felt I was
+          <mark data-n="8">late for something important but couldn't remember what</mark>.
+        </blockquote>
+        <div class="db-attr">Dreamed by <a href="/u/reubstock">reubstock</a></div>
       </div>
+      <a class="db-image" href="/d/OuvHHpl2u-8" aria-label="Open the full analysis of this dream">
+        <img src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/dreams/OuvHHpl2u-8-1779659990145-a5GYixDQyZHhtknjZblSy1MTJFScrH.jpg"
+             alt="The Ceiling Made of Water — surrealist painting of the dream"
+             loading="lazy">
+        <span class="db-image-cap"><b>The Ceiling Made of Water</b> · full analysis →</span>
+      </a>
     </div>
-
-    <!-- =================== ILLUSTRATION (the dream, painted) =================== -->
-    <!-- The AI painting of the example dream. Sits right after the dream text
-         so the reader sees the words, then the image of those words, before
-         anything else. Same dream as /d/OuvHHpl2u-8. -->
-    <a class="dream-illustration example-only" href="/d/OuvHHpl2u-8" aria-label="Open the full analysis of this dream">
-      <img class="di-img"
-           src="https://uerv29s7boua5adz.public.blob.vercel-storage.com/dreams/OuvHHpl2u-8-1779659990145-a5GYixDQyZHhtknjZblSy1MTJFScrH.jpg"
-           alt="The Ceiling Made of Water — surrealist painting of the dream above"
-           loading="lazy">
-      <div class="di-caption"><b>The Ceiling Made of Water</b> · the dream above, painted · <span class="di-cta">full analysis →</span></div>
-    </a>
 
     <!-- =================== READING (interpretation, moved above the art) =================== -->
     <div class="reading-block example-only">
