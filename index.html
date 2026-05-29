@@ -66,7 +66,12 @@
     flex-wrap: wrap; gap: 8px;
   }
   .dream-title-kicker { color: var(--rust); }
-  .dream-title-id { color: var(--muted); font-size: 9.5px; }
+  /* The ID is the exact, case-sensitive tail of the dream's URL (/d/:id).
+     The parent .dream-title-meta uppercases its text for the kicker label,
+     but an uppercased ID is a trap — dream IDs are case-sensitive base64url
+     and a hand-typed link built from an uppercased chip 404s. Render the ID
+     verbatim so what you see is exactly what works in the URL. */
+  .dream-title-id { color: var(--muted); font-size: 9.5px; text-transform: none; letter-spacing: 0.06em; }
   h1.dream-title {
     font-family: 'Didot', 'Bodoni 72', serif;
     font-size: 54px; font-style: italic; font-weight: 400;
