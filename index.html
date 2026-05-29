@@ -2019,6 +2019,15 @@
       display: flex;
       flex-direction: column;
     }
+    /* Default EVERY other container child to the bottom. This is the
+       rename-proof guard: the recent-dreams feed, its header/footer, the
+       "Record your dream" CTA, and all analysis blocks stay below the
+       shared dream instead of floating up beside the masthead (order 0).
+       A homepage-reorder commit once renamed the feed header and silently
+       reintroduced exactly that bug — defaulting to order 4 prevents any
+       new or renamed sibling from doing it again. The four priority blocks
+       below override this (equal specificity, declared after = they win). */
+    body.dream-page .container > * { order: 4; }
     body.dream-page .masthead { order: 0; }
     /* Title above the picture — it's the name of the dream, it deserves
        to be the first thing the visitor reads under the masthead. */
@@ -2045,18 +2054,19 @@
     body.dream-page footer,
     body.dream-page .historical-dreamer { order: 4; }
 
-    /* Inside .dream-frame on mobile: recipient prompt → transcript →
-       image (with its painterly caption directly below). The dream text
-       is what the reader came to see; the image is the AI illustration
-       of that text and belongs next to it, not before it. */
+    /* Inside .dream-frame on mobile: image → transcript → recipient prompt.
+       A recipient arriving via a shared link should see the AI illustration
+       first — it's the visceral hook — then the dream text it illustrates,
+       then the sign-in CTA last as "whatever's left." (The image's painterly
+       caption still renders directly beneath the image.) */
     body.dream-page .dream-frame {
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-    body.dream-page .dream-frame .recipient-prompt { order: 0; }
+    body.dream-page .dream-frame .hero-image { order: 0; }
     body.dream-page .dream-frame .capture { order: 1; }
-    body.dream-page .dream-frame .hero-image { order: 2; }
+    body.dream-page .dream-frame .recipient-prompt { order: 2; }
 
     /* Title above the image is more prominent now — keep it bold but
        remove the "click to edit" hint (which is a noise on a phone). */
