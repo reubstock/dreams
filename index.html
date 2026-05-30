@@ -2517,10 +2517,16 @@
   }
   .vis-toggle.vis-toggle-danger:hover { background: #c43e1a; border-color: #c43e1a; color: var(--paper); }
   /* Real, prominent owner-action buttons (Edit, Delete) that sit on their
-     own row below the dreamer line, separated from the visibility toggle. */
+     own row below the dreamer line, separated from the visibility toggle.
+     flex-basis: 100% forces them to always wrap to their own line so they
+     never crowd "Public — make private" on wide viewports. Small negative
+     left margin nudges them slightly leftward of the inline flex flow so
+     they read as a distinct action block rather than a continuation. */
   .owner-actions {
     display: flex; gap: 8px; flex-wrap: wrap;
+    flex-basis: 100%;
     margin-top: 12px;
+    margin-left: -6px;
   }
   .owner-action {
     appearance: none;
