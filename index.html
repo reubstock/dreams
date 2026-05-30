@@ -1033,6 +1033,121 @@
     font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
     letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
   }
+  /* Breed action on each library card (mine tab only, experimental) — a
+     small in-card affordance that opens the picker modal. Lives inside
+     the wrapping <a> so we stopPropagation on click. */
+  .library-card .lc-breed-btn {
+    margin-top: 12px;
+    background: transparent;
+    border: 1px solid var(--rust);
+    color: var(--rust);
+    padding: 7px 12px 6px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .library-card .lc-breed-btn:hover { background: var(--rust); color: var(--paper); }
+  .library-card .lc-breed-btn:disabled { opacity: 0.55; cursor: wait; }
+
+  /* ============ BREED MODAL (experimental) ============ */
+  #breed-modal .modal { max-width: 760px; }
+  .breed-parent-a {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px;
+    background: var(--paper-2);
+    border: 1px solid var(--rust-soft);
+    margin-bottom: 18px;
+  }
+  .breed-parent-a img {
+    width: 56px; height: 56px; object-fit: cover; flex: 0 0 auto;
+    background: var(--paper);
+  }
+  .breed-parent-a .bp-empty {
+    width: 56px; height: 56px; flex: 0 0 auto;
+    background: var(--paper); border: 1px dashed var(--ink-2);
+  }
+  .breed-parent-a .bp-label {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--rust);
+    margin-bottom: 4px;
+  }
+  .breed-parent-a .bp-title {
+    font-family: 'Didot', serif; font-style: italic; font-size: 20px;
+    line-height: 1.15; color: var(--ink);
+  }
+  .breed-pick-label {
+    font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    margin: 8px 0 14px;
+  }
+  .breed-pick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding: 2px;
+  }
+  .breed-pick-card {
+    cursor: pointer;
+    background: var(--paper);
+    border: 1px solid var(--ink-2);
+    transition: border-color 0.15s ease, transform 0.12s ease;
+    display: flex; flex-direction: column;
+    text-align: left;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+  }
+  .breed-pick-card:hover { border-color: var(--rust); transform: translateY(-1px); }
+  .breed-pick-card img {
+    width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;
+    background: var(--paper-2);
+  }
+  .breed-pick-card .bpc-empty {
+    width: 100%; aspect-ratio: 1/1;
+    background: var(--paper-2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Didot', serif; font-style: italic; font-size: 14px;
+    color: var(--muted);
+  }
+  .breed-pick-card .bpc-title {
+    font-family: 'Didot', serif; font-style: italic; font-size: 14px;
+    line-height: 1.2; color: var(--ink);
+    padding: 8px 10px 9px;
+  }
+  .breed-pick-card.is-picked { border-color: var(--rust); box-shadow: inset 0 0 0 2px var(--rust); }
+  .breed-empty {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-style: italic; color: var(--muted); font-size: 15px;
+    padding: 24px 0;
+  }
+  .breed-submit-btn {
+    background: var(--rust); color: var(--paper); border: 1px solid var(--rust);
+    padding: 11px 20px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .breed-submit-btn:hover { background: var(--rust-soft); border-color: var(--rust-soft); }
+  .breed-submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .breed-cancel-btn {
+    background: transparent; color: var(--ink-2); border: 1px solid var(--ink-2);
+    padding: 11px 18px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .breed-cancel-btn:hover { color: var(--ink); border-color: var(--ink); }
+  .breed-status {
+    font-family: 'Iowan Old Style', Georgia, serif; font-style: italic;
+    font-size: 14px; color: var(--rust);
+    margin-top: 12px; min-height: 18px;
+  }
+  @media (max-width: 720px) {
+    .breed-pick-grid { grid-template-columns: repeat(2, 1fr); }
+  }
 
   /* Recipient prompt on shared dream pages */
   .recipient-prompt {
@@ -3543,6 +3658,36 @@
     </div>
   </div>
 
+  <!-- =================== BREED MODAL (experimental — solo-breeding picker) =================== -->
+  <div class="modal-backdrop" id="breed-modal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="breed-title">
+      <button class="modal-close" aria-label="Close" data-action="close-breed">×</button>
+      <h2 id="breed-title">Breed dreams.</h2>
+      <div class="modal-sub">Combine two of your own dreams into a third</div>
+      <div class="modal-help">A new "child" dream is generated from both — it carries motifs from each parent and gets its own painting. You can see its heritage on the new dream's page.</div>
+
+      <div class="breed-parent-a" id="breed-parent-a-row">
+        <div class="bp-empty"></div>
+        <div>
+          <div class="bp-label">Parent A</div>
+          <div class="bp-title" id="breed-parent-a-title">—</div>
+        </div>
+      </div>
+
+      <div class="breed-pick-label">Pick the second parent</div>
+      <div class="breed-pick-grid" id="breed-pick-grid">
+        <div class="breed-empty">Loading your other dreams…</div>
+      </div>
+
+      <div class="breed-status" id="breed-status" aria-live="polite"></div>
+
+      <div class="modal-actions">
+        <button class="breed-cancel-btn" type="button" data-action="close-breed">Cancel</button>
+        <button class="breed-submit-btn" type="button" id="breed-submit" disabled>Breed these two ↪</button>
+      </div>
+    </div>
+  </div>
+
   <!-- =================== TOAST =================== -->
   <div class="toast" id="toast">Saved</div>
 
@@ -4155,6 +4300,13 @@
     else prompt.classList.remove('shown');
   }
 
+  // Breeding experiment kill switch. Mirror of the server-side
+  // BREEDING_ENABLED const in /api/dream/breed.js — flip both to false to
+  // fully retire the feature (UI vanishes, API returns 410). See
+  // dreams_breeding_experiment.md in user memory for the full reversion
+  // playbook.
+  const BREEDING_ENABLED = true;
+
   // Library has two tabs: "My dreams" (default — what you've recorded) and
   // "Favorites" (dreams from anyone you've hearted). The user toggles between
   // them with the tab buttons rendered in the library-section markup.
@@ -4207,6 +4359,9 @@
         return;
       }
       grid.className = 'library-grid';
+      // Cache the My-dreams list at module scope so the breed modal can
+      // populate its picker grid without re-fetching.
+      if (currentLibraryTab === 'mine') window.__myDreamsCache = dreams;
       grid.innerHTML = dreams.map((d) => {
         const fb = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
         const title = (d.title && d.title.trim()) || (fb ? fb + '…' : 'Untitled');
@@ -4216,18 +4371,176 @@
         const by = currentLibraryTab === 'favorites' && d.owner_handle
           ? ` · by @${escapeHtmlAuth(d.owner_handle)}`
           : '';
+        // Breed button — only on My dreams tab, only when feature is on,
+        // and only when the user has at least 2 of their own dreams (a
+        // single dream has no second parent to fuse with).
+        const showBreed = BREEDING_ENABLED && currentLibraryTab === 'mine' && dreams.length >= 2;
+        const breedBtn = showBreed
+          ? `<button type="button" class="lc-breed-btn" data-breed-id="${escapeHtmlAuth(d.id)}" data-breed-title="${escapeHtmlAuth(title)}" data-breed-img="${escapeHtmlAuth(d.image_url || '')}">Breed ↪</button>`
+          : '';
         return `<a class="library-card" href="/d/${escapeHtmlAuth(d.id)}">
           ${img}
           <div class="lc-body">
             <div class="lc-title">${escapeHtmlAuth(title)}</div>
             <div class="lc-meta">${escapeHtmlAuth(created)} · ${d.morph_count || 0} morphs${by}</div>
+            ${breedBtn}
           </div>
         </a>`;
       }).join('');
+      wireLibraryBreedButtons(grid);
     } catch (err) {
       grid.innerHTML = `<div class="library-empty">${escapeHtmlAuth(err.message || 'Error')}</div>`;
     }
   }
+
+  // ============ BREEDING (experimental) ============
+  // The picker modal lives in the static HTML; we just populate + wire it.
+  // State during a pick session:
+  let breedParentA = null;     // { id, title, image_url }
+  let breedParentB = null;     // populated when the user clicks a card
+
+  function wireLibraryBreedButtons(grid) {
+    // Idempotent — re-binding on each tab switch is fine because the
+    // delegated handler only acts on the live DOM. We tag the grid so we
+    // don't bind twice.
+    if (grid.dataset.breedBound === '1') return;
+    grid.dataset.breedBound = '1';
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.lc-breed-btn');
+      if (!btn) return;
+      e.preventDefault(); // don't navigate the wrapping <a>
+      e.stopPropagation();
+      openBreedModal({
+        id: btn.dataset.breedId,
+        title: btn.dataset.breedTitle,
+        image_url: btn.dataset.breedImg,
+      });
+    });
+  }
+
+  function openBreedModal(parentA) {
+    if (!BREEDING_ENABLED) return;
+    const modal = document.getElementById('breed-modal');
+    if (!modal) return;
+    breedParentA = parentA;
+    breedParentB = null;
+
+    // Header row: parent A
+    const row = document.getElementById('breed-parent-a-row');
+    if (row) {
+      const imgHtml = parentA.image_url
+        ? `<img src="${escapeHtmlAuth(parentA.image_url)}" alt="">`
+        : `<div class="bp-empty"></div>`;
+      row.innerHTML = `${imgHtml}
+        <div>
+          <div class="bp-label">Parent A</div>
+          <div class="bp-title" id="breed-parent-a-title">${escapeHtmlAuth(parentA.title || 'Untitled')}</div>
+        </div>`;
+    }
+
+    // Picker grid: the user's other dreams (everything except parent A)
+    const pickGrid = document.getElementById('breed-pick-grid');
+    if (pickGrid) {
+      const others = (window.__myDreamsCache || []).filter((d) => d.id !== parentA.id);
+      if (others.length === 0) {
+        pickGrid.innerHTML = `<div class="breed-empty">You need at least one other dream to breed. Record another first.</div>`;
+      } else {
+        pickGrid.innerHTML = others.map((d) => {
+          const fb = (d.text_preview || '').trim().split(/\s+/).slice(0, 5).join(' ');
+          const title = (d.title && d.title.trim()) || (fb ? fb + '…' : 'Untitled');
+          const imgHtml = d.image_url
+            ? `<img src="${escapeHtmlAuth(d.image_url)}" alt="" loading="lazy">`
+            : `<div class="bpc-empty">no image</div>`;
+          return `<button type="button" class="breed-pick-card" data-breed-pick-id="${escapeHtmlAuth(d.id)}" data-breed-pick-title="${escapeHtmlAuth(title)}" data-breed-pick-img="${escapeHtmlAuth(d.image_url || '')}">
+            ${imgHtml}
+            <div class="bpc-title">${escapeHtmlAuth(title)}</div>
+          </button>`;
+        }).join('');
+      }
+      // Wire pick clicks
+      pickGrid.onclick = (e) => {
+        const card = e.target.closest('.breed-pick-card');
+        if (!card) return;
+        // Toggle pick — click same card again to deselect
+        const same = breedParentB && breedParentB.id === card.dataset.breedPickId;
+        pickGrid.querySelectorAll('.breed-pick-card.is-picked').forEach((c) => c.classList.remove('is-picked'));
+        if (same) {
+          breedParentB = null;
+        } else {
+          breedParentB = {
+            id: card.dataset.breedPickId,
+            title: card.dataset.breedPickTitle,
+            image_url: card.dataset.breedPickImg,
+          };
+          card.classList.add('is-picked');
+        }
+        const submit = document.getElementById('breed-submit');
+        if (submit) submit.disabled = !breedParentB;
+      };
+    }
+
+    // Reset status + submit state
+    const status = document.getElementById('breed-status');
+    if (status) status.textContent = '';
+    const submit = document.getElementById('breed-submit');
+    if (submit) { submit.disabled = true; submit.textContent = 'Breed these two ↪'; }
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeBreedModal() {
+    const modal = document.getElementById('breed-modal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    breedParentA = null;
+    breedParentB = null;
+  }
+
+  async function submitBreed() {
+    if (!breedParentA || !breedParentB) return;
+    const submit = document.getElementById('breed-submit');
+    const status = document.getElementById('breed-status');
+    if (submit) { submit.disabled = true; submit.textContent = 'Fusing… 10–20 sec'; }
+    if (status) status.textContent = 'Combining motifs from both dreams…';
+    try {
+      const r = await fetch('/api/dream/breed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parent_a_id: breedParentA.id, parent_b_id: breedParentB.id }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        const msg = data.message || data.error || `Error ${r.status}`;
+        if (status) status.textContent = msg;
+        if (submit) { submit.disabled = false; submit.textContent = 'Try again ↪'; }
+        return;
+      }
+      if (status) status.textContent = 'Child dream created — opening it now…';
+      // Navigate to the new dream — the dream page will auto-fire image
+      // generation just like a fresh recording.
+      window.location.href = data.permalink || ('/d/' + data.id);
+    } catch (err) {
+      if (status) status.textContent = err.message || 'Could not breed those dreams.';
+      if (submit) { submit.disabled = false; submit.textContent = 'Try again ↪'; }
+    }
+  }
+
+  // Wire close + submit buttons (modal lives in static HTML)
+  document.addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]')?.dataset.action;
+    if (action === 'close-breed') closeBreedModal();
+    if (e.target.id === 'breed-submit') submitBreed();
+    // Backdrop click closes
+    if (e.target.id === 'breed-modal') closeBreedModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const m = document.getElementById('breed-modal');
+      if (m && m.classList.contains('open')) closeBreedModal();
+    }
+  });
 
   (function consumeAuthQuery() {
     const m = window.location.search.match(/[?&]auth=(\w+)/);
