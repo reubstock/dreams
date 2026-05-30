@@ -96,65 +96,58 @@
   }
   body.dream-page .pane-done .capture-textarea { opacity: 0.85; }
 
-  /* ============ HERITAGE STRIPE (on /d/:id when dream.parents is present) ============
-     Reveals the two parents of a bred dream. Only renders when the dream
-     has a parents array — gracefully invisible for regular dreams. Lives
-     above the title so it reads as a chapter marker. */
-  .dream-heritage {
-    display: flex; align-items: center; gap: 14px;
-    margin-bottom: 16px;
-    padding: 10px 14px;
-    background: var(--paper-2);
-    border-left: 3px solid var(--rust);
+  /* ============ HERITAGE (on /d/:id when dream.parents is present) ============
+     Inlined into the dream-title meta row, replacing the "Your dream"
+     kicker with "A product of [thumb] Parent A × [thumb] Parent B".
+     Compact, clickable, no separate stripe block. */
+  .dream-heritage-inline {
+    display: inline-flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--rust);
   }
-  .dream-heritage-label {
-    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
-    letter-spacing: 0.18em; text-transform: uppercase; color: var(--rust);
-    flex: 0 0 auto;
-  }
-  .dream-heritage-parents {
-    display: flex; align-items: center; gap: 12px;
-    flex: 1 1 auto; flex-wrap: wrap;
-  }
-  .dream-heritage-parent {
-    display: flex; align-items: center; gap: 10px;
+  .dream-heritage-inline .dh-label { color: var(--rust); }
+  .dream-heritage-inline .dh-parent {
+    display: inline-flex; align-items: center; gap: 6px;
     text-decoration: none;
-    color: var(--ink);
-    padding: 4px 8px 4px 4px;
+    padding: 2px 6px 2px 2px;
     border: 1px solid transparent;
     transition: border-color 0.15s ease, background 0.15s ease;
+    text-transform: none;
+    letter-spacing: 0;
   }
-  .dream-heritage-parent:hover {
+  .dream-heritage-inline .dh-parent:hover {
     border-color: var(--rust);
-    background: var(--paper);
+    background: var(--paper-2);
   }
-  .dream-heritage-parent img,
-  .dream-heritage-parent .dh-empty {
-    width: 40px; height: 40px; flex: 0 0 auto;
+  .dream-heritage-inline .dh-parent img,
+  .dream-heritage-inline .dh-parent .dh-empty {
+    width: 22px; height: 22px; flex: 0 0 auto;
     object-fit: cover;
-    background: var(--paper);
+    background: var(--paper-2);
     border: 1px solid var(--ink-2);
+    display: block;
   }
-  .dream-heritage-parent .dh-empty {
+  .dream-heritage-inline .dh-parent .dh-empty {
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Didot', serif; font-style: italic; font-size: 12px;
+    font-family: 'Didot', serif; font-style: italic; font-size: 11px;
     color: var(--muted);
   }
-  .dream-heritage-parent-title {
+  .dream-heritage-inline .dh-parent-title {
     font-family: 'Didot', 'Bodoni 72', serif;
-    font-style: italic; font-size: 17px; line-height: 1.15;
+    font-style: italic; font-size: 15px; line-height: 1.15;
     color: var(--ink);
-    max-width: 200px;
+    max-width: 180px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .dream-heritage-x {
-    font-family: 'Didot', serif; font-style: italic; font-size: 22px;
+  .dream-heritage-inline .dh-x {
+    font-family: 'Didot', serif; font-style: italic; font-size: 16px;
     color: var(--rust);
-    flex: 0 0 auto;
+    text-transform: none; letter-spacing: 0;
   }
   @media (max-width: 720px) {
-    .dream-heritage { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; }
-    .dream-heritage-parent-title { max-width: 180px; font-size: 15px; }
+    .dream-heritage-inline .dh-parent-title { max-width: 130px; font-size: 14px; }
   }
 
   /* ============ HERO DREAM IMAGE (on /d/:id only) ============ */
@@ -1094,21 +1087,28 @@
     font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
     letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
   }
-  /* Breed action on each library card (mine tab only, experimental) — a
-     small in-card affordance that opens the picker modal. Lives inside
-     the wrapping <a> so we stopPropagation on click. */
+  /* Breed action on each library card (My-dreams tab only, experimental) —
+     overlaid on the image top-right (sibling to the heart pattern on /all)
+     so it's the first thing the user sees on each card. Lives inside the
+     wrapping <a>; click handler stops propagation. */
   .library-card .lc-breed-btn {
-    margin-top: 12px;
-    background: transparent;
-    border: 1px solid var(--rust);
-    color: var(--rust);
+    position: absolute;
+    top: 10px; right: 10px;
+    z-index: 2;
+    background: rgba(13, 10, 4, 0.78);
+    color: var(--paper);
+    border: 1px solid rgba(241, 234, 215, 0.35);
     padding: 7px 12px 6px;
-    font-family: ui-monospace, Menlo, monospace; font-size: 9px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
     letter-spacing: 0.18em; text-transform: uppercase;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    backdrop-filter: blur(2px);
   }
-  .library-card .lc-breed-btn:hover { background: var(--rust); color: var(--paper); }
+  .library-card .lc-breed-btn:hover {
+    background: var(--rust);
+    border-color: var(--rust);
+  }
   .library-card .lc-breed-btn:disabled { opacity: 0.55; cursor: wait; }
 
   /* ============ BREED MODAL (experimental) ============ */
@@ -3192,8 +3192,8 @@
       <!-- DONE -->
       <div class="capture-pane pane-done">
         <div>
-          <div class="capture-title">Your dream</div>
-          <div class="capture-sub">Transcribed by Whisper · audio saved on this device</div>
+          <div class="capture-title" id="pane-done-title">Your dream</div>
+          <div class="capture-sub" id="pane-done-sub">Transcribed by Whisper · audio saved on this device</div>
           <textarea class="capture-textarea" id="capture-textarea" placeholder="Your transcribed dream appears here…"></textarea>
 
           <!-- Hero step: put your face in the painting. This is the standout
@@ -4434,17 +4434,19 @@
           : '';
         // Breed button — only on My dreams tab, only when feature is on,
         // and only when the user has at least 2 of their own dreams (a
-        // single dream has no second parent to fuse with).
+        // single dream has no second parent to fuse with). Positioned as
+        // an overlay on the image (top-right) so it's the first thing the
+        // user sees on each card.
         const showBreed = BREEDING_ENABLED && currentLibraryTab === 'mine' && dreams.length >= 2;
         const breedBtn = showBreed
           ? `<button type="button" class="lc-breed-btn" data-breed-id="${escapeHtmlAuth(d.id)}" data-breed-title="${escapeHtmlAuth(title)}" data-breed-img="${escapeHtmlAuth(d.image_url || '')}">Breed ↪</button>`
           : '';
         return `<a class="library-card" href="/d/${escapeHtmlAuth(d.id)}">
           ${img}
+          ${breedBtn}
           <div class="lc-body">
             <div class="lc-title">${escapeHtmlAuth(title)}</div>
             <div class="lc-meta">${escapeHtmlAuth(created)} · ${d.morph_count || 0} morphs${by}</div>
-            ${breedBtn}
           </div>
         </a>`;
       }).join('');
@@ -5430,17 +5432,17 @@
       });
     })();
 
-    // ============ Heritage stripe (bred dreams) ============
-    // Renders "A child of [Parent A] × [Parent B]" above the title when the
-    // dream record has a parents array. Idempotent — multiple calls replace
-    // the previous stripe. Gracefully no-ops for regular (non-bred) dreams.
-    function renderHeritageStripe(dream) {
-      const section = document.getElementById('dream-title-section');
-      if (!section) return;
-      const existing = section.querySelector('.dream-heritage');
+    // ============ Heritage (bred dreams) ============
+    // Replaces the kicker text "Your dream" with an inline lineage callout:
+    // "A product of [thumb] Parent A × [thumb] Parent B". For non-bred
+    // dreams, restores "Your dream". Idempotent.
+    function renderHeritage(dream) {
+      const kicker = document.querySelector('.dream-title-kicker');
+      if (!kicker) return;
       const hasParents = dream && Array.isArray(dream.parents) && dream.parents.length === 2;
       if (!hasParents) {
-        if (existing) existing.remove();
+        // Restore default kicker (in case a prior render mutated it)
+        kicker.textContent = 'Your dream';
         return;
       }
       const [pa, pb] = dream.parents;
@@ -5449,27 +5451,19 @@
         const href = p && p.id ? '/d/' + encodeURIComponent(p.id) : '#';
         const img = p && p.image_url
           ? `<img src="${escapeHtmlAuth(p.image_url)}" alt="" loading="lazy">`
-          : `<div class="dh-empty">∅</div>`;
-        return `<a class="dream-heritage-parent" href="${escapeHtmlAuth(href)}" title="${escapeHtmlAuth(title)}">
+          : `<span class="dh-empty">∅</span>`;
+        return `<a class="dh-parent" href="${escapeHtmlAuth(href)}" title="${escapeHtmlAuth(title)}">
           ${img}
-          <span class="dream-heritage-parent-title">${escapeHtmlAuth(title)}</span>
+          <span class="dh-parent-title">${escapeHtmlAuth(title)}</span>
         </a>`;
       };
-      const stripeHtml = `<div class="dream-heritage" aria-label="Heritage">
-        <div class="dream-heritage-label">A child of</div>
-        <div class="dream-heritage-parents">
-          ${parentHtml(pa)}
-          <span class="dream-heritage-x" aria-hidden="true">×</span>
-          ${parentHtml(pb)}
-        </div>
-      </div>`;
-      if (existing) {
-        existing.outerHTML = stripeHtml;
-      } else {
-        // Insert just inside the section, before the existing title-meta row,
-        // so it reads as a chapter marker above the title.
-        section.insertAdjacentHTML('afterbegin', stripeHtml);
-      }
+      kicker.classList.add('dream-heritage-inline');
+      kicker.innerHTML = `
+        <span class="dh-label">A product of</span>
+        ${parentHtml(pa)}
+        <span class="dh-x" aria-hidden="true">×</span>
+        ${parentHtml(pb)}
+      `;
     }
 
     // ============ Permalink loader — when URL is /d/:id ============
@@ -5521,8 +5515,19 @@
         const discardBtn = document.querySelector('[data-action="discard-recording"]');
         if (discardBtn) discardBtn.style.display = 'none';
         showDreamTitle(dream);
-        renderHeritageStripe(dream);
+        renderHeritage(dream);
         renderDreamOwnerControls(dream);
+        // For bred dreams, the pane-done sub-line "Transcribed by Whisper ·
+        // audio saved on this device" is false — there's no transcription
+        // and no audio. Swap to the truth.
+        try {
+          const subEl = document.getElementById('pane-done-sub');
+          if (subEl) {
+            subEl.textContent = dream.kind === 'bred'
+              ? 'Bred from two of your dreams'
+              : 'Transcribed by Whisper · audio saved on this device';
+          }
+        } catch (_) {}
         if (dream.analysis) {
           renderAnalysis(dream.text, dream.analysis);
           appendPermalinkPill(dream.id, '/d/' + dream.id);
