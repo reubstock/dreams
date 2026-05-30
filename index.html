@@ -496,6 +496,91 @@
   }
   .dp-selfie-remove:hover { color: var(--rust-soft); }
 
+  /* ============ FACE STEP (prominent CTA: put your face in the painting) ============
+     The standout feature shouldn't be a tiny link buried in a row of
+     demographic selects. The face-step is a real button-shaped row inside
+     the dark capture pane: 96px circular thumb on the left, big inviting
+     headline on the right. Empty state shows a + sign + "Put your face in
+     the painting"; filled state shows the photo + "Tap to change". */
+  .face-step {
+    display: flex; align-items: center; gap: 12px;
+    margin: 18px 0 12px;
+  }
+  .face-step-action {
+    appearance: none;
+    flex: 1;
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(184, 66, 26, 0.18), rgba(184, 66, 26, 0.06) 45%, rgba(241, 234, 215, 0.04));
+    border: 1px solid rgba(216, 122, 62, 0.45);
+    color: var(--paper);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.2s, transform 0.08s;
+  }
+  .face-step-action:hover {
+    border-color: rgba(216, 122, 62, 0.85);
+    background: linear-gradient(135deg, rgba(184, 66, 26, 0.26), rgba(184, 66, 26, 0.10) 45%, rgba(241, 234, 215, 0.06));
+  }
+  .face-step-action:active { transform: translateY(1px); }
+  .face-step-thumb {
+    position: relative;
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: rgba(241, 234, 215, 0.10);
+    border: 2px dashed rgba(241, 234, 215, 0.5);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .face-step-thumb img {
+    width: 100%; height: 100%; object-fit: cover;
+    border-radius: 50%;
+    display: block;
+  }
+  .face-step-thumb img[hidden] { display: none; }
+  .face-step-plus {
+    font-family: 'Didot', serif;
+    font-style: italic;
+    font-size: 38px; line-height: 1;
+    color: rgba(241, 234, 215, 0.7);
+  }
+  .face-step.has-photo .face-step-thumb {
+    border-style: solid;
+    border-color: var(--rust-soft);
+  }
+  .face-step.has-photo .face-step-plus { display: none; }
+  .face-step-text { flex: 1; min-width: 0; }
+  .face-step-title {
+    display: block;
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-style: italic;
+    font-size: 22px; line-height: 1.15;
+    color: var(--paper);
+    margin-bottom: 4px;
+  }
+  .face-step-sub {
+    display: block;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10.5px; line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: rgba(241, 234, 215, 0.7);
+  }
+  .face-step-remove {
+    appearance: none; background: none; border: none; padding: 8px 10px;
+    color: rgba(241, 234, 215, 0.55);
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .face-step-remove:hover { color: var(--rust-soft); }
+  @media (max-width: 720px) {
+    .face-step-action { padding: 12px 12px; gap: 14px; }
+    .face-step-thumb { width: 60px; height: 60px; border-width: 1.5px; }
+    .face-step-title { font-size: 18px; }
+    .face-step-sub { font-size: 10px; }
+  }
+
   /* ============ LLM ANALYSIS RESULT (inside capture banner) ============ */
   .capture-result-stats.ar-mode { display: block; }
   .ar-pattern { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(241, 234, 215, 0.18); }
@@ -785,6 +870,52 @@
   }
   .signin-success.shown { display: block; }
   .signin-success b { color: var(--rust); }
+
+  /* Code-entry stage of the sign-in modal */
+  .signin-code-form { margin-top: 0; }
+  .signin-code-prompt {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 15px; color: var(--ink-2); line-height: 1.55;
+    margin-bottom: 16px;
+  }
+  .signin-code-prompt b { color: var(--ink); }
+  .signin-code-resend {
+    display: inline-block;
+    background: none; border: none; padding: 0; margin-left: 6px;
+    font: inherit; font-size: 13px;
+    color: var(--rust);
+    border-bottom: 1px dotted var(--rust);
+    cursor: pointer;
+  }
+  #signin-code-input {
+    width: 100%;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 28px; letter-spacing: 0.4em; text-align: center;
+    padding: 14px 12px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    -webkit-text-security: none;
+  }
+  #signin-code-input::placeholder {
+    color: rgba(13, 10, 4, 0.25); letter-spacing: 0.4em;
+  }
+  #signin-code-input:focus { border-color: var(--rust); background: var(--paper-2); }
+  .signin-code-hint {
+    margin-top: 16px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px; letter-spacing: 0.04em;
+    color: var(--muted); line-height: 1.5;
+  }
+  .signin-code-error {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: rgba(196, 62, 26, 0.10);
+    border: 1px solid rgba(196, 62, 26, 0.35);
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 14px; color: #8c2a14;
+  }
 
   /* Library view */
   .library-section { display: none; padding: 32px 0; }
@@ -2888,6 +3019,26 @@
           <div class="capture-title">Your dream</div>
           <div class="capture-sub">Transcribed by Whisper · audio saved on this device</div>
           <textarea class="capture-textarea" id="capture-textarea" placeholder="Your transcribed dream appears here…"></textarea>
+
+          <!-- Hero step: put your face in the painting. This is the standout
+               feature; no email required, just upload. -->
+          <div class="face-step" id="face-step">
+            <button type="button" class="face-step-action" data-action="upload-selfie" aria-label="Add your face to the painting">
+              <span class="face-step-thumb">
+                <img id="selfie-thumb" alt="" hidden>
+                <span class="face-step-plus" aria-hidden="true">+</span>
+              </span>
+              <span class="face-step-text">
+                <span class="face-step-title"><span id="face-step-title-text">Put your face in the painting</span></span>
+                <span class="face-step-sub" id="face-step-sub">Tap to add a clear photo of your face. We'll swap it into the AI illustration so the dreamer in the scene actually looks like you. Stays on this device until you sign in.</span>
+              </span>
+            </button>
+            <button class="face-step-remove" id="selfie-remove-btn" type="button" data-action="remove-selfie" hidden>Remove</button>
+            <input type="file" id="selfie-file-input" accept="image/jpeg,image/png,image/webp" hidden>
+            <!-- Compat: hidden anchor used by older code paths -->
+            <button id="selfie-upload-btn" type="button" data-action="upload-selfie" hidden></button>
+          </div>
+
           <div class="dreamer-profile">
             <span class="dp-label">I am</span>
             <select class="dp-input" id="dreamer-gender" aria-label="Dreamer gender">
@@ -2929,13 +3080,7 @@
               <option value="rimless">rimless</option>
               <option value="other">other</option>
             </select>
-            <span class="dp-sep">·</span>
-            <span class="dp-label">your face</span>
-            <button class="dp-input dp-selfie-btn" id="selfie-upload-btn" type="button" data-action="upload-selfie">+ add reference photo</button>
-            <img class="dp-selfie-thumb" id="selfie-thumb" alt="" hidden>
-            <button class="dp-input dp-selfie-remove" id="selfie-remove-btn" type="button" data-action="remove-selfie" hidden>remove</button>
-            <input type="file" id="selfie-file-input" accept="image/jpeg,image/png,image/webp" hidden>
-            <span class="dp-hint">demographic info saved on this device · reference photo (for likeness in image) requires sign-in</span>
+            <span class="dp-hint">Demographic info stays on this device.</span>
           </div>
           <div class="capture-actions">
             <button class="btn" data-action="play-recording">▶ Play recording</button>
@@ -3323,23 +3468,42 @@
     <div class="modal" role="dialog" aria-labelledby="signin-title">
       <button class="modal-close" aria-label="Close" data-action="close-signin">×</button>
       <h2 id="signin-title">Sign in.</h2>
-      <div class="modal-sub">No password · we'll email you a link</div>
+      <div class="modal-sub">No password · we'll send a code</div>
       <div class="modal-help">
-        Enter your email and we'll send you a one-click sign-in link.
-        Your dreams will be tied to your email so you can find them on any
-        device. New here? Same flow — entering your email creates your account.
+        Enter your email. We'll send a 6-digit code you can type in here
+        (read it off your phone if you're on a laptop). Or click the
+        sign-in link in the email if you're on the same device.
       </div>
       <form id="signin-form" novalidate>
         <input type="email" id="signin-email" placeholder="you@example.com" autocomplete="email" required>
         <div class="modal-actions">
           <button class="btn" type="button" data-action="close-signin">Cancel</button>
-          <button class="btn primary" type="submit" id="signin-submit">Send link</button>
+          <button class="btn primary" type="submit" id="signin-submit">Send code</button>
         </div>
       </form>
+      <!-- After the email is sent: prompt for the 6-digit code (cross-device path) -->
+      <form id="signin-code-form" class="signin-code-form" novalidate hidden>
+        <div class="signin-code-prompt">
+          We sent a code to <b id="signin-code-email"></b>.
+          <button type="button" class="signin-code-resend" data-action="signin-resend">use a different email</button>
+        </div>
+        <input type="text" id="signin-code-input"
+               inputmode="numeric" pattern="[0-9]*"
+               autocomplete="one-time-code"
+               maxlength="6"
+               placeholder="000000"
+               aria-label="6-digit code">
+        <div class="modal-actions">
+          <button class="btn" type="button" data-action="close-signin">Cancel</button>
+          <button class="btn primary" type="submit" id="signin-code-submit">Sign in</button>
+        </div>
+        <div class="signin-code-hint">
+          Or just click the sign-in link in the email if you're on the same device that received it.
+        </div>
+        <div class="signin-code-error" id="signin-code-error" hidden></div>
+      </form>
       <div class="signin-success" id="signin-success">
-        Check your inbox at <b id="signin-success-email"></b>. The link expires in 30 minutes.
-        <br><br>
-        <small style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.04em; color: var(--muted);">If you don't see it, check spam. We send from onboarding@resend.dev.</small>
+        Signed in. ✓
       </div>
     </div>
   </div>
@@ -3580,6 +3744,21 @@
     return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
+  // Stable per-device identifier in localStorage. Used to key anonymous
+  // dreams + the device-keyed selfie so face-swap can find your photo
+  // before you've signed in.
+  function getDeviceId() {
+    let id = localStorage.getItem('dreams:device_id');
+    if (!id) {
+      id = (window.crypto && window.crypto.randomUUID)
+        ? window.crypto.randomUUID()
+        : 'dev-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem('dreams:device_id', id);
+    }
+    return id;
+  }
+  window.getDeviceId = getDeviceId;
+
   async function refreshAuth() {
     try {
       const r = await fetch('/api/auth/me');
@@ -3591,6 +3770,20 @@
       authState.displayName = data.display_name || null;
       authState.unreadCount = Number(data.unread_count || 0);
       authState.selfieUrl = data.selfie_url || null;
+      // If not signed in but we have a device selfie, surface that so the
+      // thumbnail still renders and face-swap works anonymously.
+      if (!authState.signedIn && !authState.selfieUrl) {
+        try {
+          const did = (typeof getDeviceId === 'function') ? getDeviceId() : null;
+          if (did) {
+            const dr = await fetch('/api/device/selfie?device_id=' + encodeURIComponent(did));
+            if (dr.ok) {
+              const dd = await dr.json();
+              if (dd?.selfie_url) authState.selfieUrl = dd.selfie_url;
+            }
+          }
+        } catch (_) {}
+      }
       renderAuthSlot();
       renderSelfieState();
       maybeShowRecipientPrompt();
@@ -3606,19 +3799,25 @@
   window.refreshAuth = refreshAuth;
 
   function renderSelfieState() {
-    const uploadBtn = document.getElementById('selfie-upload-btn');
+    const faceStep = document.getElementById('face-step');
     const thumb = document.getElementById('selfie-thumb');
     const removeBtn = document.getElementById('selfie-remove-btn');
-    if (!uploadBtn || !thumb || !removeBtn) return;
+    const titleEl = document.getElementById('face-step-title-text');
+    const subEl = document.getElementById('face-step-sub');
+    if (!faceStep || !thumb || !removeBtn) return;
     if (authState.selfieUrl) {
-      uploadBtn.hidden = true;
+      faceStep.classList.add('has-photo');
       thumb.src = authState.selfieUrl;
       thumb.hidden = false;
       removeBtn.hidden = false;
+      if (titleEl) titleEl.textContent = 'Your face is in.';
+      if (subEl) subEl.textContent = 'Tap to swap in a different photo. The face-swap runs on every new dream.';
     } else {
-      uploadBtn.hidden = false;
+      faceStep.classList.remove('has-photo');
       thumb.hidden = true;
       removeBtn.hidden = true;
+      if (titleEl) titleEl.textContent = 'Put your face in the painting';
+      if (subEl) subEl.textContent = 'Tap to add a clear photo of your face. We swap it into the AI illustration so the dreamer in the scene looks like you. No sign-in needed — stays on this device.';
     }
   }
 
@@ -3628,9 +3827,8 @@
     if (already === '1') return true;
     const ok = confirm(
       'Reference photo — privacy notice:\n\n' +
-      '• Your photo will be sent to OpenAI on every dream-image generation\n' +
-      '• OpenAI states they do NOT use API data to train models\n' +
-      '• The photo is stored in Vercel Blob at an unguessable but technically public URL\n' +
+      '• Your photo gets your likeness into the dream painting via face-swap\n' +
+      '• Stored on Vercel Blob at an unguessable but technically public URL\n' +
       '• You can remove it anytime from this same row\n\n' +
       'Continue?'
     );
@@ -3639,11 +3837,9 @@
   }
 
   async function uploadSelfieFile(file) {
-    if (!authState.signedIn) {
-      showToast('Sign in first to save a reference photo');
-      openSignin();
-      return;
-    }
+    // No more sign-in gate. Anonymous device-keyed upload is the default
+    // path for first-timers; if they sign in later, claimDeviceSelfieIfAny()
+    // promotes the device selfie onto their user record.
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
       showToast('Photo too large (max 10 MB)');
@@ -3655,10 +3851,13 @@
     reader.onload = async () => {
       const b64 = String(reader.result || '').split(',')[1];
       try {
+        const body = { selfie_b64: b64, content_type: file.type };
+        // Anonymous uploads ride on the device id so /api/image can find them
+        if (!authState.signedIn) body.device_id = getDeviceId();
         const r = await fetch('/api/profile/selfie', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ selfie_b64: b64, content_type: file.type }),
+          body: JSON.stringify(body),
         });
         if (!r.ok) {
           const data = await r.json().catch(() => ({}));
@@ -3668,7 +3867,7 @@
         const data = await r.json();
         authState.selfieUrl = data.selfie_url;
         renderSelfieState();
-        showToast('Reference photo saved · new dreams will use it');
+        showToast(authState.signedIn ? 'Reference photo saved' : 'Photo saved · your face will appear in the painting');
       } catch (err) {
         showToast('Upload error: ' + err.message);
       }
@@ -3680,7 +3879,8 @@
   async function removeSelfie() {
     if (!confirm('Remove your reference photo? Future dream images will be generated without it.')) return;
     try {
-      const r = await fetch('/api/profile/selfie', { method: 'DELETE' });
+      const params = !authState.signedIn ? '?device_id=' + encodeURIComponent(getDeviceId()) : '';
+      const r = await fetch('/api/profile/selfie' + params, { method: 'DELETE' });
       if (!r.ok) {
         const data = await r.json().catch(() => ({}));
         showToast(data.message || 'Remove failed');
@@ -3692,6 +3892,48 @@
     } catch (err) {
       showToast('Error: ' + err.message);
     }
+  }
+
+  // After a fresh sign-in, promote any anonymous device-keyed selfie to
+  // the user's profile so the face survives the sign-in transition.
+  async function claimDeviceSelfieIfAny() {
+    // Quick auth check via /api/auth/me — we may not have refreshed yet
+    let me = null;
+    try { me = await fetch('/api/auth/me').then(r => r.json()); } catch (_) {}
+    if (!me?.signed_in || me.selfie_url) return; // already has a profile selfie
+    // Does the device have a selfie we can promote?
+    let deviceSelfieUrl = null;
+    try {
+      const dr = await fetch('/api/device/selfie?device_id=' + encodeURIComponent(getDeviceId()));
+      if (dr.ok) {
+        const d = await dr.json();
+        deviceSelfieUrl = d?.selfie_url || null;
+      }
+    } catch (_) {}
+    if (!deviceSelfieUrl) return;
+    // Re-fetch the bytes and POST them as a signed-in upload so they get
+    // stored on the user record. (Simpler than a server-side mover.)
+    try {
+      const imgRes = await fetch(deviceSelfieUrl);
+      if (!imgRes.ok) return;
+      const blob = await imgRes.blob();
+      const reader = new FileReader();
+      await new Promise((resolve) => {
+        reader.onload = async () => {
+          const b64 = String(reader.result || '').split(',')[1];
+          try {
+            await fetch('/api/profile/selfie', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ selfie_b64: b64, content_type: blob.type || 'image/jpeg' }),
+            });
+          } catch (_) {}
+          resolve();
+        };
+        reader.onerror = () => resolve();
+        reader.readAsDataURL(blob);
+      });
+    } catch (_) { /* best-effort */ }
   }
 
   (function wireSelfieInputs() {
@@ -3738,12 +3980,26 @@
   const signinEmail = document.getElementById('signin-email');
   const signinSubmit = document.getElementById('signin-submit');
   const signinSuccess = document.getElementById('signin-success');
-  const signinSuccessEmail = document.getElementById('signin-success-email');
+  const signinCodeForm = document.getElementById('signin-code-form');
+  const signinCodeEmail = document.getElementById('signin-code-email');
+  const signinCodeInput = document.getElementById('signin-code-input');
+  const signinCodeSubmit = document.getElementById('signin-code-submit');
+  const signinCodeError = document.getElementById('signin-code-error');
+
+  let pendingSigninEmail = null;
+
+  function setSigninStage(stage /* 'email' | 'code' | 'done' */) {
+    if (!signinForm || !signinCodeForm || !signinSuccess) return;
+    signinForm.style.display = stage === 'email' ? '' : 'none';
+    signinCodeForm.hidden = stage !== 'code';
+    signinSuccess.classList.toggle('shown', stage === 'done');
+  }
 
   function openSignin() {
     if (!signinModal) return;
-    signinSuccess.classList.remove('shown');
-    if (signinForm) signinForm.style.display = '';
+    setSigninStage('email');
+    if (signinCodeInput) signinCodeInput.value = '';
+    if (signinCodeError) { signinCodeError.hidden = true; signinCodeError.textContent = ''; }
     signinModal.classList.add('open');
     signinModal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -3778,12 +4034,76 @@
           showToast(data.message || 'Could not send sign-in email');
           return;
         }
-        signinSuccessEmail.textContent = data.email || email;
-        signinSuccess.classList.add('shown');
-        signinForm.style.display = 'none';
+        pendingSigninEmail = data.email || email;
+        if (signinCodeEmail) signinCodeEmail.textContent = pendingSigninEmail;
+        setSigninStage('code');
+        setTimeout(() => signinCodeInput?.focus(), 80);
       } finally {
         signinSubmit.disabled = false;
         signinSubmit.textContent = orig;
+      }
+    });
+  }
+
+  if (signinCodeForm) {
+    // Strip non-digits as the user types and auto-submit at 6 digits
+    if (signinCodeInput) {
+      signinCodeInput.addEventListener('input', () => {
+        const cleaned = signinCodeInput.value.replace(/\D/g, '').slice(0, 6);
+        if (cleaned !== signinCodeInput.value) signinCodeInput.value = cleaned;
+        if (signinCodeError && !signinCodeError.hidden) {
+          signinCodeError.hidden = true;
+        }
+      });
+    }
+    signinCodeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!pendingSigninEmail) {
+        setSigninStage('email');
+        return;
+      }
+      const code = (signinCodeInput?.value || '').trim();
+      if (!/^\d{6}$/.test(code)) {
+        if (signinCodeError) {
+          signinCodeError.textContent = 'Enter the 6-digit code from your email.';
+          signinCodeError.hidden = false;
+        }
+        return;
+      }
+      const orig = signinCodeSubmit?.textContent || 'Sign in';
+      if (signinCodeSubmit) {
+        signinCodeSubmit.disabled = true;
+        signinCodeSubmit.textContent = 'Signing in…';
+      }
+      try {
+        const r = await fetch('/api/auth/verify-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: pendingSigninEmail, code }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.signed_in) {
+          if (signinCodeError) {
+            signinCodeError.textContent = data.message || 'That code didn’t work. Try again.';
+            signinCodeError.hidden = false;
+          }
+          if (signinCodeInput) { signinCodeInput.select?.(); signinCodeInput.focus?.(); }
+          return;
+        }
+        setSigninStage('done');
+        // Adopt anonymous device-keyed selfie into the user's profile if
+        // one exists, so the face survives sign-in.
+        try { if (typeof claimDeviceSelfieIfAny === 'function') await claimDeviceSelfieIfAny(); } catch (_) {}
+        // Refresh auth state so the masthead, owner controls, heart
+        // states, etc. all reflect the signed-in identity immediately.
+        try { if (typeof window.refreshAuth === 'function') await window.refreshAuth(); } catch (_) {}
+        showToast('Signed in');
+        setTimeout(() => closeSignin(), 800);
+      } finally {
+        if (signinCodeSubmit) {
+          signinCodeSubmit.disabled = false;
+          signinCodeSubmit.textContent = orig;
+        }
       }
     });
   }
@@ -3798,6 +4118,11 @@
     const action = btn.dataset.action;
     if (action === 'open-signin') openSignin();
     else if (action === 'close-signin') closeSignin();
+    else if (action === 'signin-resend') {
+      pendingSigninEmail = null;
+      setSigninStage('email');
+      setTimeout(() => signinEmail?.focus(), 60);
+    }
     else if (action === 'signout') signOut();
     else if (action === 'upload-selfie') {
       const input = document.getElementById('selfie-file-input');

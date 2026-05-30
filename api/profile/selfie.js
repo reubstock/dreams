@@ -1,10 +1,13 @@
-// POST   /api/profile/selfie  { selfie_b64, content_type } → uploads selfie to Blob, stores URL on user record
-// DELETE /api/profile/selfie                              → clears selfie URL
-// Requires sign-in (dreams_session cookie).
+// POST   /api/profile/selfie  { selfie_b64, content_type, device_id? }
+//                            → uploads selfie to Blob; if signed in, stored on
+//                              user record. Else stored on device_selfie:{id}
+//                              so anonymous first-timers get face-swap without
+//                              going through the email sign-in wall.
+// DELETE /api/profile/selfie [?device_id=...]
+//                            → clears the appropriate selfie URL
 //
 // Selfie is used by /api/image.js to maintain visual likeness of the
-// dreamer across generated dream images, via /v1/images/edits with the
-// selfie as the reference image.
+// dreamer across generated dream images, via Replicate face-swap.
 
 import { put, del } from '@vercel/blob';
 
@@ -47,16 +50,28 @@ async function getSignedInEmail(req) {
   return session?.email || null;
 }
 
+function isValidDeviceId(s) {
+  return typeof s === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(s);
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const email = await getSignedInEmail(req);
-  if (!email) return res.status(401).json({ error: 'not_signed_in' });
-
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'kv_not_configured' });
+
+  const email = await getSignedInEmail(req);
+  // Either a signed-in user OR an anonymous device may upload a selfie.
+  // For anonymous uploads we key by device_id so the face follows the
+  // browser (no email gate before the magic face-swap moment).
+  const rawDeviceId = (req.body && req.body.device_id) || (req.query && req.query.device_id);
+  const deviceId = isValidDeviceId(rawDeviceId) ? rawDeviceId : null;
+
+  if (!email && !deviceId) {
+    return res.status(400).json({ error: 'no_identity', message: 'Sign in, or send a device_id to attach the selfie anonymously.' });
+  }
 
   if (req.method === 'POST') {
     if (!BLOB_TOKEN) return res.status(503).json({ error: 'blob_not_configured' });
@@ -78,12 +93,22 @@ export default async function handler(req, res) {
       ? content_type
       : 'image/jpeg';
     const ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : 'jpg';
-    const hash = Buffer.from(email).toString('base64url').slice(0, 12);
-    const rnd = Math.random().toString(36).slice(2, 8);
-    const filename = `profile/${hash}-${rnd}.${ext}`;
 
-    const user = (await kvGet(`user:${email}`)) || { email };
-    const oldUrl = user.selfie_url;
+    // Filename prefix keeps signed-in vs anonymous uploads separated in Blob.
+    let oldUrl = null;
+    let prefix;
+    if (email) {
+      const hash = Buffer.from(email).toString('base64url').slice(0, 12);
+      prefix = `profile/${hash}`;
+      const user = (await kvGet(`user:${email}`)) || { email };
+      oldUrl = user.selfie_url;
+    } else {
+      prefix = `device-selfies/${deviceId.slice(0, 24)}`;
+      const existing = await kvGet(`device_selfie:${deviceId}`);
+      oldUrl = existing?.selfie_url || null;
+    }
+    const rnd = Math.random().toString(36).slice(2, 8);
+    const filename = `${prefix}-${rnd}.${ext}`;
 
     let blob;
     try {
@@ -97,24 +122,48 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'upload_failed', message: err.message });
     }
 
-    user.selfie_url = blob.url;
-    user.selfie_updated_at = new Date().toISOString();
-    await kvSet(`user:${email}`, JSON.stringify(user));
+    if (email) {
+      const user = (await kvGet(`user:${email}`)) || { email };
+      user.selfie_url = blob.url;
+      user.selfie_updated_at = new Date().toISOString();
+      await kvSet(`user:${email}`, JSON.stringify(user));
+    } else {
+      // Anonymous: keyed to device. Used by face-swap until they sign in.
+      await kvSet(`device_selfie:${deviceId}`, JSON.stringify({
+        selfie_url: blob.url,
+        device_id: deviceId,
+        updated_at: new Date().toISOString(),
+      }));
+    }
 
     // Best-effort cleanup of old selfie
     if (oldUrl && oldUrl !== blob.url) {
       try { await del(oldUrl, { token: BLOB_TOKEN }); } catch (_) {}
     }
 
-    return res.status(200).json({ selfie_url: blob.url });
+    return res.status(200).json({ selfie_url: blob.url, scope: email ? 'user' : 'device' });
   }
 
   if (req.method === 'DELETE') {
-    const user = (await kvGet(`user:${email}`)) || { email };
-    const oldUrl = user.selfie_url;
-    user.selfie_url = null;
-    user.selfie_updated_at = new Date().toISOString();
-    await kvSet(`user:${email}`, JSON.stringify(user));
+    if (email) {
+      const user = (await kvGet(`user:${email}`)) || { email };
+      const oldUrl = user.selfie_url;
+      user.selfie_url = null;
+      user.selfie_updated_at = new Date().toISOString();
+      await kvSet(`user:${email}`, JSON.stringify(user));
+      if (oldUrl && BLOB_TOKEN) {
+        try { await del(oldUrl, { token: BLOB_TOKEN }); } catch (_) {}
+      }
+      return res.status(200).json({ selfie_url: null });
+    }
+    // Anonymous delete
+    const key = `device_selfie:${deviceId}`;
+    const existing = await kvGet(key);
+    const oldUrl = existing?.selfie_url;
+    await fetch(`${KV_URL}/del/${encodeURIComponent(key)}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${KV_TOKEN}` },
+    });
     if (oldUrl && BLOB_TOKEN) {
       try { await del(oldUrl, { token: BLOB_TOKEN }); } catch (_) {}
     }

@@ -55,28 +55,47 @@ export default async function handler(req, res) {
   const normalizedEmail = email.toLowerCase().trim();
   const token = randomBytes(24).toString('base64url');
 
-  // Store token in Redis with 30-minute TTL
-  const saved = await kvSetEx(`auth_token:${token}`, JSON.stringify({
+  // Generate a 6-digit code for cross-device sign-in (read the code off
+  // your phone, type it into the browser you're trying to sign in on).
+  // Padded so leading zeros aren't dropped.
+  const code = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+
+  // Store both in Redis with 30-minute TTL.
+  const ttl = 30 * 60;
+  const tokenSaved = await kvSetEx(`auth_token:${token}`, JSON.stringify({
     email: normalizedEmail,
     created_at: new Date().toISOString(),
-  }), 30 * 60);
-  if (!saved) return res.status(500).json({ error: 'kv_write_failed' });
+  }), ttl);
+  // Per-email keyed code (so a user can request a code, type it in their
+  // own browser without us guessing the right one). Overwrites any prior
+  // code for the same email — most recent request wins.
+  const codeSaved = await kvSetEx(`auth_code:${normalizedEmail}`, JSON.stringify({
+    code,
+    attempts: 0,
+    created_at: new Date().toISOString(),
+  }), ttl);
+  if (!tokenSaved || !codeSaved) return res.status(500).json({ error: 'kv_write_failed' });
 
   const verifyUrl = `${SITE_ORIGIN}/api/auth/verify?token=${token}`;
+  // Email leads with the 6-digit code (the most reliable cross-device path)
+  // and keeps the magic-link button as a same-device shortcut.
+  const codeBoxed = code.split('').join(' ');
   const html = `<!doctype html>
 <html><body style="font-family: Georgia, 'Iowan Old Style', serif; max-width: 540px; margin: 40px auto; padding: 24px; color: #15110a; background: #f1ead7;">
   <div style="font-family: Didot, 'Bodoni 72', serif; font-style: italic; font-size: 32px; line-height: 1; margin-bottom: 24px;">
     Dreams<span style="color: #b8421a;">.</span>
   </div>
-  <p style="font-size: 16px; line-height: 1.55;">Click below to sign in. This link expires in 30 minutes and can only be used once.</p>
-  <p style="margin: 28px 0;">
-    <a href="${verifyUrl}" style="background: #b8421a; color: #f1ead7; text-decoration: none; padding: 14px 22px; font-family: ui-monospace, Menlo, monospace; letter-spacing: 0.18em; text-transform: uppercase; font-size: 11px; display: inline-block;">Sign in to Dreams</a>
-  </p>
-  <p style="font-size: 13px; color: #7a6e4f; line-height: 1.5;">If the button doesn't work, paste this URL into your browser:<br>
-    <code style="word-break: break-all; font-size: 11px;">${verifyUrl}</code>
+  <p style="font-size: 16px; line-height: 1.55; margin: 0 0 18px;">Your sign-in code:</p>
+  <div style="font-family: ui-monospace, Menlo, monospace; font-size: 38px; letter-spacing: 0.32em; color: #15110a; padding: 18px 22px; background: rgba(184, 66, 26, 0.08); border: 1px solid rgba(184, 66, 26, 0.32); display: inline-block; margin-bottom: 8px;">${codeBoxed}</div>
+  <p style="font-size: 13px; color: #7a6e4f; line-height: 1.5; margin-top: 14px;">Type this code into the Dreams sign-in screen where you started. It expires in 30 minutes.</p>
+  <p style="font-size: 13px; color: #7a6e4f; line-height: 1.5; margin-top: 26px;">If you started sign-in on this same device, you can also just click here:</p>
+  <p style="margin: 12px 0 24px;">
+    <a href="${verifyUrl}" style="background: #b8421a; color: #f1ead7; text-decoration: none; padding: 12px 18px; font-family: ui-monospace, Menlo, monospace; letter-spacing: 0.18em; text-transform: uppercase; font-size: 11px; display: inline-block;">Sign in on this device</a>
   </p>
   <p style="font-size: 11px; color: #aaa; margin-top: 32px;">If you didn't request this email, ignore it.</p>
 </body></html>`;
+
+  const text = `Sign in to Dreams\n\nYour code: ${code}\n\nType it into the Dreams sign-in screen where you started.\n(Code expires in 30 min.)\n\nOr — if you're on the same device you started on — open this link:\n${verifyUrl}`;
 
   const resendRes = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -84,9 +103,9 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       from: FROM_EMAIL,
       to: normalizedEmail,
-      subject: 'Sign in to Dreams',
+      subject: `Sign in to Dreams — code ${code}`,
       html,
-      text: `Sign in to Dreams\n\nClick here (expires in 30 min):\n${verifyUrl}`,
+      text,
     }),
   });
 

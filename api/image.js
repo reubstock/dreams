@@ -372,10 +372,12 @@ export default async function handler(req, res) {
     // automatically below (no signed-in user → no selfie lookup).
   }
 
-  // Selfie lookup for face-swap. Only meaningful if we have an owner email
-  // (anonymous orphan dreamers have no stored selfie, so skip the lookup
-  // and just generate text-only — face-swap can run on a later re-roll
-  // after they sign in).
+  // Selfie lookup for face-swap. Two paths:
+  //   1. Owner-keyed (signed-in user with selfie on their user record)
+  //   2. Device-keyed (anonymous dreamer who uploaded a selfie that's
+  //      stored against the dream's device_id — `device_selfie:{id}`)
+  // Anonymous device path is what lets a first-time visitor get their
+  // face into the painting without going through email sign-in first.
   let selfieUrl = null;
   if (dream.owner_email) {
     try {
@@ -383,6 +385,17 @@ export default async function handler(req, res) {
       if (user?.selfie_url) selfieUrl = user.selfie_url;
     } catch (err) {
       console.warn('Selfie lookup failed:', err.message);
+    }
+  }
+  // Fallback: if no owner selfie (or no owner at all), use the device selfie
+  // attached to this dream's recording device. Same device that recorded
+  // the dream IS the device that uploaded the selfie.
+  if (!selfieUrl && dream.device_id) {
+    try {
+      const deviceSelfie = await kvGetRaw(`device_selfie:${dream.device_id}`);
+      if (deviceSelfie?.selfie_url) selfieUrl = deviceSelfie.selfie_url;
+    } catch (err) {
+      console.warn('Device selfie lookup failed:', err.message);
     }
   }
   const willFaceSwap = !!(selfieUrl && REPLICATE_TOKEN);
