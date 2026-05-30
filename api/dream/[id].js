@@ -22,13 +22,58 @@ export default async function handler(req, res) {
   }
 
   try {
-    const r = await fetch(`${KV_URL}/get/dream:${id}`, {
+    let r = await fetch(`${KV_URL}/get/dream:${id}`, {
       headers: { Authorization: `Bearer ${KV_TOKEN}` },
     });
     if (!r.ok) throw new Error(`KV get → ${r.status}`);
-    const { result } = await r.json();
+    let { result } = await r.json();
+    let realId = id;
+    let resolvedViaFallback = false;
+
+    // Case-insensitive fallback. Dream IDs are case-sensitive base64url, but a
+    // link transcribed from the (previously uppercased) on-page ID chip arrives
+    // in the wrong case. On an exact-key miss, resolve through the
+    // dreamlc:<lowercased-id> → real-id pointer index (written on save, by the
+    // one-time backfill, and self-healed below). Existence of the real record
+    // is re-checked, so a stale pointer just yields not_found.
+    if (!result) {
+      const lc = id.toLowerCase();
+      if (lc !== id) {
+        try {
+          const ir = await fetch(`${KV_URL}/get/dreamlc:${lc}`, {
+            headers: { Authorization: `Bearer ${KV_TOKEN}` },
+          });
+          if (ir.ok) {
+            const { result: mapped } = await ir.json();
+            const mappedId = typeof mapped === 'string' ? mapped : null;
+            if (mappedId && mappedId !== id && /^[A-Za-z0-9_-]{8,20}$/.test(mappedId)) {
+              const r2 = await fetch(`${KV_URL}/get/dream:${mappedId}`, {
+                headers: { Authorization: `Bearer ${KV_TOKEN}` },
+              });
+              if (r2.ok) {
+                ({ result } = await r2.json());
+                if (result) { realId = mappedId; resolvedViaFallback = true; }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+    }
     if (!result) return res.status(404).json({ error: 'not_found', id });
     const dream = typeof result === 'string' ? JSON.parse(result) : result;
+
+    // Self-heal the case-insensitive index for dreams that predate it, so a
+    // wrong-case link resolves even if the one-time backfill was never run.
+    // Skip when we just resolved via the index — it already exists.
+    if (!resolvedViaFallback) {
+      try {
+        await fetch(`${KV_URL}/set/dreamlc:${realId.toLowerCase()}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${KV_TOKEN}` },
+          body: realId,
+        });
+      } catch (_) {}
+    }
 
     // Backfill owner_handle / owner_display_name for pre-migration dreams
     // by looking up the owner's user record. We don't write it back here;
@@ -60,7 +105,7 @@ export default async function handler(req, res) {
     try {
       const fixed = await backfillImagesIfNeeded(dream);
       if (fixed) {
-        await fetch(`${KV_URL}/set/dream:${id}`, {
+        await fetch(`${KV_URL}/set/dream:${realId}`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' },
           body: JSON.stringify(dream),
@@ -79,7 +124,7 @@ export default async function handler(req, res) {
       if (lr.ok) {
         const { result: ids } = await lr.json();
         if (Array.isArray(ids) && ids.length) {
-          const myIdx = ids.indexOf(id);
+          const myIdx = ids.indexOf(realId);
           if (myIdx !== -1) {
             const fetchVis = async (otherId) => {
               try {
@@ -121,7 +166,7 @@ export default async function handler(req, res) {
           if (sRes) {
             const session = typeof sRes === 'string' ? JSON.parse(sRes) : sRes;
             if (session?.email) {
-              const fr = await fetch(`${KV_URL}/get/${encodeURIComponent(`favorited:${session.email}:${id}`)}`, {
+              const fr = await fetch(`${KV_URL}/get/${encodeURIComponent(`favorited:${session.email}:${realId}`)}`, {
                 headers: { Authorization: `Bearer ${KV_TOKEN}` },
               });
               if (fr.ok) {

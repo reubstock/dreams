@@ -70,8 +70,9 @@ export default async function handler(req, res) {
     if (dream.device_id) {
       await kvCmd(`lrem/${encodeURIComponent(`device:${dream.device_id}`)}/0/${encodeURIComponent(id)}`);
     }
-    // Drop the dream record itself
+    // Drop the dream record itself + its case-insensitive lookup pointer
     await kvCmd(`del/${encodeURIComponent(`dream:${id}`)}`);
+    await kvCmd(`del/${encodeURIComponent(`dreamlc:${id.toLowerCase()}`)}`);
     return res.status(200).json({ ok: true, id });
   } catch (err) {
     console.error('delete failed:', err);

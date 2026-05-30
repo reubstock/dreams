@@ -143,6 +143,9 @@ export default async function handler(req, res) {
   try {
     // Set the dream record (Upstash REST: send value as JSON string in body)
     await kv(`set/dream:${id}`, JSON.stringify(record));
+    // Case-insensitive lookup index: lowercased-id → real id, so a link
+    // transcribed in the wrong case still resolves (see /api/dream/[id]).
+    await kv(`set/dreamlc:${id.toLowerCase()}`, id);
     // Add to global recent list (newest first, cap at 200)
     await kv(`lpush/dreams:recent/${id}`);
     await kv(`ltrim/dreams:recent/0/199`);
