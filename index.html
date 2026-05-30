@@ -96,6 +96,67 @@
   }
   body.dream-page .pane-done .capture-textarea { opacity: 0.85; }
 
+  /* ============ HERITAGE STRIPE (on /d/:id when dream.parents is present) ============
+     Reveals the two parents of a bred dream. Only renders when the dream
+     has a parents array — gracefully invisible for regular dreams. Lives
+     above the title so it reads as a chapter marker. */
+  .dream-heritage {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--paper-2);
+    border-left: 3px solid var(--rust);
+  }
+  .dream-heritage-label {
+    font-family: ui-monospace, Menlo, monospace; font-size: 9.5px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--rust);
+    flex: 0 0 auto;
+  }
+  .dream-heritage-parents {
+    display: flex; align-items: center; gap: 12px;
+    flex: 1 1 auto; flex-wrap: wrap;
+  }
+  .dream-heritage-parent {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+    color: var(--ink);
+    padding: 4px 8px 4px 4px;
+    border: 1px solid transparent;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .dream-heritage-parent:hover {
+    border-color: var(--rust);
+    background: var(--paper);
+  }
+  .dream-heritage-parent img,
+  .dream-heritage-parent .dh-empty {
+    width: 40px; height: 40px; flex: 0 0 auto;
+    object-fit: cover;
+    background: var(--paper);
+    border: 1px solid var(--ink-2);
+  }
+  .dream-heritage-parent .dh-empty {
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Didot', serif; font-style: italic; font-size: 12px;
+    color: var(--muted);
+  }
+  .dream-heritage-parent-title {
+    font-family: 'Didot', 'Bodoni 72', serif;
+    font-style: italic; font-size: 17px; line-height: 1.15;
+    color: var(--ink);
+    max-width: 200px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .dream-heritage-x {
+    font-family: 'Didot', serif; font-style: italic; font-size: 22px;
+    color: var(--rust);
+    flex: 0 0 auto;
+  }
+  @media (max-width: 720px) {
+    .dream-heritage { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; }
+    .dream-heritage-parent-title { max-width: 180px; font-size: 15px; }
+  }
+
   /* ============ HERO DREAM IMAGE (on /d/:id only) ============ */
   .hero-image {
     margin: 32px 0 32px;
@@ -5369,6 +5430,48 @@
       });
     })();
 
+    // ============ Heritage stripe (bred dreams) ============
+    // Renders "A child of [Parent A] × [Parent B]" above the title when the
+    // dream record has a parents array. Idempotent — multiple calls replace
+    // the previous stripe. Gracefully no-ops for regular (non-bred) dreams.
+    function renderHeritageStripe(dream) {
+      const section = document.getElementById('dream-title-section');
+      if (!section) return;
+      const existing = section.querySelector('.dream-heritage');
+      const hasParents = dream && Array.isArray(dream.parents) && dream.parents.length === 2;
+      if (!hasParents) {
+        if (existing) existing.remove();
+        return;
+      }
+      const [pa, pb] = dream.parents;
+      const parentHtml = (p) => {
+        const title = (p && p.title && p.title.trim()) || 'Untitled';
+        const href = p && p.id ? '/d/' + encodeURIComponent(p.id) : '#';
+        const img = p && p.image_url
+          ? `<img src="${escapeHtmlAuth(p.image_url)}" alt="" loading="lazy">`
+          : `<div class="dh-empty">∅</div>`;
+        return `<a class="dream-heritage-parent" href="${escapeHtmlAuth(href)}" title="${escapeHtmlAuth(title)}">
+          ${img}
+          <span class="dream-heritage-parent-title">${escapeHtmlAuth(title)}</span>
+        </a>`;
+      };
+      const stripeHtml = `<div class="dream-heritage" aria-label="Heritage">
+        <div class="dream-heritage-label">A child of</div>
+        <div class="dream-heritage-parents">
+          ${parentHtml(pa)}
+          <span class="dream-heritage-x" aria-hidden="true">×</span>
+          ${parentHtml(pb)}
+        </div>
+      </div>`;
+      if (existing) {
+        existing.outerHTML = stripeHtml;
+      } else {
+        // Insert just inside the section, before the existing title-meta row,
+        // so it reads as a chapter marker above the title.
+        section.insertAdjacentHTML('afterbegin', stripeHtml);
+      }
+    }
+
     // ============ Permalink loader — when URL is /d/:id ============
     (async function loadDreamFromUrl() {
       const m = window.location.pathname.match(/^\/d\/([A-Za-z0-9_-]{8,20})/);
@@ -5418,6 +5521,7 @@
         const discardBtn = document.querySelector('[data-action="discard-recording"]');
         if (discardBtn) discardBtn.style.display = 'none';
         showDreamTitle(dream);
+        renderHeritageStripe(dream);
         renderDreamOwnerControls(dream);
         if (dream.analysis) {
           renderAnalysis(dream.text, dream.analysis);
