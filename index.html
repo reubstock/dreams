@@ -5288,15 +5288,23 @@
       // Image URL pulled from the rendered hero <img>; null if not yet generated.
       const heroImgEl = document.getElementById('hero-image');
       const heroSrc = (heroImgEl && heroImgEl.src && !heroImgEl.src.includes('morpho.png')) ? heroImgEl.src : null;
-      // Cache-bust shared URLs with a short stable token derived from the
-      // image filename. Social platforms (iMessage / Gmail / Slack / FB)
-      // cache the OG preview for the FIRST URL they scrape; if a dream's
-      // image was generated AFTER an early share, the platform keeps
-      // showing the morpho butterfly fallback. The token changes when the
-      // image changes (re-roll → new blob URL → new token) so each fresh
-      // share looks like a new URL and forces a fresh OG scrape.
+      // Cache-bust shared URLs so social platforms (iMessage / Gmail / Slack
+      // / FB) don't lock in an OG preview from a moment when the dream's
+      // image hadn't been generated yet (which produced the morpho butterfly
+      // fallback). Prefer the image-filename token — it changes on re-rolls,
+      // forcing fresh OG re-scrapes when the painting itself changes. Fall
+      // back to the dream's created_at unix seconds, which is ALWAYS
+      // available (even when the page just loaded and the hero <img> hasn't
+      // rendered yet). That guarantees every share carries a busting token,
+      // never bare /d/:id.
       const heroSrcMatch = (heroSrc || '').match(/-([A-Za-z0-9_-]{6,})\.[a-z]+$/);
-      const cacheBust = heroSrcMatch ? heroSrcMatch[1].slice(0, 10) : null;
+      const imageToken = heroSrcMatch ? heroSrcMatch[1].slice(0, 10) : null;
+      let createdToken = null;
+      try {
+        const ts = window.__currentDream?.created_at;
+        if (ts) createdToken = String(Math.floor(new Date(ts).getTime() / 1000));
+      } catch (_) {}
+      const cacheBust = imageToken || createdToken;
       const fullUrl = window.location.origin + permalink + (cacheBust ? '?v=' + cacheBust : '');
       const titleEl = document.getElementById('dream-title');
       const title = (titleEl && titleEl.textContent && titleEl.textContent.trim()) || 'A dream';
