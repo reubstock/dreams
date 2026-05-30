@@ -559,6 +559,10 @@
   .face-step {
     display: flex; align-items: center; gap: 12px;
     margin: 18px 0 12px;
+    /* Cap the face step so it doesn't run distractingly wide on
+       desktop. ~540px keeps it in a comfortable reading column while
+       letting it scale down full-width on phones. */
+    max-width: 540px;
   }
   .face-step-action {
     appearance: none;

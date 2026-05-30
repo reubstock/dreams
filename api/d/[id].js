@@ -66,7 +66,16 @@ export default async function handler(req, res) {
   const title = dream.title || dream.analysis?.title || 'A dream';
   const description = ((dream.text || '').slice(0, 240).replace(/\s+/g, ' ').trim()) +
     ((dream.text || '').length > 240 ? '…' : '');
+  // If the dream's image hasn't been generated yet (image_url null), fall
+  // back to the brand butterfly — BUT mark the response no-store so
+  // social-card crawlers (iMessage, Slack, etc.) don't cache the fallback
+  // version. Otherwise we ship a stale butterfly preview that survives
+  // long after the real image lands.
+  const hasImage = !!dream.image_url;
   const image = dream.image_url || `${SITE_ORIGIN}/images/morpho.png`;
+  // gpt-image-1 returns 1024x1024 PNG/JPG; the morpho fallback is 800x606.
+  const imageW = hasImage ? 1024 : 800;
+  const imageH = hasImage ? 1024 : 606;
   const url = `${SITE_ORIGIN}/d/${id}`;
 
   // Strip the hard-coded site-default OG/Twitter tags from index.html so we
@@ -92,6 +101,9 @@ export default async function handler(req, res) {
     <meta property="og:title" content="${escapeHTML(title)}">
     <meta property="og:description" content="${escapeHTML(description)}">
     <meta property="og:image" content="${escapeHTML(image)}">
+    <meta property="og:image:width" content="${imageW}">
+    <meta property="og:image:height" content="${imageH}">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:alt" content="${escapeHTML(title)} — dream illustration">
     <meta property="og:url" content="${escapeHTML(url)}">
     <meta property="og:type" content="article">
@@ -104,7 +116,15 @@ export default async function handler(req, res) {
   `;
 
   out = out.replace('</head>', ogTags + '\n</head>');
-  // Cache at edge for 60s so social-card crawlers don't keep regenerating
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+  // Cache strategy:
+  // - With image present: 60s edge cache. Stable preview, low fetch cost.
+  // - Without image (image still generating): no-store. We never want a
+  //   crawler to lock in the butterfly fallback for a URL that's about
+  //   to have a real dream painting.
+  if (hasImage) {
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+  } else {
+    res.setHeader('Cache-Control', 'no-store');
+  }
   return res.status(200).send(out);
 }
